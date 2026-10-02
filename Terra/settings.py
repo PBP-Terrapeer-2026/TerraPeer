@@ -27,11 +27,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-9afwg_o9lm4+627gm!$87+f=wo+bksg9x@kz0uw6%)+q3dqa=3'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = not PRODUCTION
+
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "muhammad-farel52-terrapeer.pws.cs.ui.ac.id",
+]
 
 
 # Application definition

@@ -1,0 +1,243 @@
+:root {
+    --nav-cream: rgba(248, 253, 249, 0.94);
+    --forest: #1b4032;
+    --button-green: #316e57;
+    --hero-text: #fff9dc;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--forest);
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
+}
+
+a {
+    text-decoration: none;
+}
+
+.hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 130px 0 76px;
+    color: var(--hero-text);
+    background-image:
+        linear-gradient(90deg, rgba(5, 22, 12, 0.6), rgba(5, 22, 12, 0.33) 57%, rgba(5, 22, 12, 0.14)),
+        url("https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=2200&q=85");
+    background-size: cover;
+    background-position: center;
+}
+
+.site-header {
+    position: absolute;
+    top: 24px;
+    left: 0;
+    width: 100%;
+    padding: 0 6%;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1380px;
+    min-height: 68px;
+    margin: 0 auto;
+    padding: 10px 30px;
+    border-radius: 999px;
+    background: var(--nav-cream);
+    color: var(--forest);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.brand,
+.nav-links {
+    display: flex;
+    align-items: center;
+}
+
+.brand {
+    gap: 6px;
+    color: #176048;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.8px;
+}
+
+.brand-icon {
+    width: 26px;
+    height: 31px;
+    flex: none;
+}
+
+.nav-links {
+    gap: clamp(24px, 2.8vw, 44px);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.nav-links a {
+    color: var(--forest);
+}
+
+.nav-links a:hover,
+.nav-links a:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 5px;
+}
+
+.nav-more {
+    font-size: 20px;
+    letter-spacing: -3px;
+    line-height: 1;
+}
+
+.hero-content {
+    width: min(88%, 1320px);
+    margin: 0 auto;
+}
+
+.hero h1 {
+    max-width: 760px;
+    margin: 0 0 16px;
+    font-family: Lora, Georgia, serif;
+    font-size: clamp(52px, 5vw, 80px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+}
+
+.hero p {
+    max-width: 680px;
+    margin: 0 0 32px;
+    color: #fff;
+    font-size: clamp(15px, 1.1vw, 18px);
+    font-weight: 500;
+    line-height: 1.7;
+}
+
+.cta-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    min-height: 58px;
+    padding: 10px 24px;
+    border-radius: 999px;
+    background: var(--button-green);
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.cta-button svg {
+    width: 29px;
+    height: 33px;
+    flex: none;
+}
+
+.cta-button:hover,
+.cta-button:focus-visible {
+    background: #245b46;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 700px) {
+    .hero {
+        min-height: 100dvh;
+        padding: 125px 24px 64px;
+        background-position: 60% center;
+        background-image:
+            linear-gradient(rgba(5, 22, 12, 0.55), rgba(5, 22, 12, 0.62)),
+            url("https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=1200&q=85");
+    }
+
+    .site-header {
+        top: 16px;
+        padding: 0 16px;
+    }
+
+    .navbar {
+        min-height: 60px;
+        padding: 9px 17px;
+    }
+
+    .brand {
+        gap: 3px;
+        font-size: 18px;
+        letter-spacing: -0.7px;
+    }
+
+    .brand-icon {
+        width: 23px;
+        height: 27px;
+    }
+
+    .nav-links {
+        gap: 12px;
+        font-size: 12px;
+    }
+
+    .nav-more {
+        font-size: 17px;
+        letter-spacing: -3px;
+    }
+
+    .hero-content {
+        width: 100%;
+        text-align: center;
+    }
+
+    .hero h1 {
+        margin-bottom: 18px;
+        font-size: clamp(36px, 9vw, 52px);
+        line-height: 1.12;
+        letter-spacing: -1px;
+    }
+
+    .hero p {
+        margin: 0 auto 28px;
+        font-size: 15px;
+        line-height: 1.65;
+    }
+
+    .desktop-break {
+        display: none;
+    }
+
+    .cta-button {
+        min-height: 52px;
+        padding: 9px 20px;
+        font-size: 15px;
+    }
+
+    .cta-button svg {
+        width: 25px;
+        height: 29px;
+    }
+}
+
+@media (max-width: 360px) {
+    .navbar {
+        padding: 10px 14px;
+    }
+
+    .brand {
+        font-size: 16px;
+    }
+
+    .nav-links {
+        gap: 8px;
+        font-size: 11px;
+    }
+}
