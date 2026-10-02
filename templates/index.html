@@ -1,50 +1,20 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Plan your garden and care for your plants with TerraPeer.">
-    <title>TerraPeer — Your Digital Garden Peer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <main>
-        <section class="hero" aria-labelledby="hero-title">
-            <header class="site-header">
-                <nav class="navbar" aria-label="Main navigation">
-                    <a class="brand" href="/" aria-label="TerraPeer home">
-                        <svg class="brand-icon" viewBox="0 0 38 45" fill="none" aria-hidden="true">
-                            <path d="M19 23V11M19 17C10 17 7 11 7 5c8 0 12 4 12 12ZM19 15c0-7 5-11 13-11 0 7-4 11-13 11Z" fill="#267353"/>
-                            <path d="M10 25h18l-2 15H12l-2-15Z" fill="#C3654C"/>
-                            <path d="M8 25h22M19 28v8" stroke="#C3654C" stroke-width="3" stroke-linecap="round"/>
-                        </svg>
-                        <span>TerraPeer</span>
-                    </a>
+{% extends "base.html" %}
 
-                    <div class="nav-links">
-                        <a href="#">Login</a>
-                        <a href="#">Sign Up</a>
-                        <span class="nav-more" aria-hidden="true">•••</span>
-                    </div>
-                </nav>
-            </header>
+{% block title %}TerraPeer — Your Digital Garden Peer{% endblock %}
+{% block body_class %}landing-page{% endblock %}
 
-            <div class="hero-content">
-                <h1 id="hero-title">Your Digital<br>Garden Peer</h1>
-                <p>Know your garden. Choose the perfect plant.<br class="desktop-break"> Nurture it daily with clear steps on TerraPeer.</p>
-                <a class="cta-button" href="#">
-                    <svg viewBox="0 0 42 48" fill="none" aria-hidden="true">
-                        <path d="M21 24V12M21 17C13 17 10 12 10 6c7 0 11 4 11 11Zm0-2c0-7 4-11 11-11 0 7-4 11-11 11Z" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M9 27h24l-3 16H12L9 27ZM7 27h28" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span>Plan your plants</span>
-                </a>
-            </div>
-        </section>
-    </main>
-</body>
-</html>
+{% block content %}
+    <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-content">
+            <h1 id="hero-title">Your Digital<br>Garden Peer</h1>
+            <p>Know your garden. Choose the perfect plant.<br class="desktop-break"> Nurture it daily with clear steps on TerraPeer.</p>
+            <a class="cta-button" href="#">
+                <svg viewBox="0 0 42 48" fill="none" aria-hidden="true">
+                    <path d="M21 24V12M21 17C13 17 10 12 10 6c7 0 11 4 11 11Zm0-2c0-7 4-11 11-11 0 7-4 11-11 11Z" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 27h24l-3 16H12L9 27ZM7 27h28" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Plan your plants</span>
+            </a>
+        </div>
+    </section>
+{% endblock %}

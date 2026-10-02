@@ -35,10 +35,16 @@ a {
 }
 
 .site-header {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: 24px 6% 0;
+}
+
+.landing-page .site-header {
     position: absolute;
     top: 24px;
     left: 0;
-    width: 100%;
     padding: 0 6%;
 }
 
@@ -152,6 +158,37 @@ a {
     transform: translateY(-2px);
 }
 
+.site-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    background: #173b2d;
+    color: var(--hero-text);
+}
+
+.footer-inner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    width: min(88%, 1320px);
+    margin: 0 auto;
+    padding: 36px 0 40px;
+}
+
+.footer-brand {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.footer-tagline,
+.footer-copyright {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
 @media (max-width: 700px) {
     .hero {
         min-height: 100dvh;
@@ -163,6 +200,10 @@ a {
     }
 
     .site-header {
+        padding: 16px 16px 0;
+    }
+
+    .landing-page .site-header {
         top: 16px;
         padding: 0 16px;
     }
@@ -224,6 +265,14 @@ a {
     .cta-button svg {
         width: 25px;
         height: 29px;
+    }
+
+    .footer-inner {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 28px 0 32px;
+        text-align: center;
     }
 }
 

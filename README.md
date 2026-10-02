@@ -8,6 +8,12 @@ TerraPeer adalah website yang dirancang untuk mendampingi pengguna dalam menanam
 Di langkah awal, pengguna membuat profil ruang tanam yang mencakup spesifikasi media tanam, daerah penanaman, dan kemampuan dalam melakukan perawatan. Profil tersebut akan menjadi dasar TerraPeer dalam merekomendasikan tumbuhan yang realistis untuk ditanam beserta penjelasan lengkap. Dari situ, pengguna bisa memilih tumbuhan untuk dimasukkan ke Garden Plan. Setelah dipilih, website akan memberikan ringkasan rencana.
 Saat pengguna sudah membeli bibit dan mempersiapkan penanaman, pengguna bisa set status dari tumbuhan tersebut menjadi Active Plant. Dari situ, fokus website berpindah menjadi pendampingan perawatan harian, website akan menampilkan tugas dan instruksi perawatan. Perkembangan tanaman akan dicatat, pengguna cukup memilih opsi kondisi tanaman seperti tumbuh normal, layu, dan sebagainya. Di beberapa periode waktu, TerraPeer akan memberikan ringkasan evaluasi kebun.
 
+# DESAIN UI/UX
+
+Desain UI/UX TerraPeer: [Figma TerraPeer](https://www.figma.com/design/fZa8nxPXXGqgu0ytl6WFhY/Terrapeer?)
+
+Password akses: `TerrapeerPBP5F`
+
 # PUBLIC API YANG DIPAKAI
 
 https://open-meteo.com/en/docs/geocoding-api - Open Meteo Geocoding API
