@@ -472,6 +472,41 @@ a {
     transform: translateY(0);
 }
 
+/* --- Messages (dari Django messages framework) --- */
+.auth-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.auth-message {
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.auth-message--success {
+    background: #eaf6ef;
+    border: 1.5px solid #a3d4b5;
+    color: #1b5e3b;
+}
+
+.auth-message--error {
+    background: #fff5f5;
+    border: 1.5px solid #f5c6c6;
+    color: #c0392b;
+}
+
+.auth-message--warning {
+    background: #fffbea;
+    border: 1.5px solid #f0d58c;
+    color: #7d5a00;
+}
+
 /* --- Footer link --- */
 .auth-footer-text {
     margin: 22px 0 0;
@@ -508,4 +543,14 @@ a {
         font-size: 15px;
         padding: 12px 20px;
     }
+}
+
+.nav-username {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--forest);
+    background: rgba(38, 115, 83, 0.10);
+    padding: 5px 13px;
+    border-radius: 999px;
+    letter-spacing: -0.2px;
 }

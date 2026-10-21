@@ -17,7 +17,7 @@
                 <p class="auth-subtitle">Bergabung dan mulai kelola kebun digitalmu.</p>
             </div>
 
-            <form method="post" action="{% url 'main:register' %}" class="auth-form" novalidate>
+            <form method="post" action="{% url 'register' %}" class="auth-form" novalidate>
                 {% csrf_token %}
 
                 {% if form.non_field_errors %}
@@ -46,7 +46,7 @@
 
             <p class="auth-footer-text">
                 Sudah punya akun?
-                <a href="{% url 'main:login' %}" class="auth-link">Masuk di sini</a>
+                <a href="{% url 'login' %}" class="auth-link">Masuk di sini</a>
             </p>
         </div>
     </div>

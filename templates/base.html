@@ -15,7 +15,7 @@
 <body class="{% block body_class %}{% endblock %}">
     <header class="site-header">
         <nav class="navbar" aria-label="Main navigation">
-            <a class="brand" href="{% url 'index' %}" aria-label="TerraPeer home">
+            <a class="brand" href="{% url 'show_main' %}" aria-label="TerraPeer home">
                 <svg class="brand-icon" viewBox="0 0 38 45" fill="none" aria-hidden="true">
                     <path d="M19 23V11M19 17C10 17 7 11 7 5c8 0 12 4 12 12ZM19 15c0-7 5-11 13-11 0 7-4 11-13 11Z" fill="#267353"/>
                     <path d="M10 25h18l-2 15H12l-2-15Z" fill="#C3654C"/>
@@ -25,8 +25,13 @@
             </a>
 
             <div class="nav-links">
-                <a href="#">Login</a>
-                <a href="#">Sign Up</a>
+                {% if user.is_authenticated %}
+                    <span class="nav-username">&#128075; {{ user.username }}</span>
+                    <a href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}">Login</a>
+                    <a href="{% url 'register' %}">Sign Up</a>
+                {% endif %}
                 <span class="nav-more" aria-hidden="true">•••</span>
             </div>
         </nav>
