@@ -37,6 +37,12 @@ ALLOWED_HOSTS = [
     "muhammad-farel52-terrapeer.pws.cs.ui.ac.id",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://muhammad-farel52-terrapeer.pws.cs.ui.ac.id",
+    "http://localhost",
+    "http://127.0.0.1",
+]
+
 
 # Application definition
 
@@ -47,6 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "main",
 ]
 
 MIDDLEWARE = [
