@@ -1,0 +1,78 @@
+
+{% extends "base.html" %}
+
+{% block title %}Garden Journal — TerraPeer{% endblock %}
+
+{% block content %}
+<section class="journal-page">
+    <header class="journal-header">
+        <div>
+            <p>YOUR GARDEN STORY</p>
+            <h1>Garden Journal</h1>
+            <p>
+                Keep track of your plants' growth,
+                milestones, and harvests.
+            </p>
+        </div>
+
+        <a href="{% url 'garden_journal_create' %}">
+            + Add Journal Entry
+        </a>
+    </header>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if entries %}
+        <div class="journal-list">
+            {% for entry in entries %}
+                <article class="journal-entry">
+                    <p>
+                        {{ entry.entry_date|date:"d M Y" }}
+                        · {{ entry.get_entry_type_display }}
+                    </p>
+
+                    <h2>{{ entry.title }}</h2>
+                    <h3>{{ entry.plant_name }}</h3>
+
+                    <p>{{ entry.notes|linebreaksbr }}</p>
+
+                    {% if entry.harvest_quantity %}
+                        <p>
+                            Harvest:
+                            {{ entry.harvest_quantity }}
+                            {{ entry.harvest_unit }}
+                        </p>
+                    {% endif %}
+
+                    {% if entry.weather_summary %}
+                        <p>Weather: {{ entry.weather_summary }}</p>
+                    {% endif %}
+
+                    <a href="{% url 'garden_journal_edit' entry.id %}">
+                        Edit
+                    </a>
+
+                    <a href="{% url 'garden_journal_delete' entry.id %}">
+                        Delete
+                    </a>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="journal-empty">
+            <h2>Your garden story starts here</h2>
+            <p>
+                You haven't recorded any milestones yet.
+                Start documenting your garden's journey.
+            </p>
+            <a href="{% url 'garden_journal_create' %}">
+                Create Your First Entry
+            </a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

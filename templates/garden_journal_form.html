@@ -1,0 +1,19 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} — TerraPeer{% endblock %}
+
+{% block content %}
+<section class="journal-form-page">
+    <h1>{{ page_title }}</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit">Save Journal Entry</button>
+        <a href="{% url 'garden_journal' %}">Cancel</a>
+    </form>
+</section>
+{% endblock %}
