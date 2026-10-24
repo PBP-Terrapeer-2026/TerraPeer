@@ -63,3 +63,13 @@ Setiap data tanaman yang bersifat personal, seperti Growing Spaces, Garden Plans
    Plant Care membantu pengguna mengelola tugas perawatan untuk tanaman yang sudah aktif, seperti menyiram, memangkas, memeriksa kondisi daun, penyangga, nutrisi, dan kesiapan panen. Pengguna dapat membuat, melihat, mengubah, menyelesaikan, menghapus, serta memfilter tugas berdasarkan waktu atau tanaman tertentu. Modul ini juga menampilkan informasi cuaca sebagai konteks pendukung agar pengguna lebih mudah menentukan apa yang perlu diperiksa dan kapan melakukannya.
 5. Garden Journal - Adinda Pika Fauziah
    Garden Journal membantu pengguna mencatat perkembangan tanaman aktif, seperti pertumbuhan, pembungaan, panen, atau masalah yang terjadi. Catatan ditampilkan dalam bentuk timeline dan dapat dilengkapi tanggal, keterangan, jumlah panen, serta konteks cuaca pada waktu tertentu. Modul ini membantu pengguna melihat riwayat kebun dan mengevaluasi pengalaman sebelumnya untuk perencanaan berikutnya.
+
+---
+
+# CHANGELOG
+
+- 15 September, initial commit
+- 29 September, inisisasi tampilan awal web
+- 2 Oktober, Adding base template (header, footer, navbar) and show main page
+- 21 Oktober, Refactoring auth page and fix user login
+- 24 Oktober, Fixing cookie session timer
