@@ -1,0 +1,426 @@
+{% extends "terrapeer/base.html" %}
+{% load static %}
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'terrapeer/css/landing.css' %}">
+{% endblock %}
+{% block content %}
+    <main id="main-content">
+        <div id="tp-garden-home"
+             style="--gh-garden:url(/static/terrapeer/img/landing-4e6df95ca31a.jpg)"
+             aria-label="TerraPeer personal garden home">
+            <div class="gh-demo-switch">
+                <span>TERRAPEER / LANDING & GARDEN HOME</span>
+                <div role="group" aria-label="Preview halaman">
+                    <button type="button" data-page="public" aria-pressed="false">Sebelum login</button>
+                    <button type="button" data-page="home" aria-pressed="true">Setelah login</button>
+                </div>
+            </div>
+            <div id="tp-public-view" hidden>
+                <header class="gh-hero gp-hero">
+                    <div class="gh-shell">
+                        <div class="gh-topbar">
+                            <div class="gh-brand">
+                                <img src="/static/terrapeer/img/landing-f2f129cc5211.png" alt="">TerraPeer
+                            </div>
+                            <nav class="gh-nav gh-navlinks" aria-label="Public navigation">
+                                <button data-public-jump="gp-journey">How it works</button>
+                                <button data-public-jump="gp-preview">App preview</button>
+                                <button data-public-jump="gp-start">Get started</button>
+                            </nav>
+                            <button class="gh-btn secondary" data-demo-home>
+                                Try demo <i data-lucide="arrow-up-right" aria-hidden="true">
+                                </i>
+                            </button>
+                        </div>
+                        <div class="gp-herocopy">
+                            <div class="gh-overline">Your digital garden peer</div>
+                            <h1>
+                                A little space.
+                                <br>
+                                A greener everyday.
+                            </h1>
+                            <p>
+                                Plan your plants. Keep up with care.
+                                <br>
+                                Watch your garden grow.
+                            </p>
+                            <button class="gh-btn" data-public-jump="gp-start">
+                                Plan your plants <i data-lucide="sprout" aria-hidden="true">
+                                </i>
+                            </button>
+                            <button class="gh-link" data-public-jump="gp-preview">
+                                Take a look inside <i data-lucide="arrow-down" aria-hidden="true">
+                                </i>
+                            </button>
+                        </div>
+                    </div>
+                </header>
+                <main class="gh-shell gp-main">
+                    <section class="gp-journey" id="gp-journey">
+                        <div>
+                            <div class="gh-overline">Start with what you have</div>
+                            <h2>
+                                Your corner.
+                                <br>
+                                Your kind of garden.
+                            </h2>
+                            <p class="gh-muted">A balcony, a terrace, or a backyard.</p>
+                        </div>
+                        <div class="gp-steps">
+                            <div>
+                                <span>01</span>
+                                <div>
+                                    <h3>Set up your space</h3>
+                                    <p>Location, light, and pots.</p>
+                                </div>
+                            </div>
+                            <div>
+                                <span>02</span>
+                                <div>
+                                    <h3>Make a planting plan</h3>
+                                    <p>Choose plants that fit your space.</p>
+                                </div>
+                            </div>
+                            <div>
+                                <span>03</span>
+                                <div>
+                                    <h3>Care, record, and grow</h3>
+                                    <p>Your tasks and plant story, together.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="gp-preview" id="gp-preview">
+                        <div class="gh-head">
+                            <div>
+                                <div class="gh-overline">A peek into your everyday</div>
+                                <h2>Your garden, in one place.</h2>
+                            </div>
+                            <button class="gh-btn secondary" data-demo-home>
+                                Explore the demo <i data-lucide="arrow-up-right" aria-hidden="true">
+                                </i>
+                            </button>
+                        </div>
+                        <div class="gp-previewframe">
+                            <div class="gp-previewbar">
+                                <span class="gp-windowdots" aria-hidden="true">● ● ●</span>
+                                <span>TerraPeer / My garden</span>
+                                <span>Sample account</span>
+                            </div>
+                            <img id="gp-home-preview"
+                                 src="/static/terrapeer/img/landing-app-preview.png"
+                                 alt="Preview of TerraPeer after login: garden photograph, today's care tasks, one complete plant card, weather, weekly care calendar and garden journal.">
+                        </div>
+                        <div class="gp-features">
+                            <span>
+                                <i data-lucide="flower-2" aria-hidden="true">
+                                </i>Your plants</span>
+                                <span>
+                                    <i data-lucide="calendar-check" aria-hidden="true">
+                                    </i>Care schedule</span>
+                                    <span>
+                                        <i data-lucide="notebook-pen" aria-hidden="true">
+                                        </i>Garden journal</span>
+                                    </div>
+                                </section>
+                                <section class="gp-start gh-panel" id="gp-start">
+                                    <div>
+                                        <div class="gh-overline">One space is enough to start</div>
+                                        <h2>
+                                            Make room for
+                                            <br>
+                                            something growing.
+                                        </h2>
+                                    </div>
+                                    <div>
+                                        <button class="gh-btn" id="gp-signup">
+                                            Create your account <i data-lucide="arrow-right" aria-hidden="true">
+                                            </i>
+                                        </button>
+                                        <p class="gh-muted"
+                                           id="gp-signup-message"
+                                           aria-live="polite">Your personal garden starts after sign up.</p>
+                                    </div>
+                                </section>
+                                <footer class="gh-footer">
+                                    <span>TerraPeer · Your digital garden peer.</span>
+                                    <button class="gh-link" data-demo-home>
+                                        View sample garden <i data-lucide="arrow-up-right" aria-hidden="true">
+                                        </i>
+                                    </button>
+                                </footer>
+                            </main>
+                        </div>
+                        <div id="tp-home-view">
+                            <header class="gh-hero">
+                                <div class="gh-shell">
+                                    <div class="gh-topbar">
+                                        <div class="gh-brand">
+                                            <img src="/static/terrapeer/img/landing-f2f129cc5211.png" alt="">TerraPeer
+                                        </div>
+                                        <nav class="gh-nav" aria-label="Main navigation">
+                                            <div class="gh-navlinks">
+                                                <button class="active" data-jump="gh-top">Home</button>
+                                                <button data-jump="gh-space">Garden Setup</button>
+                                                <button data-jump="gh-plan">Planning</button>
+                                                <button data-jump="gh-plants">My Plants</button>
+                                                <button data-jump="gh-schedule">Plant Care</button>
+                                                <button data-jump="gh-journal">Journal</button>
+                                            </div>
+                                        </nav>
+                                        <button class="gh-avatar" aria-label="Open profile" data-action="profile">N</button>
+                                    </div>
+                                    <div class="gh-welcome" id="gh-top">
+                                        <div class="gh-welcome-left">
+                                            <div class="gh-overline">Wednesday, 21 October 2026</div>
+                                            <h1>
+                                                Back to
+                                                <br>
+                                                your garden.
+                                            </h1>
+                                            <div class="gh-row">
+                                                <select class="gh-space-select" aria-label="Current garden">
+                                                    <option>My Balcony · Depok</option>
+                                                </select>
+                                                <button class="gh-icon"
+                                                        data-action="space"
+                                                        aria-label="Edit growing space">
+                                                    <i data-lucide="sliders-horizontal" aria-hidden="true">
+                                                    </i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <section class="gh-nearest" aria-label="Nearest care tasks">
+                                            <div class="gh-head">
+                                                <h2>A little care today</h2>
+                                                <span class="gh-muted" id="gh-todaycount">2 tasks</span>
+                                            </div>
+                                            <div id="gh-nearest-list"></div>
+                                            <div class="gh-row gh-between">
+                                                <button class="gh-link" data-jump="gh-schedule">
+                                                    Open schedule <i data-lucide="arrow-right" aria-hidden="true">
+                                                    </i>
+                                                </button>
+                                                <button class="gh-icon" data-action="task" aria-label="Add care task">
+                                                    <i data-lucide="plus" aria-hidden="true">
+                                                    </i>
+                                                </button>
+                                            </div>
+                                        </section>
+                                    </div>
+                                </div>
+                            </header>
+                            <main class="gh-shell gh-main">
+                                <div class="gh-grid">
+                                    <div class="gh-column">
+                                        <section class="gh-plants" id="gh-plants">
+                                            <div class="gh-head">
+                                                <h2>
+                                                    My Plants <small id="gh-plantcount">2 active</small>
+                                                </h2>
+                                                <div class="gh-row">
+                                                    <button class="gh-link" data-action="plant-new">
+                                                        <i data-lucide="plus" aria-hidden="true">
+                                                        </i>Add existing plant
+                                                    </button>
+                                                    <button class="gh-icon" id="gh-prev" aria-label="Previous plant">
+                                                        <i data-lucide="chevron-left" aria-hidden="true">
+                                                        </i>
+                                                    </button>
+                                                    <button class="gh-icon" id="gh-next" aria-label="Next plant">
+                                                        <i data-lucide="chevron-right" aria-hidden="true">
+                                                        </i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="gh-carousel"
+                                                 id="gh-carousel"
+                                                 role="region"
+                                                 aria-label="Your plant cards"></div>
+                                            <div class="gh-row gh-between gh-carousel-footer">
+                                                <span>Swipe to explore · <span id="gh-slidecount">1 / 2</span>
+                                                </span>
+                                                <button class="gh-link" id="gh-autoplay" aria-pressed="false">
+                                                    <i data-lucide="play" aria-hidden="true">
+                                                    </i>
+                                                    <span>Auto slide</span>
+                                                </button>
+                                            </div>
+                                        </section>
+                                        <section class="gh-panel" id="gh-schedule">
+                                            <div class="gh-head">
+                                                <div>
+                                                    <div class="gh-overline">Plant Care</div>
+                                                    <h2>This week</h2>
+                                                </div>
+                                                <div class="gh-row">
+                                                    <span class="gh-muted" id="gh-month">October 2026</span>
+                                                    <button class="gh-icon" id="gh-weekprev" aria-label="Previous week">
+                                                        <i data-lucide="chevron-left" aria-hidden="true">
+                                                        </i>
+                                                    </button>
+                                                    <button class="gh-icon" id="gh-weeknext" aria-label="Next week">
+                                                        <i data-lucide="chevron-right" aria-hidden="true">
+                                                        </i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="gh-week" id="gh-week"></div>
+                                            <div class="gh-row gh-between">
+                                                <div class="gh-filters" aria-label="Task status">
+                                                    <button aria-pressed="true" data-filter="pending">To do</button>
+                                                    <button aria-pressed="false" data-filter="done">Completed</button>
+                                                </div>
+                                                <button class="gh-link" data-action="task">
+                                                    <i data-lucide="plus" aria-hidden="true">
+                                                    </i>Task
+                                                </button>
+                                            </div>
+                                            <div id="gh-task-list"></div>
+                                        </section>
+                                    </div>
+                                    <aside class="gh-column">
+                                        <section class="gh-panel gh-weather">
+                                            <div class="gh-row gh-between">
+                                                <span class="gh-overline">Depok weather</span>
+                                                <i data-lucide="cloud-sun" aria-hidden="true">
+                                                </i>
+                                            </div>
+                                            <h2>32°</h2>
+                                            <p>Partly cloudy</p>
+                                            <div class="gh-weather-facts">
+                                                <span>
+                                                    <i data-lucide="cloud-rain" aria-hidden="true">
+                                                    </i>60% rain</span>
+                                                    <span>
+                                                        <i data-lucide="droplets" aria-hidden="true">
+                                                        </i>2 mm</span>
+                                                    </div>
+                                                    <p class="gh-weather-note">Pot exposed to rain? Check the soil before watering.</p>
+                                                    <div class="gh-muted"
+                                                         style="margin-top:10px">Illustrative forecast · not live</div>
+                                                </section>
+                                                <section class="gh-panel" id="gh-space">
+                                                    <div class="gh-head">
+                                                        <div>
+                                                            <div class="gh-overline">Garden Setup</div>
+                                                            <h2 id="gh-spacename">My Balcony</h2>
+                                                        </div>
+                                                        <button class="gh-icon"
+                                                                data-action="space"
+                                                                aria-label="Edit garden space">
+                                                            <i data-lucide="pencil" aria-hidden="true">
+                                                            </i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="gh-spacedata">
+                                                        <div>
+                                                            <i data-lucide="sun" aria-hidden="true">
+                                                            </i>
+                                                            <span id="gh-sun">4–6 hours<small>Sunlight / day</small>
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <i data-lucide="cloud-rain" aria-hidden="true">
+                                                            </i>
+                                                            <span>Exposed<small>Rain access</small>
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <i data-lucide="flower-2" aria-hidden="true">
+                                                            </i>
+                                                            <span>4 pots<small>2 occupied</small>
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <i data-lucide="calendar-check" aria-hidden="true">
+                                                            </i>
+                                                            <span>Daily<small>Care capacity</small>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <button class="gh-link" data-action="pots">
+                                                        Manage pots <i data-lucide="arrow-up-right" aria-hidden="true">
+                                                        </i>
+                                                    </button>
+                                                </section>
+                                            </aside>
+                                        </div>
+                                        <div class="gh-bottomgrid">
+                                            <section class="gh-panel gh-plan" id="gh-plan">
+                                                <div class="gh-head">
+                                                    <div>
+                                                        <div class="gh-overline">Garden Planning · Draft</div>
+                                                        <h2>Next to grow</h2>
+                                                    </div>
+                                                    <button class="gh-icon"
+                                                            data-action="plan"
+                                                            aria-label="Edit garden plan">
+                                                        <i data-lucide="pencil" aria-hidden="true">
+                                                        </i>
+                                                    </button>
+                                                </div>
+                                                <div id="gh-planitems"></div>
+                                                <button class="gh-link" data-action="plan">
+                                                    <i data-lucide="search" aria-hidden="true">
+                                                    </i>Find plants for this space
+                                                </button>
+                                            </section>
+                                            <section class="gh-panel" id="gh-journal">
+                                                <div class="gh-head">
+                                                    <h2>Garden Journal</h2>
+                                                    <button class="gh-icon"
+                                                            data-action="journal"
+                                                            aria-label="Add journal entry">
+                                                        <i data-lucide="plus" aria-hidden="true">
+                                                        </i>
+                                                    </button>
+                                                </div>
+                                                <div id="gh-journal-list"></div>
+                                                <div class="gh-progress">
+                                                    <div class="gh-growing" id="gh-growing">
+                                                        <img class="sprout"
+                                                             src="/static/terrapeer/img/landing-29bdd9e458dd.png"
+                                                             alt="">
+                                                        <img class="pot"
+                                                             src="/static/terrapeer/img/landing-ace77e53198b.png"
+                                                             alt="">
+                                                    </div>
+                                                    <div>
+                                                        <div class="gh-overline">Growing journey</div>
+                                                        <h3 id="gh-growthtitle">Tomato · Fruiting</h3>
+                                                        <p>Stage recorded by you</p>
+                                                        <button class="gh-link" data-action="plant" data-id="tomato">
+                                                            Update stage <i data-lucide="arrow-right"
+    aria-hidden="true">
+                                                            </i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                        </div>
+                                        <div class="gh-status" id="gh-feedback" aria-live="polite"></div>
+                                        <footer class="gh-footer">
+                                            <span>TerraPeer · My garden, at my pace.</span>
+                                            <span>Sample garden · 21 October 2026</span>
+                                        </footer>
+                                    </main>
+                                </div>
+                            </div>
+                        </main>
+                        <div class="tp-container" style="padding:20px 0">
+                            <p style="font-size:12px">Landing widgets are a visual sample; Plant Care uses your saved database records.</p>
+                            {% if request.user.is_authenticated %}
+                                <form action="{% url 'logout' %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="tp-button" type="submit">Sign out</button>
+                                </form>
+                            {% else %}
+                                <a class="tp-button" href="{% url 'login' %}">Sign in to your garden</a>
+                            {% endif %}
+                        </div>
+                        {{ landing_config|json_script:'landing-config' }}{% endblock %}
+                    {% block scripts %}
+                        <script src="{% static 'terrapeer/vendor/lucide.min.js' %}" defer></script>
+                        <script src="{% static 'terrapeer/js/landing.js' %}" defer></script>
+                    {% endblock %}

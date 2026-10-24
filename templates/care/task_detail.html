@@ -1,0 +1,61 @@
+{% load care_icons tz %}
+<div class="dialog-head">
+    <div>
+        <div class="eyebrow">Care task · {{ task.plant.name }}</div>
+        <h2 id="dialog-title">{{ task.title }}</h2>
+    </div>
+    <button class="iconbtn" data-close aria-label="Close detail">{% icon 'close' %}</button>
+</div>
+<div class="row">
+    <span class="pill {% if task.status == 'Pending' %}pending{% endif %}">{{ task.status }}</span>
+    {% if task.overdue %}
+        <span class="pill overdue">Overdue</span>
+    {% endif %}
+</div>
+<dl class="detail-grid">
+    <div>
+        <dt>Action Type</dt>
+        <dd>
+            {{ task.action_type }}
+        </dd>
+    </div>
+    <div>
+        <dt>Scheduled date</dt>
+        <dd>
+            {{ task.due_date|date:'j M Y' }}
+        </dd>
+    </div>
+    <div>
+        <dt>Repeat</dt>
+        <dd>
+            {{ task.repeat_label }}
+        </dd>
+    </div>
+    <div>
+        <dt>Plant</dt>
+        <dd>
+            {{ task.plant.name }} · {{ task.plant.pot }}
+        </dd>
+    </div>
+</dl>
+<span class="field-label">Instructions</span>
+<div class="instructions">{{ task.instructions|default:'No instructions added.' }}</div>
+{% if task.status == "Completed" %}
+    <div class="hint">Completed {% localtime off %}{{ completed_local|date:'j M Y · H:i' }}{% endlocaltime %} · {{ task.plant.garden.timezone_name }}</div>
+{% elif next_date %}
+    <div class="hint">Completing this task creates one new reminder for {{ next_date|date:'j M Y' }}.</div>
+{% elif not task.plant.active and task.repeat_every %}
+    <div class="hint">This plant is not active. No new reminder will be created.</div>
+{% endif %}
+<div id="modal-error" class="error-text" role="alert"></div>
+<div class="dialog-footer">
+    <button class="link danger danger-link"
+            data-open="{% url 'care:delete' task.pk %}">
+    {% icon 'trash' %}Delete</button>
+    {% if task.status == "Pending" %}
+        <button class="btn secondary" data-open="{% url 'care:edit' task.pk %}">Edit task</button>
+        <button class="btn" data-complete="{% url 'care:complete' task.pk %}">{% icon 'check' %}Mark as Completed</button>
+    {% else %}
+        <button class="btn secondary" data-close>Close</button>
+    {% endif %}
+</div>

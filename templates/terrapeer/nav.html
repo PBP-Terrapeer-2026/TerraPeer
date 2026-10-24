@@ -1,0 +1,15 @@
+{% load static %}
+<nav class="nav tp-nav" aria-label="Main navigation">
+    <a class="brand" href="{% url 'care:landing' %}">
+    <img src="{% static 'terrapeer/img/logo.png' %}" alt="">TerraPeer</a>
+    <div class="navlinks">
+        <a href="{% url 'show_main' %}">Home</a>
+        <a class="selected" aria-current="page" href="{% url 'care:choose' %}">Plant Care</a>
+        {% url 'garden_journal' as journal_url %}
+        {% if journal_url %}
+            <a href="{{ journal_url }}">Garden Journal</a>
+        {% endif %}
+    </div>
+    <span class="avatar"
+          aria-label="Signed in as {{ request.user.username }}">{{ request.user.username|first|upper }}</span>
+</nav>

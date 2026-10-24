@@ -1,0 +1,124 @@
+{% extends "terrapeer/base.html" %}
+{% load static care_icons %}
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'terrapeer/css/plant-care.css' %}">
+{% endblock %}
+{% block body_class %}care-page{% endblock %}
+{% block content %}
+    <header class="hero">
+        <img class="hero-photo"
+             src="{% static 'terrapeer/img/garden.jpg' %}"
+             alt="">
+        <div class="hero-shade"></div>
+        <div class="shell">
+            {% include "terrapeer/nav.html" %}
+            <div class="crumb">
+                <a href="{% url 'care:landing' %}">Home</a>
+                <span>/</span>
+                <span>{{ plant.name }}</span>
+                <span>/</span>
+                <span>Plant Care</span>
+            </div>
+            <div class="hero-title">
+                <div>
+                    <h1>A little care, every day.</h1>
+                    <p>Small routines for a garden that keeps growing.</p>
+                </div>
+                <button class="btn light"
+                        data-open="{% url 'care:add' plant.pk %}"
+                        {% if not plant.active %}disabled{% endif %}>
+                {% icon 'plus' %}Add care task</button>
+            </div>
+        </div>
+    </header>
+    <main id="main-content"
+          class="shell main"
+          data-list-url="{% url 'care:list' plant.pk %}"
+          data-weather-url="{% url 'care:weather' plant.pk %}">
+        <div hidden>{% csrf_token %}</div>
+        <div id="feedback" class="feedback" role="status" hidden></div>
+        <section class="plant-context" aria-label="Selected plant">
+            <div class="row">
+                <img class="plant-photo"
+                     src="{% static plant.image_path %}"
+                     alt="{{ plant.name }}">
+                <div>
+                    <div class="eyebrow">Caring for</div>
+                    <div class="row">
+                        <span class="plant-title">{{ plant.name }}</span>
+                        <span class="pill">{{ plant.status }}</span>
+                    </div>
+                    <div class="muted">{{ plant.pot }} · {{ plant.garden.name }} · {{ plant.garden.location }}</div>
+                </div>
+            </div>
+            <div class="row">
+                <label for="plant-select" class="muted">Switch plant</label>
+                <select id="plant-select" style="width:175px">
+                    {% for p in plants %}
+                        <option value="{% url 'care:page' p.pk %}"
+                                {% if p.pk == plant.pk %}selected{% endif %}>{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </section>
+        <div class="grid">
+            <section class="panel tp-panel">
+                <div class="section-head">
+                    <div>
+                        <div class="eyebrow">Plant Care</div>
+                        <h2>Your care tasks</h2>
+                    </div>
+                    <span class="pill" id="pending-count">{{ pending_count }} pending</span>
+                </div>
+                <form class="filters" id="filters">
+                    <label>
+                        <span class="field-label">When</span>
+                        <select name="time">
+                            <option value="all">All Dates</option>
+                            <option value="today" {% if time_filter == 'today' %}selected{% endif %}>Today</option>
+                            <option value="upcoming"
+                                    {% if time_filter == 'upcoming' %}selected{% endif %}>Upcoming</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span class="field-label">Status</span>
+                        <select name="status">
+                            <option value="all">All Statuses</option>
+                            <option value="Pending"
+                                    {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="Completed"
+                                    {% if status_filter == 'Completed' %}selected{% endif %}>Completed</option>
+                        </select>
+                    </label>
+                    <button type="button" class="link" data-reset>Reset Filters</button>
+                </form>
+                <div id="task-list" aria-live="polite">{% include "care/task_list.html" %}</div>
+            </section>
+            <aside>
+                <div id="weather-slot" aria-live="polite">
+                    <section class="panel weather">
+                        <div class="weather-head">Weather Forecast</div>
+                        <div class="weather-place">{{ plant.garden.name }} · {{ plant.garden.location }}</div>
+                        <div class="loading-line big"></div>
+                        <p>Loading your forecast…</p>
+                    </section>
+                </div>
+                <section class="small-panel">
+                    <h3>One plant, one routine.</h3>
+                    <p class="muted">Recurring tasks create the next reminder after completion, while your plant is active.</p>
+                </section>
+            </aside>
+        </div>
+        <noscript>
+            <p>Enable JavaScript to add, edit, filter, or complete care tasks and load the forecast.</p>
+        </noscript>
+        <footer class="footer">
+            <span>TerraPeer · My garden, at my pace.</span>
+            <span>{{ plant.today|date:'j F Y' }}</span>
+        </footer>
+    </main>
+    <div id="modal-root"></div>
+{% endblock %}
+{% block scripts %}
+    <script src="{% static 'terrapeer/js/plant-care.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% load care_icons %}
+<div class="dialog-head">
+    <div>
+        <h2 id="dialog-title">{% if task %}Edit care task{% else %}Add care task{% endif %}</h2>
+        <p>{{ plant.name }} · {{ plant.pot }} · {{ plant.garden.name }}</p>
+    </div>
+    <button class="iconbtn" data-close aria-label="Close dialog">{% icon 'close' %}</button>
+</div>
+<form id="care-form"
+      action="{% if task %}{% url 'care:edit' task.pk %}{% else %}{% url 'care:add' plant.pk %}{% endif %}"
+      method="post"
+      novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="formgrid">
+        <label>
+            <span class="field-label">Action Type *</span>{{ form.action_type }}
+            <div id="error-action_type" class="error-text">{{ form.action_type.errors }}</div>
+        </label>
+        <label>
+            <span class="field-label">Start Date *</span>{{ form.due_date }}
+            <div id="error-due_date" class="error-text">{{ form.due_date.errors }}</div>
+        </label>
+        <label>
+            <span class="field-label">Repeat</span>{{ form.repeat }}
+            <div id="error-repeat" class="error-text">{{ form.repeat.errors }}</div>
+        </label>
+        <label id="interval-field">
+            <span class="field-label">Interval (days) *</span>{{ form.interval }}
+            <div id="error-interval" class="error-text">{{ form.interval.errors }}</div>
+            <div class="help">1 = every day · 3 = every three days</div>
+        </label>
+        <label class="wide">
+            <span class="field-label">Instructions <span class="muted">(optional)</span>
+            </span>{{ form.instructions }}
+            <div id="error-instructions" class="error-text">{{ form.instructions.errors }}</div>
+        </label>
+    </div>
+    <div class="hint" id="repeat-hint">
+        {% if task %}Changing only the interval keeps this task's current date. The new interval is used after completion.{% else %}After completion, the next task uses the scheduled date plus the interval.{% endif %}
+    </div>
+    <div id="modal-error" class="error-text" role="alert"></div>
+    <div class="dialog-footer">
+        <button type="button" class="btn secondary" data-close>Cancel</button>
+        <button type="submit" class="btn">{% if task %}Save Changes{% else %}Save Task{% endif %}</button>
+    </div>
+</form>

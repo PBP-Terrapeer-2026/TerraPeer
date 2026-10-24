@@ -1,0 +1,16 @@
+{% extends "terrapeer/base.html" %}
+{% load static %}
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'terrapeer/css/plant-care.css' %}">
+{% endblock %}
+{% block body_class %}care-page{% endblock %}
+{% block content %}
+    <div class="shell" style="padding-top:28px">{% include "terrapeer/nav.html" %}</div>
+    <main id="main-content" class="shell main">
+        <section class="panel empty">
+            <h1>Your plants will appear here</h1>
+            <p>Once your plants are connected, you can plan and track their care here.</p>
+            <a class="btn" href="{% url 'show_main' %}">Back to home</a>
+        </section>
+    </main>
+{% endblock %}
