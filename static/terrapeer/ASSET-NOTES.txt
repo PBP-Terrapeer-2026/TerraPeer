@@ -1,0 +1,1 @@
+User-supplied TerraPeer icons and images reused for this project. Photos are low-resolution crops from supplied references; replace with original licensed high-resolution photos before production. Lucide is included locally with its license when available. Google Fonts use Lora and Plus Jakarta Sans; browser falls back to Georgia and Arial without network access.
