@@ -81,6 +81,10 @@ class PlantFilterForm(BootstrapFormMixin, forms.Form):
     }
 
 class CheckInForm(BootstrapFormMixin, forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['condition'].choices = PlantCheckIn.Condition.choices  # no blank "-----" chip
+
     class Meta:
         model = PlantCheckIn
         fields = ['condition', 'note']

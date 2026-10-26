@@ -8,6 +8,6 @@
     <path d="M151 58c-7-27 3-41 17-45 10 24 2 40-17 45Z" fill="#477E53"/>
     <path d="M118 137h65l-9 34a5 5 0 0 1-5 4h-37a5 5 0 0 1-5-4l-9-34Z" fill="#BA795B"/>
     <path d="M115 134h70v9h-70z" fill="#D09572"/>
-    {% if plant.growth_stage == 'flowering' %}<g fill="#F3C3B0"><circle cx="193" cy="57" r="9"/><circle cx="205" cy="65" r="9"/><circle cx="201" cy="78" r="9"/><circle cx="188" cy="78" r="9"/><circle cx="182" cy="66" r="9"/></g><circle cx="194" cy="68" r="6" fill="#E4AF52"/>{% endif %}
-    {% if plant.growth_stage == 'fruiting' or plant.growth_stage == 'harvesting' %}<circle cx="111" cy="96" r="12" fill="#C6704F"/><circle cx="185" cy="87" r="10" fill="#DE9C56"/>{% endif %}
+    <g class="mp-flower"><g fill="#F3C3B0"><circle cx="193" cy="57" r="9"/><circle cx="205" cy="65" r="9"/><circle cx="201" cy="78" r="9"/><circle cx="188" cy="78" r="9"/><circle cx="182" cy="66" r="9"/></g><circle cx="194" cy="68" r="6" fill="#E4AF52"/></g>
+    <g class="mp-fruit"><circle cx="111" cy="96" r="12" fill="#C6704F"/><circle cx="185" cy="87" r="10" fill="#DE9C56"/></g>
 </svg>

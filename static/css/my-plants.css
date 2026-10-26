@@ -90,3 +90,8 @@
 .mp-check-ins { --bs-list-group-bg: transparent; --bs-list-group-border-color: var(--tp-line); max-height: 320px; overflow-y: auto; }
 .mp-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--tp-primary); margin-top: .4rem; flex: none; }
 .mp-dot-warn { background: var(--tp-clay); }
+
+/* Flowers / fruit follow the stage class, so AJAX stage changes update the illustration too. */
+.mp-art .mp-flower, .mp-art .mp-fruit { display: none; }
+.mp-art-flowering .mp-flower, .mp-art-fruiting .mp-fruit, .mp-art-harvesting .mp-fruit { display: inline; }
+.plants-page h2 .badge, .plants-page h3 .badge { font-family: var(--bs-body-font-family); }
