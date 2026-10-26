@@ -6,10 +6,11 @@ from django.db.models import Count, Q
 from django.db.models.deletion import ProtectedError, RestrictedError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
-from .forms import PlantFilterForm, PlantForm, StageForm
-from .models import Plant
+from .forms import CheckInForm, PlantFilterForm, PlantForm, StageForm
+from .models import Plant, PlantCheckIn
 from .services import CatalogUnavailable, search_species
 
 PAGE_SIZE = 12
@@ -96,8 +97,20 @@ def plant_fragment(request):
     return render(request, 'my_plants/_results.html', _list_context(request))
 
 
-def _detail_context(plant, stage_form=None):
-    return {'plant': plant, 'stage_form': stage_form or StageForm(instance=plant), 'stage_steps': _stage_steps(plant)}
+def _detail_context(plant, stage_form=None, check_in_form=None):
+    return {
+        'plant': plant, 'stage_form': stage_form or StageForm(instance=plant), 'stage_steps': _stage_steps(plant),
+        'check_in_form': check_in_form or CheckInForm(), 'check_ins': plant.check_ins.all()[:8],
+        'check_in_count': plant.check_ins.count(),
+    }
+
+
+def _serialize_check_in(check_in):
+    return {
+        'id': check_in.pk, 'plant': check_in.plant_id, 'condition': check_in.condition,
+        'condition_label': check_in.get_condition_display(), 'note': check_in.note,
+        'needs_attention': check_in.needs_attention, 'created_at': check_in.created_at.isoformat(),
+    }
 
 
 @login_required
@@ -209,3 +222,34 @@ def species_api(request):
     except CatalogUnavailable as exc:
         return JsonResponse({'error': str(exc)}, status=503)
     return JsonResponse({'results': results, 'source': 'Perenual'})
+
+@login_required
+@require_POST
+def check_in_create(request, pk):
+    plant = _owned_plant(request, pk)
+    form = CheckInForm(request.POST)
+    if not form.is_valid():
+        if _wants_json(request):
+            return JsonResponse({'errors': form.errors.get_json_data()}, status=400)
+        return render(request, 'my_plants/detail.html', _detail_context(plant, check_in_form=form), status=400)
+    check_in = form.save(commit=False)
+    check_in.plant = plant
+    check_in.save()
+    if _wants_json(request):
+        html = render_to_string('my_plants/_check_in.html', {'check_in': check_in, 'plant': plant}, request=request)
+        return JsonResponse({'check_in': _serialize_check_in(check_in), 'html': html,
+                             'count': plant.check_ins.count()}, status=201)
+    messages.success(request, f'Saved: {check_in.get_condition_display()}.')
+    return redirect(plant)
+
+
+@login_required
+@require_POST
+def check_in_delete(request, pk, check_in_pk):
+    plant = _owned_plant(request, pk)
+    check_in = get_object_or_404(PlantCheckIn, pk=check_in_pk, plant=plant)
+    check_in.delete()
+    if _wants_json(request):
+        return JsonResponse({'deleted': True, 'count': plant.check_ins.count()})
+    messages.success(request, 'Check-in removed.')
+    return redirect(plant)

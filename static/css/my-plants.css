@@ -81,3 +81,12 @@
 .mp-species small { display: block; color: var(--tp-muted); font-style: italic; }
 
 @media (prefers-reduced-motion: reduce) { .mp-card { transition: none; } .mp-card:hover { transform: none; } }
+
+/* Condition check-ins */
+.mp-chip { border: 1px solid var(--tp-line-strong); background: var(--tp-surface); color: var(--tp-ink); --bs-btn-padding-x: .9rem; min-height: 38px; }
+.mp-chip:hover { background: var(--tp-moss-100); color: var(--tp-ink); }
+.btn-check:checked + .mp-chip { background: var(--tp-primary); border-color: var(--tp-primary); color: #FFFDF1; }
+.btn-check:focus-visible + .mp-chip { outline: 3px solid var(--tp-moss); outline-offset: 2px; }
+.mp-check-ins { --bs-list-group-bg: transparent; --bs-list-group-border-color: var(--tp-line); max-height: 320px; overflow-y: auto; }
+.mp-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--tp-primary); margin-top: .4rem; flex: none; }
+.mp-dot-warn { background: var(--tp-clay); }

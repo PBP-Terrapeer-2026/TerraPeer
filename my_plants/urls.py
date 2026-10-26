@@ -15,4 +15,6 @@ urlpatterns = [
     path('<int:pk>/edit/', views.plant_edit, name='edit'),
     path('<int:pk>/stage/', views.plant_stage, name='stage'),
     path('<int:pk>/delete/', views.plant_delete, name='delete'),
+    path('<int:pk>/check-ins/', views.check_in_create, name='check_in_create'),
+    path('<int:pk>/check-ins/<int:check_in_pk>/delete/', views.check_in_delete, name='check_in_delete'),
 ]

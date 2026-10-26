@@ -129,7 +129,55 @@
     });
   }
 
-  // 4. Perenual species lookup on the add / edit form.
+  // 4. One-tap condition check-ins on the plant page.
+  const checkInForm = document.querySelector('[data-check-in-form]');
+  if (checkInForm) {
+    const list = document.querySelector('[data-check-in-list]');
+    const empty = document.querySelector('[data-check-in-empty]');
+    const count = document.querySelector('[data-check-in-count]');
+    const error = checkInForm.querySelector('[data-check-in-error]');
+    const setCount = (n) => {
+      count.textContent = `${n} check-in${n === 1 ? '' : 's'}`;
+      empty.classList.toggle('d-none', n > 0);
+    };
+    checkInForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      error.textContent = '';
+      if (!checkInForm.querySelector('[name=condition]:checked')) { error.textContent = 'Choose how the plant looks first.'; return; }
+      const button = checkInForm.querySelector('button[type=submit]');
+      button.disabled = true;
+      try {
+        const response = await fetch(checkInForm.action, {
+          method: 'POST', body: new FormData(checkInForm), headers: { Accept: 'application/json' },
+        });
+        if (response.redirected) { redirectToLogin(response); return; }
+        const data = await response.json();
+        if (!response.ok) throw new Error(Object.values(data.errors || {})[0]?.[0]?.message || 'Could not save the check-in.');
+        list.insertAdjacentHTML('afterbegin', data.html);
+        setCount(data.count);
+        checkInForm.reset();
+        announce(`Check-in saved: ${data.check_in.condition_label}.`);
+      } catch (err) {
+        error.textContent = err.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+    list.addEventListener('submit', async (event) => {
+      const form = event.target.closest('[data-check-in-delete]');
+      if (!form) return;
+      event.preventDefault();
+      const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+      if (response.redirected) { redirectToLogin(response); return; }
+      if (!response.ok) { announce('Could not remove the check-in.'); return; }
+      const data = await response.json();
+      form.closest('[data-check-in]').remove();
+      setCount(data.count);
+      announce('Check-in removed.');
+    });
+  }
+
+  // 5. Perenual species lookup on the add / edit form.
   const lookup = document.querySelector('[data-species-lookup]');
   if (lookup) {
     const button = lookup.querySelector('[data-species-search]');

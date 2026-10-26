@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 
-from .models import Plant
+from .models import Plant, PlantCheckIn
 
 
 class BootstrapFormMixin:
@@ -79,3 +79,13 @@ class PlantFilterForm(BootstrapFormMixin, forms.Form):
         'newest': ['-created_at', '-pk'], 'oldest': ['created_at', 'pk'],
         'name': ['name', 'pk'], 'planted': ['planted_on', 'pk'],
     }
+
+class CheckInForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = PlantCheckIn
+        fields = ['condition', 'note']
+        labels = {'condition': 'How does it look today?', 'note': 'Note (optional)'}
+        widgets = {
+            'condition': forms.RadioSelect,
+            'note': forms.TextInput(attrs={'placeholder': 'e.g. Lower leaves look pale', 'maxlength': 200}),
+        }

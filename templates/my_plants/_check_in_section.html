@@ -1,0 +1,31 @@
+            <section class="card" aria-labelledby="check-in-title">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-baseline gap-2 mb-3">
+                        <h2 id="check-in-title" class="h5 mb-0">How does it look today?</h2>
+                        <span class="small text-muted" data-check-in-count>{{ check_in_count }} check-in{{ check_in_count|pluralize }}</span>
+                    </div>
+                    <form method="post" action="{% url 'my_plants:check_in_create' plant.pk %}" data-check-in-form novalidate>
+                        {% csrf_token %}
+                        <fieldset>
+                            <legend class="visually-hidden">{{ check_in_form.condition.label }}</legend>
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                {% for choice in check_in_form.condition %}
+                                    <input type="radio" class="btn-check" name="{{ choice.data.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}"{% if choice.data.selected %} checked{% endif %} required>
+                                    <label class="btn btn-sm mp-chip" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+                                {% endfor %}
+                            </div>
+                        </fieldset>
+                        {% for error in check_in_form.condition.errors %}<div class="invalid-feedback d-block mb-2" id="condition-error">{{ error }}</div>{% endfor %}
+                        <div class="d-flex flex-wrap gap-2">
+                            <label class="visually-hidden" for="{{ check_in_form.note.id_for_label }}">{{ check_in_form.note.label }}</label>
+                            <div class="flex-grow-1" style="min-width: 220px">{{ check_in_form.note }}</div>
+                            <button type="submit" class="btn btn-primary">Save check-in</button>
+                        </div>
+                        <div class="invalid-feedback d-block mt-2" data-check-in-error></div>
+                    </form>
+                    <ul class="list-group list-group-flush mt-3 mp-check-ins" data-check-in-list>
+                        {% for check_in in check_ins %}{% include "my_plants/_check_in.html" %}{% endfor %}
+                    </ul>
+                    <p class="small text-muted mb-0 mt-2{% if check_ins %} d-none{% endif %}" data-check-in-empty>No check-ins yet. One tap a day builds a useful history.</p>
+                </div>
+            </section>
