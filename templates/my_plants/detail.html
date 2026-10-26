@@ -79,7 +79,7 @@
 
     <div class="modal fade" id="delete-plant" tabindex="-1" aria-labelledby="delete-plant-title" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <form class="modal-content p-2" method="post" action="{% url 'my_plants:delete' plant.pk %}" data-delete-form>
+            <form class="modal-content p-2" method="post" action="{% url 'my_plants:delete' plant.pk %}" data-delete-form data-list-url="{% url 'my_plants:list' %}">
                 {% csrf_token %}
                 <div class="modal-body">
                     <span class="mp-stat-icon mp-tone-danger mb-3"><svg class="mp-icon"><use href="#i-trash"/></svg></span>
