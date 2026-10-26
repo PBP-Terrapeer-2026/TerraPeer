@@ -7,6 +7,7 @@ from urllib.error import URLError
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
 from django.db.models.deletion import ProtectedError
 from django.test import Client, TestCase, override_settings
@@ -16,6 +17,13 @@ from django.utils import timezone
 from .forms import PlantForm
 from .models import Plant, PlantCheckIn
 from .services import CatalogUnavailable, search_species
+
+
+def photo_upload(name='plant.png', size=(40, 30), color=(80, 140, 90), fmt='PNG'):
+    from PIL import Image
+    buffer = io.BytesIO()
+    Image.new('RGB', size, color).save(buffer, fmt)
+    return SimpleUploadedFile(name, buffer.getvalue(), content_type=f'image/{fmt.lower()}')
 
 
 class PlantTests(TestCase):
@@ -119,7 +127,7 @@ class PlantTests(TestCase):
 
     def test_finished_status_is_derived_and_reopening_is_consistent(self):
         for stage, status in [('finished', 'finished'), ('flowering', 'active')]:
-            response = self.client.post(self.url('stage'), {'growth_stage': stage}, HTTP_ACCEPT='application/json')
+            response = self.client.post(self.url('stage'), {'growth_stage': stage, 'photo': photo_upload()}, HTTP_ACCEPT='application/json')
             self.assertEqual(response.status_code, 200)
             self.plant.refresh_from_db()
             self.assertEqual(self.plant.status, status)
@@ -131,7 +139,7 @@ class PlantTests(TestCase):
             self.assertEqual(self.client.post(self.url('stage'), {'growth_stage': 'unknown'}, HTTP_ACCEPT=accept).status_code, 400)
 
     def test_stage_and_edit_html_success_redirect(self):
-        self.assertRedirects(self.client.post(self.url('stage'), {'growth_stage': 'flowering'}), self.plant.get_absolute_url())
+        self.assertRedirects(self.client.post(self.url('stage'), {'growth_stage': 'flowering', 'photo': photo_upload()}), self.plant.get_absolute_url())
         self.assertRedirects(self.client.post(self.url('edit'), self.data), self.plant.get_absolute_url())
 
     def test_delete_requires_post_and_preserves_plant_on_confirmation_page(self):
@@ -297,7 +305,7 @@ class PlantListExtrasTests(TestCase):
         self.assertContains(response, 'aria-current="page">My Plants')
 
     def test_stage_json_returns_stepper_state(self):
-        response = self.client.post(reverse('my_plants:stage', args=[self.old.pk]), {'growth_stage': 'harvesting'},
+        response = self.client.post(reverse('my_plants:stage', args=[self.old.pk]), {'growth_stage': 'harvesting', 'photo': photo_upload()},
                                     HTTP_ACCEPT='application/json')
         states = {step['value']: step['state'] for step in response.json()['steps']}
         self.assertEqual(states, {'growing': 'done', 'flowering': 'done', 'fruiting': 'done',

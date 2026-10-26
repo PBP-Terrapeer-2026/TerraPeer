@@ -2,6 +2,7 @@ from django import forms
 from django.utils import timezone
 
 from .models import Plant, PlantCheckIn
+from .photos import ACCEPT, process_photo
 
 
 class BootstrapFormMixin:
@@ -27,10 +28,35 @@ class BootstrapFormMixin:
                 attrs['aria-describedby'] = f'{self.add_prefix(name)}-error'
 
 
-class PlantForm(BootstrapFormMixin, forms.ModelForm):
+PHOTO_HELP = 'JPG, PNG or WebP, up to 5 MB. Location data is removed before saving.'
+
+
+def photo_field(required=False, label='Photo'):
+    return forms.FileField(required=required, label=label, help_text=PHOTO_HELP,
+                           widget=forms.FileInput(attrs={'accept': ACCEPT, 'data-photo-input': ''}))
+
+
+class PhotoCleanMixin:
+    """Validates the `photo` upload and keeps the processed JPEG on `self.processed_photo`."""
+
+    processed_photo = None
+
+    def clean_photo(self):
+        upload = self.cleaned_data.get('photo')
+        if upload:
+            self.processed_photo = process_photo(upload)
+        return upload
+
+
+class PlantForm(PhotoCleanMixin, BootstrapFormMixin, forms.ModelForm):
+    photo = photo_field()
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['planted_on'].widget.attrs['max'] = timezone.localdate().isoformat()
+        if self.instance.pk:
+            self.fields['photo'].label = 'Add a new photo'
+            self.fields['photo'].help_text = 'Optional. It is added to the photo diary. ' + PHOTO_HELP
 
     class Meta:
         model = Plant
@@ -54,11 +80,37 @@ class PlantForm(BootstrapFormMixin, forms.ModelForm):
         }
 
 
-class StageForm(BootstrapFormMixin, forms.ModelForm):
+class StageForm(PhotoCleanMixin, BootstrapFormMixin, forms.ModelForm):
+    """Changing the stage requires a photo of the plant at its new stage."""
+
+    photo = photo_field(label='Photo of the plant now')
+    caption = forms.CharField(required=False, max_length=200, label='Caption (optional)',
+                              widget=forms.TextInput(attrs={'placeholder': 'e.g. First flowers opened'}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.original_stage = self.instance.growth_stage
+
+    @property
+    def stage_changed(self):
+        return self.cleaned_data.get('growth_stage', self.original_stage) != self.original_stage
+
+    def clean(self):
+        cleaned = super().clean()
+        if self.stage_changed and not cleaned.get('photo') and 'photo' not in self.errors:
+            self.add_error('photo', 'Add a photo of the plant at its new stage.')
+        return cleaned
+
     class Meta:
         model = Plant
         fields = ['growth_stage']
         labels = {'growth_stage': 'Growth stage'}
+
+
+class PhotoForm(PhotoCleanMixin, BootstrapFormMixin, forms.Form):
+    photo = photo_field(required=True, label='Photo')
+    caption = forms.CharField(required=False, max_length=200, label='Caption (optional)',
+                              widget=forms.TextInput(attrs={'placeholder': 'What changed?'}))
 
 
 class PlantFilterForm(BootstrapFormMixin, forms.Form):

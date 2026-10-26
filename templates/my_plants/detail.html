@@ -4,10 +4,16 @@
 {% block plants_content %}
     <a class="mp-back" href="{% url 'my_plants:list' %}"><svg class="mp-icon mp-icon-sm"><use href="#i-back"/></svg>Back to My Plants</a>
 
+    <div class="alert alert-success d-flex flex-wrap align-items-center gap-3 mt-3 mb-0{% if plant.status != 'finished' %} d-none{% endif %}" data-recap-cta>
+        <svg class="mp-icon" aria-hidden="true"><use href="#i-sparkle"/></svg>
+        <span class="flex-grow-1"><strong>{{ plant.name }} is finished.</strong> Its whole story — every stage and photo — is ready.</span>
+        <a class="btn btn-primary btn-sm" href="{% url 'my_plants:recap' plant.pk %}">View growing recap</a>
+    </div>
+
     <div class="row g-4 mt-1 align-items-stretch">
         <div class="col-12 col-lg-5">
-            <div class="mp-art mp-art-lg mp-art-{{ plant.growth_stage }} h-100" data-plant-art>
-                {% include "my_plants/_botanical.html" %}
+            <div class="mp-art mp-art-lg mp-art-{{ plant.growth_stage }} h-100{% if cover %} has-photo{% endif %}" data-plant-art>
+                {% if cover %}{% include "my_plants/_plant_visual.html" with cover_url=cover.get_absolute_url %}{% else %}{% include "my_plants/_botanical.html" %}{% endif %}
                 <span class="badge mp-status" data-plant-status>{{ plant.status|capfirst }}</span>
             </div>
         </div>
@@ -24,15 +30,15 @@
             </header>
 
             <section class="card" aria-labelledby="stage-title">
-                <div class="card-body">
+                <form method="post" action="{% url 'my_plants:stage' plant.pk %}" enctype="multipart/form-data" class="card-body" data-stage-form data-original-stage="{{ plant.growth_stage }}" novalidate>
+                    {% csrf_token %}
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
                         <h2 id="stage-title" class="h5 mb-0">Growth stage <span class="badge mp-stage mp-stage-{{ plant.growth_stage }} ms-1 align-middle" data-stage-badge>{{ plant.get_growth_stage_display }}</span></h2>
-                        <form method="post" action="{% url 'my_plants:stage' plant.pk %}" class="d-flex gap-2" data-stage-form data-original-stage="{{ plant.growth_stage }}" novalidate>
-                            {% csrf_token %}
+                        <div class="d-flex gap-2">
                             <label class="visually-hidden" for="{{ stage_form.growth_stage.id_for_label }}">Change growth stage</label>
                             {{ stage_form.growth_stage }}
                             <button class="btn btn-primary" type="submit">Save</button>
-                        </form>
+                        </div>
                     </div>
                     {% for error in stage_form.growth_stage.errors %}<div class="invalid-feedback d-block mb-3" id="growth_stage-error">{{ error }}</div>{% endfor %}
                     <ol class="mp-steps" data-stage-steps aria-label="Growth stages">
@@ -43,13 +49,51 @@
                             </li>
                         {% endfor %}
                     </ol>
+                    <div class="mp-stage-photo mt-4" data-stage-photo>
+                        <p class="small fw-semibold mb-2"><svg class="mp-icon mp-icon-sm me-1" aria-hidden="true"><use href="#i-camera"/></svg>A new stage needs a photo — it becomes part of the growing recap.</p>
+                        {% include "my_plants/_photo_input.html" with field=stage_form.photo required=True %}
+                        <div class="mt-2">
+                            <label class="visually-hidden" for="{{ stage_form.caption.id_for_label }}">{{ stage_form.caption.label }}</label>
+                            {{ stage_form.caption }}
+                        </div>
+                    </div>
+                    <div class="invalid-feedback d-block mt-2" role="alert" data-stage-error></div>
                     <p class="form-text mb-0 mt-3">Choose the stage that fits your plant — skipping is fine. Finished keeps the plant in your history and stops new care tasks.</p>
-                </div>
+                </form>
             </section>
 
 {% include "my_plants/_check_in_section.html" %}
         </div>
     </div>
+
+    <section class="card mt-4" id="photo-diary" aria-labelledby="diary-title">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                <div>
+                    <h2 id="diary-title" class="h5 mb-0">Photo diary</h2>
+                    <p class="small text-muted mb-0" data-photo-count>{{ photos|length }} photo{{ photos|length|pluralize }} · stored privately in your account</p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn {% if plant.status == 'finished' %}btn-primary{% else %}btn-outline-primary{% endif %}" href="{% url 'my_plants:recap' plant.pk %}"><svg class="mp-icon mp-icon-sm"><use href="#i-sparkle"/></svg>{% if plant.status == 'finished' %}Growing recap{% else %}Story so far{% endif %}</a>
+                    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#add-photo" aria-expanded="{% if photo_form.errors %}true{% else %}false{% endif %}" aria-controls="add-photo"><svg class="mp-icon mp-icon-sm"><use href="#i-camera"/></svg>Add photo</button>
+                </div>
+            </div>
+            <form class="collapse{% if photo_form.errors %} show{% endif %} mp-add-photo mb-3" id="add-photo" method="post" action="{% url 'my_plants:photo_add' plant.pk %}" enctype="multipart/form-data" data-photo-form novalidate>
+                {% csrf_token %}
+                {% include "my_plants/_photo_input.html" with field=photo_form.photo %}
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <label class="visually-hidden" for="{{ photo_form.caption.id_for_label }}">{{ photo_form.caption.label }}</label>
+                    <div class="flex-grow-1" style="min-width: 220px">{{ photo_form.caption }}</div>
+                    <button class="btn btn-primary" type="submit">Save photo</button>
+                </div>
+                <div class="invalid-feedback d-block mt-2" role="alert" data-photo-error></div>
+            </form>
+            <ul class="mp-tiles" data-photo-list>
+                {% for photo in photos reversed %}{% include "my_plants/_photo_tile.html" %}{% endfor %}
+            </ul>
+            <p class="small text-muted mb-0{% if photos %} d-none{% endif %}" data-photo-empty>No photos yet. Add one now, and every stage change will add another.</p>
+        </div>
+    </section>
 
     <div class="row g-4 mt-1">
         <section class="col-12 col-lg-5" aria-labelledby="facts-title">
@@ -86,7 +130,7 @@
                 <div class="modal-body">
                     <span class="mp-stat-icon mp-tone-danger mb-3"><svg class="mp-icon"><use href="#i-trash"/></svg></span>
                     <h2 class="h4" id="delete-plant-title">Delete {{ plant.name }}?</h2>
-                    <p class="text-muted mb-0">This can't be undone{% if check_in_count %} and also removes its {{ check_in_count }} check-in{{ check_in_count|pluralize }}{% endif %}. You can mark it Finished instead to keep it in your garden history.</p>
+                    <p class="text-muted mb-0">This can't be undone and also removes its {{ photos|length }} photo{{ photos|length|pluralize }} and {{ check_in_count }} check-in{{ check_in_count|pluralize }}. You can mark it Finished instead to keep it in your garden history.</p>
                     <div class="alert alert-warning mt-3 mb-0 d-none" role="alert" data-delete-error></div>
                 </div>
                 <div class="modal-footer border-0">

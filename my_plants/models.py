@@ -66,6 +66,9 @@ class Plant(models.Model):
     def get_absolute_url(self):
         return reverse('my_plants:detail', args=[self.pk])
 
+    def get_recap_url(self):
+        return reverse('my_plants:recap', args=[self.pk])
+
     def __str__(self):
         return self.name
 

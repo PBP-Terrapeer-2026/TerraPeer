@@ -9,8 +9,8 @@
 {% for plant in page_obj %}
     <div class="col">
         <article class="card h-100 mp-card">
-            <div class="mp-art mp-art-{{ plant.growth_stage }}" aria-hidden="true">
-                {% include "my_plants/_botanical.html" %}
+            <div class="mp-art mp-art-{{ plant.growth_stage }}{% if plant.cover_id %} has-photo{% endif %}" aria-hidden="true">
+                {% if plant.cover_id %}{% url 'my_plants:photo' plant.pk plant.cover_id as cover_url %}{% include "my_plants/_plant_visual.html" %}{% else %}{% include "my_plants/_botanical.html" %}{% endif %}
                 <span class="badge mp-status">{{ plant.status|capfirst }}</span>
             </div>
             <div class="card-body d-flex flex-column">

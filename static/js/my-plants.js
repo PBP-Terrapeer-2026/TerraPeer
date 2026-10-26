@@ -67,19 +67,65 @@
     });
   }
 
-  // 2. Change the growth stage without reloading the plant page.
+  // 2. Change the growth stage without reloading. A new stage needs a photo (checked again on the server).
+  const art = document.querySelector('[data-plant-art]');
+  const photoList = document.querySelector('[data-photo-list]');
+  const photoCount = document.querySelector('[data-photo-count]');
+  const photoEmpty = document.querySelector('[data-photo-empty]');
+  const setCover = (url, alt) => {
+    if (!art || !url) return;
+    let img = art.querySelector('img.mp-photo');
+    if (!img) {
+      art.querySelector('svg')?.remove();
+      img = document.createElement('img');
+      img.className = 'mp-photo';
+      art.prepend(img);
+    }
+    img.src = url;
+    img.alt = alt;
+    art.classList.add('has-photo');
+  };
+  const addTile = (html, count) => {
+    if (!photoList || !html) return;
+    photoList.insertAdjacentHTML('afterbegin', html);
+    if (photoCount) photoCount.textContent = `${count} photo${count === 1 ? '' : 's'} · stored privately in your account`;
+    photoEmpty?.classList.add('d-none');
+  };
+  const resetPicker = (form) => {
+    form.querySelectorAll('[data-photo-input]').forEach((input) => { input.value = ''; input.dispatchEvent(new Event('change')); });
+  };
+
   const stageForm = document.querySelector('[data-stage-form]');
   if (stageForm) {
+    const select = stageForm.elements.growth_stage;
     const badge = document.querySelector('[data-stage-badge]');
     const steps = document.querySelector('[data-stage-steps]');
-    const art = document.querySelector('[data-plant-art]');
     const statusBadge = document.querySelector('[data-plant-status]');
     const statusText = document.querySelector('[data-plant-status-text]');
+    const photoPanel = stageForm.querySelector('[data-stage-photo]');
+    const photoInput = stageForm.querySelector('[data-photo-input]');
+    const error = stageForm.querySelector('[data-stage-error]');
+    const recapCta = document.querySelector('[data-recap-cta]');
     const button = stageForm.querySelector('button[type=submit]');
+    const syncPanel = () => {
+      const changed = select.value !== stageForm.dataset.originalStage;
+      const keepOpen = photoInput.classList.contains('is-invalid');
+      photoPanel.hidden = !changed && !keepOpen;
+      photoInput.required = changed;
+    };
+    syncPanel();
+    select.addEventListener('change', () => { error.textContent = ''; syncPanel(); if (!photoPanel.hidden) photoInput.focus(); });
     stageForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const select = stageForm.elements.growth_stage;
-      if (select.value === 'finished' && stageForm.dataset.originalStage !== 'finished'
+      error.textContent = '';
+      const changed = select.value !== stageForm.dataset.originalStage;
+      if (changed && !photoInput.files.length) {
+        photoPanel.hidden = false;
+        error.textContent = 'Add a photo of the plant at its new stage.';
+        photoInput.focus();
+        return;
+      }
+      if (select.value === 'finished' && changed
           && !window.confirm('Mark this plant Finished? It stays in your garden history and stops new care tasks.')) return;
       button.disabled = true;
       try {
@@ -88,7 +134,10 @@
         });
         if (response.redirected) { redirectToLogin(response); return; }
         const data = await response.json();
-        if (!response.ok) throw new Error(data.errors?.growth_stage?.[0]?.message || 'Could not save the stage.');
+        if (!response.ok) {
+          const errors = data.errors || {};
+          throw new Error((errors.photo || errors.growth_stage || errors.caption || [{}])[0].message || 'Could not save the stage.');
+        }
         const plant = data.plant;
         stageForm.dataset.originalStage = plant.growth_stage;
         badge.textContent = plant.growth_stage_label;
@@ -102,15 +151,96 @@
           item.className = `mp-step is-${step.state}`;
           if (step.state === 'current') item.setAttribute('aria-current', 'step'); else item.removeAttribute('aria-current');
         }
+        if (data.photo) {
+          setCover(data.photo.url, `Latest photo of ${plant.name}`);
+          addTile(data.photo_html, photoList ? photoList.children.length + 1 : 1);
+        }
+        resetPicker(stageForm);
+        stageForm.elements.caption.value = '';
+        syncPanel();
+        recapCta?.classList.toggle('d-none', !data.recap_url);
         announce(`Growth stage saved: ${plant.growth_stage_label}.`);
-      } catch (error) {
-        announce(error.message);
-        window.alert(error.message);
+      } catch (err) {
+        error.textContent = err.message;
+        announce(err.message);
       } finally {
         button.disabled = false;
       }
     });
   }
+
+  // Add a progress photo to the diary, and delete photos.
+  const photoForm = document.querySelector('[data-photo-form]');
+  if (photoForm) {
+    const error = photoForm.querySelector('[data-photo-error]');
+    photoForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      error.textContent = '';
+      if (!photoForm.querySelector('[data-photo-input]').files.length) { error.textContent = 'Choose a photo first.'; return; }
+      const button = photoForm.querySelector('button[type=submit]');
+      button.disabled = true;
+      try {
+        const response = await fetch(photoForm.action, { method: 'POST', body: new FormData(photoForm), headers: { Accept: 'application/json' } });
+        if (response.redirected) { redirectToLogin(response); return; }
+        const data = await response.json();
+        if (!response.ok) throw new Error((data.errors?.photo || data.errors?.caption || [{}])[0].message || 'Could not save the photo.');
+        addTile(data.html, data.count);
+        setCover(data.photo.url, 'Latest photo');
+        photoForm.reset();
+        resetPicker(photoForm);
+        announce('Photo added to the diary.');
+      } catch (err) {
+        error.textContent = err.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+  photoList?.addEventListener('submit', async (event) => {
+    const form = event.target.closest('[data-photo-delete]');
+    if (!form) return;
+    event.preventDefault();
+    if (!window.confirm('Delete this photo? It will also disappear from the recap.')) return;
+    const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+    if (response.redirected) { redirectToLogin(response); return; }
+    if (!response.ok) { announce('Could not delete the photo.'); return; }
+    const data = await response.json();
+    form.closest('[data-photo-tile]').remove();
+    if (photoCount) photoCount.textContent = `${data.count} photo${data.count === 1 ? '' : 's'} · stored privately in your account`;
+    photoEmpty?.classList.toggle('d-none', data.count > 0);
+    if (data.cover_photo_url) setCover(data.cover_photo_url, 'Latest photo'); else window.location.reload();
+    announce('Photo deleted.');
+  });
+
+  // Preview a chosen photo and catch files over 5 MB before uploading.
+  document.querySelectorAll('[data-photo-picker]').forEach((picker) => {
+    const input = picker.querySelector('[data-photo-input]');
+    const preview = picker.querySelector('[data-photo-preview]');
+    const help = picker.querySelector('[data-photo-help]');
+    const defaultHelp = help?.textContent || '';
+    let objectUrl;
+    input?.addEventListener('change', () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      preview.querySelector('img')?.remove();
+      preview.classList.add('is-empty');
+      input.classList.remove('is-invalid');
+      if (help) help.textContent = defaultHelp;
+      const file = input.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        input.value = '';
+        input.classList.add('is-invalid');
+        if (help) help.textContent = 'That photo is larger than 5 MB. Choose a smaller one.';
+        return;
+      }
+      objectUrl = URL.createObjectURL(file);
+      const img = document.createElement('img');
+      img.src = objectUrl;
+      img.alt = '';
+      preview.append(img);
+      preview.classList.remove('is-empty');
+    });
+  });
 
   // 3. Delete from the confirmation modal; a 409 (linked records) is shown inside the modal.
   const deleteForm = document.querySelector('[data-delete-form]');
