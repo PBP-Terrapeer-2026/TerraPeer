@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Plant, PlantCheckIn
+from .models import Plant, PlantCheckIn, PlantPhoto
 
 
 @admin.register(Plant)
@@ -13,3 +13,9 @@ class PlantAdmin(admin.ModelAdmin):
 class PlantCheckInAdmin(admin.ModelAdmin):
     list_display = ['plant', 'condition', 'created_at']
     list_filter = ['condition']
+
+@admin.register(PlantPhoto)
+class PlantPhotoAdmin(admin.ModelAdmin):
+    list_display = ['plant', 'stage', 'kind', 'width', 'height', 'created_at']
+    list_filter = ['stage', 'kind']
+    exclude = ['image']

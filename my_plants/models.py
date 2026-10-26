@@ -94,3 +94,43 @@ class PlantCheckIn(models.Model):
 
     def __str__(self):
         return f'{self.plant} · {self.get_condition_display()}'
+
+class PlantPhotoQuerySet(models.QuerySet):
+    def without_image(self):
+        """Lists never need the binary data; load it only when a photo is served."""
+        return self.defer('image')
+
+
+class PlantPhoto(models.Model):
+    """A photo of a plant, stored in the database so it survives redeploys on PWS."""
+
+    class Kind(models.TextChoices):
+        START = 'start', 'First photo'
+        STAGE = 'stage', 'Stage update'
+        PROGRESS = 'progress', 'Progress photo'
+
+    plant = models.ForeignKey(Plant, on_delete=models.CASCADE, related_name='photos')
+    image = models.BinaryField()
+    content_type = models.CharField(max_length=30, default='image/jpeg')
+    width = models.PositiveIntegerField()
+    height = models.PositiveIntegerField()
+    stage = models.CharField(max_length=20, choices=Plant.Stage.choices)
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.PROGRESS)
+    caption = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = PlantPhotoQuerySet.as_manager()
+
+    class Meta:
+        ordering = ['created_at', 'pk']
+
+    def get_absolute_url(self):
+        return reverse('my_plants:photo', args=[self.plant_id, self.pk])
+
+    @property
+    def day_number(self):
+        """Day N of the plant's life when the photo was taken (planting day = day 0)."""
+        return max(0, (timezone.localtime(self.created_at).date() - self.plant.planted_on).days)
+
+    def __str__(self):
+        return f'{self.plant} · {self.get_stage_display()} · {self.created_at:%Y-%m-%d}'
