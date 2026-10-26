@@ -15,7 +15,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .forms import PlantForm
-from .models import Plant, PlantCheckIn
+from .models import Plant, PlantCheckIn, PlantPhoto
+from .photos import process_photo
 from .services import CatalogUnavailable, search_species
 
 
@@ -373,3 +374,185 @@ class CheckInTests(TestCase):
         self.client.post(reverse('my_plants:delete', args=[self.plant.pk]))
         self.assertFalse(PlantCheckIn.objects.exists())
         self.assertEqual(str(PlantCheckIn(plant=Plant(name='X'), condition='pests')), 'X · Pests spotted')
+
+
+
+class PhotoProcessingTests(TestCase):
+    def test_resizes_reencodes_and_strips_metadata(self):
+        from PIL import Image
+        buffer = io.BytesIO()
+        exif = Image.Exif()
+        exif[0x0110] = 'Secret phone model'
+        Image.new('RGB', (3200, 1600), (10, 120, 60)).save(buffer, 'JPEG', exif=exif)
+        data, width, height = process_photo(SimpleUploadedFile('big.jpg', buffer.getvalue()))
+        self.assertEqual((width, height), (1600, 800))
+        stored = Image.open(io.BytesIO(data))
+        self.assertEqual(stored.format, 'JPEG')
+        self.assertNotIn(0x0110, stored.getexif())
+
+    def test_png_with_transparency_is_flattened(self):
+        from PIL import Image
+        buffer = io.BytesIO()
+        Image.new('RGBA', (20, 20), (0, 0, 0, 0)).save(buffer, 'PNG')
+        data, _, _ = process_photo(SimpleUploadedFile('a.png', buffer.getvalue()))
+        self.assertEqual(Image.open(io.BytesIO(data)).mode, 'RGB')
+
+    def test_rejects_fake_images_other_formats_and_large_files(self):
+        from PIL import Image
+        gif = io.BytesIO()
+        Image.new('RGB', (5, 5)).save(gif, 'GIF')
+        cases = [SimpleUploadedFile('fake.jpg', b'not an image'), SimpleUploadedFile('a.gif', gif.getvalue())]
+        big = SimpleUploadedFile('big.jpg', b'x')
+        big.size = 6 * 1024 * 1024
+        cases.append(big)
+        for upload in cases:
+            with self.subTest(name=upload.name), self.assertRaises(ValidationError):
+                process_photo(upload)
+
+
+class PlantPhotoTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        User = get_user_model()
+        cls.owner = User.objects.create_user('photographer', password='Test-pass-2026')
+        cls.other = User.objects.create_user('stranger', password='Test-pass-2026')
+
+    def setUp(self):
+        self.client.force_login(self.owner)
+        self.plant = Plant.objects.create(owner=self.owner, name='Tomato 1', species_name='Tomato',
+                                          planted_on=timezone.localdate() - timedelta(days=10))
+
+    def stage(self, stage, **extra):
+        return self.client.post(reverse('my_plants:stage', args=[self.plant.pk]), {'growth_stage': stage, **extra},
+                                HTTP_ACCEPT='application/json')
+
+    def test_create_with_photo_saves_first_photo(self):
+        data = {'name': 'Basil', 'species_name': 'Basil', 'planted_on': timezone.localdate().isoformat(),
+                'growth_stage': 'growing', 'notes': '', 'photo': photo_upload()}
+        response = self.client.post(reverse('my_plants:create'), data, HTTP_ACCEPT='application/json')
+        self.assertEqual(response.status_code, 201)
+        photo = PlantPhoto.objects.get(plant_id=response.json()['plant']['id'])
+        self.assertEqual((photo.kind, photo.stage), ('start', 'growing'))
+        self.assertTrue(response.json()['plant']['cover_photo_url'].endswith(f'/photos/{photo.pk}/'))
+
+    def test_create_rejects_invalid_photo(self):
+        data = {'name': 'Basil', 'species_name': 'Basil', 'planted_on': timezone.localdate().isoformat(),
+                'growth_stage': 'growing', 'photo': SimpleUploadedFile('x.jpg', b'nope')}
+        response = self.client.post(reverse('my_plants:create'), data, HTTP_ACCEPT='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('photo', response.json()['errors'])
+        self.assertFalse(Plant.objects.filter(name='Basil').exists())
+
+    def test_stage_change_requires_photo(self):
+        response = self.stage('flowering')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('photo', response.json()['errors'])
+        self.plant.refresh_from_db()
+        self.assertEqual(self.plant.growth_stage, 'growing')
+        html = self.client.post(reverse('my_plants:stage', args=[self.plant.pk]), {'growth_stage': 'flowering'})
+        self.assertContains(html, 'Add a photo of the plant at its new stage.', status_code=400)
+
+    def test_stage_change_with_photo_records_stage_photo(self):
+        response = self.stage('flowering', photo=photo_upload(), caption='First flowers')
+        self.assertEqual(response.status_code, 200)
+        photo = PlantPhoto.objects.get(plant=self.plant)
+        self.assertEqual((photo.stage, photo.kind, photo.caption), ('flowering', 'stage', 'First flowers'))
+        self.assertIn('First flowers', response.json()['photo_html'])
+        self.assertNotIn('recap_url', response.json())
+
+    def test_same_stage_without_photo_is_allowed(self):
+        self.assertEqual(self.stage('growing').status_code, 200)
+        self.assertFalse(PlantPhoto.objects.exists())
+
+    def test_finishing_links_to_recap(self):
+        data = self.stage('finished', photo=photo_upload()).json()
+        self.assertEqual(data['recap_url'], reverse('my_plants:recap', args=[self.plant.pk]))
+        response = self.client.post(reverse('my_plants:stage', args=[self.plant.pk]),
+                                    {'growth_stage': 'harvesting', 'photo': photo_upload()})
+        self.assertRedirects(response, self.plant.get_absolute_url())
+        response = self.client.post(reverse('my_plants:stage', args=[self.plant.pk]),
+                                    {'growth_stage': 'finished', 'photo': photo_upload()})
+        self.assertRedirects(response, reverse('my_plants:recap', args=[self.plant.pk]))
+
+    def test_photo_is_served_only_to_owner(self):
+        self.stage('flowering', photo=photo_upload())
+        photo = PlantPhoto.objects.get()
+        url = photo.get_absolute_url()
+        response = self.client.get(url)
+        self.assertEqual(response['Content-Type'], 'image/jpeg')
+        self.assertIn('private', response['Cache-Control'])
+        self.assertTrue(response.content.startswith(b'\xff\xd8'))
+        self.client.force_login(self.other)
+        self.assertEqual(self.client.get(url).status_code, 404)
+        self.client.logout()
+        self.assertEqual(self.client.get(url).status_code, 302)
+
+    def test_photo_url_must_match_plant(self):
+        other_plant = Plant.objects.create(owner=self.owner, name='Mint', species_name='Mint')
+        self.stage('flowering', photo=photo_upload())
+        photo = PlantPhoto.objects.get()
+        self.assertEqual(self.client.get(reverse('my_plants:photo', args=[other_plant.pk, photo.pk])).status_code, 404)
+
+    def test_add_and_delete_progress_photo(self):
+        add_url = reverse('my_plants:photo_add', args=[self.plant.pk])
+        self.assertEqual(self.client.post(add_url, {}, HTTP_ACCEPT='application/json').status_code, 400)
+        response = self.client.post(add_url, {'photo': photo_upload(), 'caption': 'Day ten'}, HTTP_ACCEPT='application/json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()['count'], 1)
+        photo = PlantPhoto.objects.get()
+        self.assertEqual(photo.kind, 'progress')
+        self.assertEqual(photo.day_number, 10)
+        delete_url = reverse('my_plants:photo_delete', args=[self.plant.pk, photo.pk])
+        self.client.force_login(self.other)
+        self.assertEqual(self.client.post(delete_url).status_code, 404)
+        self.client.force_login(self.owner)
+        self.assertEqual(self.client.post(delete_url, HTTP_ACCEPT='application/json').json()['count'], 0)
+        self.assertRedirects(self.client.post(add_url, {'photo': photo_upload()}), self.plant.get_absolute_url() + '#photo-diary')
+
+    def test_edit_with_photo_adds_progress_photo(self):
+        data = {'name': 'Tomato 1', 'species_name': 'Tomato', 'planted_on': self.plant.planted_on.isoformat(),
+                'growth_stage': 'growing', 'notes': '', 'photo': photo_upload()}
+        self.client.post(reverse('my_plants:edit', args=[self.plant.pk]), data)
+        self.assertEqual(PlantPhoto.objects.get().kind, 'progress')
+
+    def test_list_and_detail_show_latest_photo(self):
+        self.stage('flowering', photo=photo_upload())
+        photo = PlantPhoto.objects.get()
+        self.assertContains(self.client.get(reverse('my_plants:list')), photo.get_absolute_url())
+        self.assertContains(self.client.get(self.plant.get_absolute_url()), photo.get_absolute_url())
+        api = self.client.get(reverse('my_plants:detail_api', args=[self.plant.pk])).json()
+        self.assertEqual(api['photos'][0]['stage'], 'flowering')
+
+    def test_recap_tells_the_story(self):
+        today = timezone.localdate()
+        for stage, days_ago in [('flowering', 6), ('fruiting', 3), ('finished', 0)]:
+            self.stage(stage, photo=photo_upload())
+            PlantPhoto.objects.filter(stage=stage).update(created_at=timezone.now() - timedelta(days=days_ago))
+        PlantCheckIn.objects.create(plant=self.plant, condition='normal')
+        PlantCheckIn.objects.create(plant=self.plant, condition='pests')
+        response = self.client.get(reverse('my_plants:recap', args=[self.plant.pk]))
+        self.assertContains(response, 'Growing recap')
+        ctx = response.context
+        self.assertEqual(ctx['total_days'], 10)
+        self.assertEqual([(s['stage'], s['days']) for s in ctx['segments']], [('growing', 4), ('flowering', 3), ('fruiting', 3)])
+        self.assertEqual(ctx['healthy_pct'], 50)
+        self.assertEqual(ctx['finished_on'], today)
+        self.assertEqual(len(ctx['photos']), 3)
+        self.assertContains(response, '?species=Tomato')
+
+    def test_recap_for_active_plant_and_privacy(self):
+        url = reverse('my_plants:recap', args=[self.plant.pk])
+        response = self.client.get(url)
+        self.assertContains(response, 'The story so far')
+        self.assertContains(response, 'No photos yet')
+        self.client.force_login(self.other)
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_grow_again_prefills_species(self):
+        response = self.client.get(reverse('my_plants:create'), {'species': 'Cherry Tomato'})
+        self.assertContains(response, 'value="Cherry Tomato"')
+
+    def test_deleting_plant_deletes_photos(self):
+        self.stage('flowering', photo=photo_upload())
+        self.client.post(reverse('my_plants:delete', args=[self.plant.pk]))
+        self.assertFalse(PlantPhoto.objects.exists())
