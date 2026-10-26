@@ -1,0 +1,23 @@
+/* Login and register pages. Scoped to .auth-page / .tp-auth. */
+.tp-auth { max-width: 1120px; padding-top: 2.5rem; padding-bottom: 1rem; }
+.tp-auth-card { box-shadow: var(--tp-shadow); }
+.tp-auth-aside { background: var(--tp-ink); color: #E3EDD7; padding: 2.5rem; min-height: 100%; }
+.tp-auth-aside-title { color: #FFF9DC; line-height: 1.2; }
+.tp-auth-art { width: 100%; max-width: 320px; height: auto; align-self: center; margin: 1.5rem 0; }
+.tp-auth-perks { display: grid; gap: 1.1rem; }
+.tp-auth-perks li { padding-left: 1rem; border-left: 2px solid var(--tp-moss); }
+.tp-auth-perks strong { display: block; color: #FFF9DC; font-weight: 600; }
+.tp-auth-perks span { font-size: .9rem; color: #CFE0C0; }
+.tp-auth-main { padding: 2.5rem; display: flex; align-items: center; justify-content: center; }
+.tp-auth-form { width: 100%; max-width: 420px; }
+.tp-auth-title { font-size: clamp(2rem, 3.5vw, 2.6rem); margin-bottom: .5rem; }
+.tp-pw-wrap { position: relative; }
+.tp-pw-wrap .form-control { padding-right: 4.5rem; }
+.tp-pw-toggle { position: absolute; top: 6px; right: 6px; min-height: 36px; text-decoration: none; font-weight: 600; }
+.auth-page .form-text ul { margin-bottom: 0; }
+@media (max-width: 991.98px) {
+  .tp-auth { padding-top: 1.25rem; }
+  .tp-auth-aside { padding: 1.75rem; }
+  .tp-auth-art { max-width: 200px; margin: .5rem 0; }
+  .tp-auth-main { padding: 1.75rem 1.25rem 2rem; }
+}
