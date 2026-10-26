@@ -76,7 +76,7 @@ def garden_journal_create(request):
 
             messages.success(
                 request,
-                "Catatan jurnal berhasil ditambahkan.",
+                "Journal entry successfully created.",
             )
             return redirect("garden_journal")
     else:
@@ -111,7 +111,7 @@ def garden_journal_edit(request, entry_id):
 
             messages.success(
                 request,
-                "Catatan jurnal berhasil diperbarui.",
+                "Journal entry successfully updated.",
             )
             return redirect("garden_journal")
     else:
@@ -139,7 +139,7 @@ def garden_journal_delete(request, entry_id):
         entry.delete()
         messages.success(
             request,
-            "Catatan jurnal berhasil dihapus.",
+            "Journal entry successfully deleted.",
         )
         return redirect("garden_journal")
 
