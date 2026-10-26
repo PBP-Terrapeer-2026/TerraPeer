@@ -4,3 +4,6 @@ psycopg2-binary
 python-dotenv
 whitenoise
 PyJWT
+# Plant Care forecast and IANA timezone support
+requests>=2.32,<3
+tzdata
