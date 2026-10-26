@@ -157,7 +157,8 @@ def plant_detail(request, pk):
 @login_required
 @require_http_methods(['GET', 'POST'])
 def plant_create(request):
-    form = PlantForm(request.POST, request.FILES) if request.method == 'POST' else PlantForm()
+    form = PlantForm(request.POST, request.FILES) if request.method == 'POST' else PlantForm(
+        initial={'species_name': request.GET.get('species', '')[:160]})
     if request.method == 'POST' and form.is_valid():
         with transaction.atomic():
             plant = form.save(commit=False)

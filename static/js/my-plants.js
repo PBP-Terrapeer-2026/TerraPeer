@@ -242,6 +242,8 @@
     });
   });
 
+  document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
+
   // 3. Delete from the confirmation modal; a 409 (linked records) is shown inside the modal.
   const deleteForm = document.querySelector('[data-delete-form]');
   if (deleteForm) {
