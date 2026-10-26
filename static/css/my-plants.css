@@ -1,0 +1,83 @@
+/* My Plants module. Everything is scoped to .plants-page; shared tokens come from theme.css. */
+.plants-page .plants-shell { max-width: 1320px; padding-bottom: 1rem; }
+.mp-icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.mp-icon-sm { width: 16px; height: 16px; }
+.mp-back { display: inline-flex; align-items: center; gap: .5rem; margin-top: 2rem; font-size: .875rem; color: var(--tp-muted); text-decoration: none; }
+.mp-back:hover { color: var(--tp-ink); }
+.mp-title { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; overflow-wrap: anywhere; margin: 0 0 .25rem; }
+
+/* Stats */
+.mp-stats { padding: 1.25rem .5rem; }
+.mp-stat { display: flex; align-items: center; gap: 1rem; padding: .5rem 1.25rem; }
+.mp-stat + .mp-stat { border-left: 1px solid var(--tp-line); }
+.mp-stat strong { display: block; font-family: Lora, Georgia, serif; font-size: 2rem; font-weight: 600; line-height: 1.1; }
+.mp-stat div > span { font-size: .8rem; color: var(--tp-muted); }
+.mp-stat-icon { width: 48px; height: 48px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.mp-tone-green { background: #E1ECD5; color: #2C5B40; }
+.mp-tone-pink { background: #F6E0DC; color: #8A4349; }
+.mp-tone-amber { background: #F5E7C8; color: #6E4B17; }
+.mp-tone-grey { background: #E6E6DE; color: #555B51; }
+.mp-tone-danger { background: var(--tp-danger-100); color: var(--tp-danger); }
+@media (max-width: 767.98px) {
+  .mp-stat { padding: .75rem 1rem; }
+  .mp-stat:nth-child(3) { border-left: 0; }
+  .mp-stat strong { font-size: 1.6rem; }
+}
+
+/* Filters */
+.mp-search { position: relative; }
+.mp-search .mp-icon { position: absolute; left: 14px; top: 14px; color: var(--tp-muted); pointer-events: none; }
+.mp-search .form-control { padding-left: 2.75rem; border-radius: 999px; }
+.mp-seg { background: var(--tp-surface-2); border-radius: 999px; padding: 4px; gap: 4px; }
+.mp-seg > .btn { border: 0 !important; border-radius: 999px !important; color: var(--tp-muted); min-height: 40px; --bs-btn-padding-x: .9rem; }
+.mp-seg > .btn-check:checked + .btn { background: var(--tp-surface); color: var(--tp-ink); box-shadow: 0 1px 4px rgba(27, 64, 50, .14); }
+.mp-seg > .btn-check:focus-visible + .btn { outline: 3px solid var(--tp-moss); outline-offset: 2px; }
+.js .mp-nojs { display: none; }
+#plant-results[aria-busy="true"] { opacity: .55; transition: opacity .15s; }
+
+/* Cards and art */
+.mp-card { overflow: hidden; transition: transform .15s, box-shadow .15s; }
+.mp-card:hover, .mp-card:focus-within { transform: translateY(-2px); box-shadow: var(--tp-shadow); }
+.mp-art { position: relative; display: flex; align-items: center; justify-content: center; color: #2E6046; background: #DCE7CE; min-height: 180px; }
+.mp-art-flowering { background: #EFE3DA; }
+.mp-art-fruiting, .mp-art-harvesting { background: #ECE2C2; }
+.mp-art-finished { background: #E3E4DA; }
+.mp-art-finished svg { opacity: .65; }
+.mp-art svg, .mp-art .botanical { display: block; width: 100%; height: 190px; }
+.mp-art-lg { border-radius: 28px; min-height: 340px; }
+.mp-art-lg svg, .mp-art-lg .botanical { height: 320px; }
+.mp-status { position: absolute; top: 14px; left: 14px; background: rgba(255, 253, 245, .92); color: var(--tp-ink); }
+.mp-stage { background: #E1ECD5; color: #2C5B40; }
+.mp-stage-flowering { background: #F6E0DC; color: #8A4349; }
+.mp-stage-fruiting { background: #F5E7C8; color: #6E4B17; }
+.mp-stage-harvesting { background: #F3DACF; color: #83392A; }
+.mp-stage-finished { background: #E6E6DE; color: #555B51; }
+.mp-empty { text-align: center; padding: 3.5rem 1.5rem; border: 1.5px dashed var(--tp-line-strong); border-radius: 20px; background: rgba(255, 255, 255, .35); }
+.mp-empty p { max-width: 380px; margin-left: auto; margin-right: auto; }
+
+/* Stage stepper */
+.mp-steps { display: flex; list-style: none; padding: 0; margin: 0; }
+.mp-step { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: .5rem; position: relative; font-size: .8rem; font-weight: 600; color: var(--tp-muted); text-align: center; }
+.mp-step::before { content: ""; position: absolute; top: 15px; right: 50%; width: 100%; height: 2px; background: var(--tp-line); }
+.mp-step:first-child::before { display: none; }
+.mp-step.is-done::before, .mp-step.is-current::before { background: var(--tp-primary); }
+.mp-step-node { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--tp-line-strong); background: var(--tp-surface); position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; color: transparent; }
+.mp-step.is-done .mp-step-node { background: var(--tp-primary); border-color: var(--tp-primary); color: #fff; }
+.mp-step.is-current { color: var(--tp-ink); }
+.mp-step.is-current .mp-step-node { border-color: var(--tp-primary); box-shadow: 0 0 0 5px var(--tp-moss-100); }
+@media (max-width: 575.98px) { .mp-step { font-size: .7rem; } }
+
+/* Facts */
+.mp-facts > div { display: flex; justify-content: space-between; gap: 1rem; padding: .75rem 0; border-bottom: 1px solid var(--tp-line); font-size: .9rem; }
+.mp-facts > div:last-child { border-bottom: 0; }
+.mp-facts dt { color: var(--tp-muted); font-weight: 400; }
+.mp-facts dd { margin: 0; font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+.mp-notes { overflow-wrap: anywhere; line-height: 1.8; }
+
+/* Species lookup */
+.mp-species { max-height: 320px; overflow-y: auto; }
+.mp-species .list-group-item { background: var(--tp-surface); border-color: var(--tp-line); }
+.mp-species .list-group-item.active { background: var(--tp-moss-100); border-color: var(--tp-moss); color: var(--tp-ink); }
+.mp-species small { display: block; color: var(--tp-muted); font-style: italic; }
+
+@media (prefers-reduced-motion: reduce) { .mp-card { transition: none; } .mp-card:hover { transform: none; } }

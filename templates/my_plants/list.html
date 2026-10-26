@@ -1,0 +1,54 @@
+{% extends "my_plants/base.html" %}
+{% block title %}My Plants · TerraPeer{% endblock %}
+{% block meta_description %}Track the plants you're growing and their growth stages.{% endblock %}
+
+{% block plants_content %}
+    <header class="tp-page-head d-flex flex-wrap align-items-end justify-content-between gap-3">
+        <div>
+            <p class="tp-eyebrow">Your living garden</p>
+            <h1>My Plants</h1>
+            <p class="tp-lead mt-3 mb-0">Plants that are actually in the ground or in a pot — from a plan, or from before you used TerraPeer.</p>
+        </div>
+        <a class="btn btn-primary btn-lg" href="{% url 'my_plants:create' %}"><svg class="mp-icon"><use href="#i-plus"/></svg>Add a plant</a>
+    </header>
+
+    <section class="card mp-stats mb-4" aria-label="Your garden at a glance">
+        <div class="row row-cols-2 row-cols-md-4 g-0" id="plant-stats">
+            {% include "my_plants/_stats.html" %}
+        </div>
+    </section>
+
+    <form class="row g-3 align-items-end mb-2" method="get" id="plant-filters" data-fragment-url="{% url 'my_plants:fragment' %}" role="search" aria-label="Filter your plants">
+        <div class="col-12 col-lg-4">
+            <label class="form-label" for="{{ filter_form.q.id_for_label }}">{{ filter_form.q.label }}</label>
+            <div class="mp-search">
+                <svg class="mp-icon" aria-hidden="true"><use href="#i-search"/></svg>
+                {{ filter_form.q }}
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <label class="form-label" for="{{ filter_form.stage.id_for_label }}">{{ filter_form.stage.label }}</label>
+            {{ filter_form.stage }}
+        </div>
+        <div class="col-6 col-lg-2">
+            <label class="form-label" for="{{ filter_form.sort.id_for_label }}">{{ filter_form.sort.label }}</label>
+            {{ filter_form.sort }}
+        </div>
+        <fieldset class="col-12 col-md-8 col-lg-3">
+            <legend class="form-label">{{ filter_form.status.label }}</legend>
+            <div class="btn-group mp-seg w-100" role="group">
+                {% for choice in filter_form.status %}
+                    <input type="radio" class="btn-check" name="{{ choice.data.name }}" id="{{ choice.id_for_label }}" value="{{ choice.data.value }}"{% if choice.data.selected %} checked{% endif %}>
+                    <label class="btn" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+                {% endfor %}
+            </div>
+        </fieldset>
+        <div class="col-12 col-md-4 col-lg-1 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary w-100 mp-nojs">Filter</button>
+            <a href="{% url 'my_plants:list' %}" class="btn btn-link px-0" data-reset>Reset</a>
+        </div>
+    </form>
+    <p class="small text-muted mb-3" id="filter-status" role="status" aria-live="polite"></p>
+
+    <section id="plant-results" aria-label="Your plants">{% include "my_plants/_results.html" %}</section>
+{% endblock %}
