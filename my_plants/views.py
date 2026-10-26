@@ -363,6 +363,9 @@ def _recap_context(plant):
     for photo in photos:
         starts.setdefault(photo.stage, local_date(photo.created_at))
     starts.setdefault(plant.growth_stage, local_date(plant.updated_at))
+    first = min(starts, key=lambda s: (starts[s], order.index(s)))
+    if first != Plant.Stage.GROWING and Plant.Stage.GROWING not in starts and starts[first] > plant.planted_on:
+        starts[Plant.Stage.GROWING.value] = plant.planted_on  # time before the first record counts as Growing
     reached = sorted(starts, key=lambda s: (starts[s], order.index(s)))
     starts[reached[0]] = min(starts[reached[0]], plant.planted_on)
     finished = plant.growth_stage == Plant.Stage.FINISHED
