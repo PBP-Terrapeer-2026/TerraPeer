@@ -1,0 +1,70 @@
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
+from django.db import models
+from django.urls import reverse
+from django.utils import timezone
+
+
+class PlantQuerySet(models.QuerySet):
+    def for_user(self, user):
+        return self.filter(owner=user)
+
+    def active(self):
+        return self.exclude(growth_stage=Plant.Stage.FINISHED)
+
+
+class Plant(models.Model):
+    class Stage(models.TextChoices):
+        GROWING = 'growing', 'Growing'
+        FLOWERING = 'flowering', 'Flowering'
+        FRUITING = 'fruiting', 'Fruiting'
+        HARVESTING = 'harvesting', 'Harvesting'
+        FINISHED = 'finished', 'Finished'
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='plants',
+    )
+    name = models.CharField(max_length=120)
+    species_name = models.CharField(max_length=160)
+    planted_on = models.DateField(default=timezone.localdate)
+    growth_stage = models.CharField(
+        max_length=20, choices=Stage.choices, default=Stage.GROWING,
+    )
+    notes = models.TextField(blank=True, max_length=2000)
+    perenual_species_id = models.PositiveIntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = PlantQuerySet.as_manager()
+
+    class Meta:
+        ordering = ['-created_at', '-pk']
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(growth_stage__in=[
+                    'growing', 'flowering', 'fruiting', 'harvesting', 'finished',
+                ]),
+                name='my_plants_valid_stage',
+            ),
+        ]
+
+    @property
+    def status(self):
+        # Derived so a Finished plant can never also be Active.
+        return 'finished' if self.growth_stage == self.Stage.FINISHED else 'active'
+
+    @property
+    def days_growing(self):
+        return max(0, (timezone.localdate() - self.planted_on).days)
+
+    def clean(self):
+        super().clean()
+        if self.planted_on and self.planted_on > timezone.localdate():
+            raise ValidationError({'planted_on': 'The planting date cannot be in the future.'})
+
+    def get_absolute_url(self):
+        return reverse('my_plants:detail', args=[self.pk])
+
+    def __str__(self):
+        return self.name
