@@ -25,8 +25,18 @@ class Pot(models.Model):
                               on_delete=models.CASCADE)
 
 class Plan(models.Model):
+    STATUS_PLANNING = "planning"
+    STATUS_READY = "ready"
+    STATUS_PLANTED = "planted"
+    STATUS_CHOICES = [
+        (STATUS_PLANNING, "Perencanaan"),
+        (STATUS_READY, "Siap Tanam"),
+        (STATUS_PLANTED, "Sudah Ditanam"),
+    ]
+
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PLANNING)
     location_name = models.CharField(max_length=150, blank=True)
     latitude = models.FloatField()
     longitude = models.FloatField()

@@ -8,6 +8,7 @@ from django.conf import settings
 import requests
 import json
 import random
+import math
 from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
 
 from .models import Plant, Pot, Plan, PlanPlant
@@ -23,6 +24,8 @@ POTS = [
     {"name": "Pot besar glazed",    "size_cm": 45, "material": "keramik glazed"},
     {"name": "Planter box",         "size_cm": 60, "material": "kayu/plastik"},
 ]
+POT_MATERIAL_CHOICES = {"plastik", "terakota", "keramik glazed", "kayu/plastik"}
+LOCATION_MATCH_TOLERANCE = 0.01  # sekitar 1 km, untuk toleransi koordinat titik kota
 
 
 def build_perenual_filters(profile) -> dict: #input berupa dict
@@ -190,6 +193,57 @@ def garden_planning_page(request):
 
 
 @login_required
+def plan_summary_page(request, pk):
+    """Render halaman ringkasan terpisah untuk satu plan milik pengguna."""
+    plan = get_object_or_404(Plan, pk=pk, owner=request.user)
+    items = list(plan.items.select_related("plant", "pot").all())
+    for item in items:
+        item.description_preview = first_description_sentence(item.plant.description or item.plant.benefit)
+
+    recommended_pot = recommend_pot(plan.environment_profile or {})
+    matching_pots = Pot.objects.filter(
+        owner=request.user,
+        material__iexact=recommended_pot["material"],
+        size_cm__gte=recommended_pot["size_cm"],
+    ).count()
+    total_quantity = sum(item.quantity for item in items)
+    return render(request, "garden_planning_template/plan_summary.html", {
+        "plan": plan,
+        "items": items,
+        "pots": Pot.objects.filter(owner=request.user).order_by("name"),
+        "recommended_pot": recommended_pot,
+        "recommended_filters": build_perenual_filters(plan.environment_profile or {}),
+        "matching_pots": matching_pots,
+        "total_quantity": total_quantity,
+        "pots_needed": max(0, total_quantity - matching_pots),
+        "status_choices": Plan.STATUS_CHOICES,
+    })
+
+
+@login_required
+@require_GET
+def city_suggestions(request):
+    """Kembalikan tiga saran kota untuk autocomplete HTMX."""
+    query = request.GET.get("q", "").strip()
+    if len(query) < 2:
+        return render(request, "garden_planning_template/_city_suggestions.html", {"cities": []})
+
+    try:
+        response = requests.get(
+            "https://geocoding-api.open-meteo.com/v1/search",
+            params={"name": query, "count": 3, "language": "id", "format": "json"},
+            timeout=5,
+        )
+        response.raise_for_status()
+        data = response.json()
+        cities = data.get("results", []) if isinstance(data, dict) else []
+    except (requests.RequestException, ValueError):
+        cities = []
+
+    return render(request, "garden_planning_template/_city_suggestions.html", {"cities": cities[:3]})
+
+
+@login_required
 @require_POST
 def recommend_plants(request):
     """
@@ -294,11 +348,12 @@ def pot_list_create(request):
     try:
         body = json.loads(request.body)
         name, size = str(body.get("name", "")).strip(), int(body.get("size_cm", 0))
-        if not name or size < 1: raise ValueError
+        material = str(body.get("material", "")).strip()
+        if not name or size < 1 or material not in POT_MATERIAL_CHOICES: raise ValueError
     except (json.JSONDecodeError, ValueError, TypeError):
-        return JsonResponse({"error": "Nama pot dan ukuran (cm) yang valid wajib diisi."}, status=400)
+        return JsonResponse({"error": "Nama, ukuran pot, dan bahan pot yang valid wajib diisi."}, status=400)
     pot = Pot.objects.create(owner=request.user, name=name, size_cm=size,
-        material=str(body.get("material", "")).strip(), drainage=bool(body.get("drainage", True)))
+        material=material, drainage=bool(body.get("drainage", True)))
     return JsonResponse({"id": pot.pk, "name": pot.name, "size_cm": pot.size_cm,
         "material": pot.material, "drainage": pot.drainage}, status=201)
 
@@ -347,6 +402,7 @@ def plan_list_create(request):
             {
                 "id":           p.pk,
                 "name":         p.name,
+                "status":       p.status,
                 "location_name": p.location_name,
                 "latitude":     p.latitude,
                 "longitude":    p.longitude,
@@ -372,7 +428,7 @@ def plan_list_create(request):
         environment_profile = body.get("environment_profile", {}),
         is_draft            = body.get("is_draft", True),
     )
-    return JsonResponse({"id": plan.pk, "name": plan.name}, status=201)
+    return JsonResponse({"id": plan.pk, "name": plan.name, "status": plan.status}, status=201)
 
 
 @login_required
@@ -388,18 +444,30 @@ def plan_detail(request, pk):
                 "plant":    item.plant.name,
                 "image":    item.plant.image_url,
                 "pot":      item.pot.name if item.pot else None,
+                "pot_id":   item.pot_id,
                 "quantity": item.quantity,
                 "note":     item.note,
             }
             for item in plan.items.select_related("plant", "pot").all()
         ]
+        recommended_pot = recommend_pot(plan.environment_profile or {})
+        matching_pots = Pot.objects.filter(
+            owner=request.user,
+            material__iexact=recommended_pot["material"],
+            size_cm__gte=recommended_pot["size_cm"],
+        ).count()
         return JsonResponse({
             "id":           plan.pk,
             "name":         plan.name,
+            "status":       plan.status,
             "location_name": plan.location_name,
+            "latitude":     plan.latitude,
+            "longitude":    plan.longitude,
             "environment_profile": plan.environment_profile,
             "is_draft":     plan.is_draft,
             "items":        items,
+            "recommended_pot": recommended_pot,
+            "matching_pots": matching_pots,
         })
 
     if request.method == "PUT":
@@ -414,6 +482,10 @@ def plan_detail(request, pk):
         plan.longitude           = body.get("longitude", plan.longitude)
         plan.environment_profile = body.get("environment_profile", plan.environment_profile)
         plan.is_draft            = body.get("is_draft", plan.is_draft)
+        if "status" in body:
+            if not isinstance(body["status"], str) or body["status"] not in dict(Plan.STATUS_CHOICES):
+                return JsonResponse({"error": "Status plan tidak valid."}, status=400)
+            plan.status = body["status"]
         plan.save()
         return JsonResponse({"ok": True})
 
@@ -449,6 +521,23 @@ def planplant_list_create(request, plan_pk):
         body = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({"error": "JSON tidak valid."}, status=400)
+
+    try:
+        recommendation_latitude = float(body["recommendation_latitude"])
+        recommendation_longitude = float(body["recommendation_longitude"])
+    except (KeyError, TypeError, ValueError):
+        return JsonResponse({"error": "Lokasi rekomendasi wajib dipilih sebelum menambahkan tanaman."}, status=400)
+
+    if not math.isfinite(recommendation_latitude) or not math.isfinite(recommendation_longitude):
+        return JsonResponse({"error": "Koordinat lokasi rekomendasi tidak valid."}, status=400)
+    same_location = (
+        math.isclose(recommendation_latitude, plan.latitude, abs_tol=LOCATION_MATCH_TOLERANCE)
+        and math.isclose(recommendation_longitude, plan.longitude, abs_tol=LOCATION_MATCH_TOLERANCE)
+    )
+    if not same_location:
+        return JsonResponse({
+            "error": f"Lokasi rekomendasi tidak sama dengan lokasi plan ({plan.location_name or 'lokasi plan'}). Tanaman tidak dapat ditambahkan."
+        }, status=409)
 
     plant = get_object_or_404(Plant, pk=body.get("plant_id"))
     pot   = None

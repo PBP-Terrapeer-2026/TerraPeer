@@ -6,6 +6,8 @@ app_name = "garden_planning"
 urlpatterns = [
     # Halaman utama garden planning
     path("", views.garden_planning_page, name="index"),
+    path("plans/<int:pk>/", views.plan_summary_page, name="plan_summary"),
+    path("api/city-suggestions/", views.city_suggestions, name="city_suggestions"),
 
     # API: terima profil cuaca dari JS → kembalikan rekomendasi tanaman + pot
     path("api/recommend/", views.recommend_plants, name="recommend_plants"),
