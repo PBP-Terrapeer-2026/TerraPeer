@@ -1,0 +1,24 @@
+{% load care_icons %}
+<div class="warn-icon">{% icon 'trash' %}</div>
+<h2 id="dialog-title">
+    {% if task.status == "Completed" %}Delete completed record?{% elif task.repeat_every %}Stop this care routine?{% else %}Delete this task?{% endif %}
+</h2>
+<p style="margin-top:16px">
+    {% if task.status == "Completed" %}Only this completed record will be deleted. The next pending task and its repetition will stay unchanged.{% elif task.repeat_every %}Delete this task and stop its repetition? Completed tasks will remain.{% else %}This pending task will be removed from {{ task.plant.name }}'s care list.{% endif %}
+</p>
+<div class="instructions">
+    {{ task.title }}
+    <div class="muted">{{ task.due_date|date:'j M Y' }} · {{ task.repeat_label }}</div>
+</div>
+<form method="post"
+      action="{% url 'care:delete' task.pk %}"
+      id="delete-form">
+    {% csrf_token %}
+    <div id="modal-error" class="error-text" role="alert"></div>
+    <div class="dialog-footer">
+        <button type="button" class="btn secondary" data-close>Cancel</button>
+        <button type="submit" class="btn danger">
+            {% if task.status == "Pending" and task.repeat_every %}Delete &amp; stop repetition{% else %}Delete task{% endif %}
+        </button>
+    </div>
+</form>

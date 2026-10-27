@@ -1,0 +1,76 @@
+{% load care_icons %}
+<div class="filter-note">{{ tasks|length }} task{{ tasks|length|pluralize }} · Pending tasks shown earliest first</div>
+{% for task in tasks %}
+    <article data-task-id="{{ task.pk }}" class="task {% if task.status == 'Completed' %}is-completed{% endif %}">
+        <button type="button" class="check {% if task.status == 'Completed' %}completed{% endif %}"
+                {% if task.status == 'Completed' %}
+                    data-undo="{% url 'care:undo' task.pk %}"
+                    aria-label="Undo completion: {{ task.title }}" aria-pressed="true"
+                {% else %}
+                    data-complete="{% url 'care:complete' task.pk %}"
+                    aria-label="Mark as Completed: {{ task.title }}" aria-pressed="false"
+                {% endif %}>
+            {% if task.status == "Completed" %}
+                {% icon 'check' %}
+            {% endif %}
+        </button>
+        <span class="action-badge {{ task.action_type|lower }}">
+            {% if task.action_type == "Watering" %}
+                {% icon 'water' %}
+            {% elif task.action_type == "Inspection" %}
+                {% icon 'inspect' %}
+            {% elif task.action_type == "Pruning" %}
+                {% icon 'prune' %}
+            {% else %}
+                {% icon 'sprout' %}
+            {% endif %}
+        </span>
+        <div class="task-body">
+            <button class="task-title" data-open="{% url 'care:detail' task.pk %}">{{ task.title }}</button>
+            <div class="task-meta">
+                {% if task.action_type == "Watering" %}
+                    {% icon 'water' %}
+                {% else %}
+                    {% icon 'leaf' %}
+                {% endif %}
+                <span>{{ task.plant.name }} · {{ task.action_type }}</span>
+                <span>·</span>
+                <span>{{ task.due_date|date:'j M Y' }}</span>
+            </div>
+            <div class="task-tags">
+                <span class="pill {% if task.status == 'Pending' %}pending{% endif %}">{{ task.status }}</span>
+                {% if task.overdue %}
+                    <span class="pill overdue">Overdue</span>
+                {% endif %}
+                {% if task.repeat_every %}
+                    <span class="repeat">{% icon 'repeat' %}{{ task.repeat_label }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <details class="task-menu">
+            <summary aria-label="Actions for {{ task.title }}">•••</summary>
+            <div class="task-actions">
+                {% if task.status == "Pending" %}
+                    <button class="iconbtn"
+                            data-open="{% url 'care:edit' task.pk %}"
+                            aria-label="Edit {{ task.title }}">{% icon 'edit' %}</button>
+                {% endif %}
+                <button class="iconbtn"
+                        data-open="{% url 'care:delete' task.pk %}"
+                        aria-label="Delete {{ task.title }}">{% icon 'trash' %}</button>
+            </div>
+        </details>
+    </article>
+{% empty %}
+    <div class="empty">
+        <div class="empty-symbol">{% icon 'sprout' %}</div>
+        <h3>{% if has_tasks %}No tasks match your filters.{% else %}No care tasks yet{% endif %}</h3>
+        <p>{% if has_tasks %}Try another date or status.{% else %}Give {{ plant.name }} its first care routine.{% endif %}
+        </p>
+        {% if has_tasks %}
+            <button class="btn secondary" data-reset>Reset Filters</button>
+        {% elif plant.active %}
+            <button class="btn secondary" data-open="{% url 'care:add' plant.pk %}">Add care task</button>
+        {% endif %}
+    </div>
+{% endfor %}

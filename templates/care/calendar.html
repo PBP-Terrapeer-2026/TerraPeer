@@ -1,0 +1,23 @@
+<section class="calendar-card" aria-label="Care calendar">
+    <div class="calendar-head">
+        <a class="iconbtn"
+           href="?date={{ previous_week|date:'Y-m-d' }}"
+           aria-label="Previous week">‹</a>
+        <h2>{{ week_start|date:'j M' }} – {{ week_end|date:'j M Y' }}</h2>
+        <a class="iconbtn"
+           href="?date={{ next_week|date:'Y-m-d' }}"
+           aria-label="Next week">›</a>
+        <a class="calendar-all" href="{% url 'care:page' plant.pk %}">All dates</a>
+    </div>
+    <div class="calendar-days">
+        {% for day in calendar %}
+            <a href="?date={{ day.date|date:'Y-m-d' }}"
+               class="calendar-day {% if day.selected %}selected{% endif %}"
+               {% if day.selected %}aria-current="date"{% endif %}>
+                <span>{{ day.date|date:'D' }}</span>
+                <strong>{{ day.date|date:'j' }}</strong>
+                <small>{{ day.count }} task{{ day.count|pluralize }}</small>
+            </a>
+        {% endfor %}
+    </div>
+</section>

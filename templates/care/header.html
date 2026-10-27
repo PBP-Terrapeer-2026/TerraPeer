@@ -1,0 +1,13 @@
+{% load care_icons %}
+<header class="shell care-header">
+    <div class="schedule-heading">
+        <div>
+            <div class="eyebrow">Plant Care</div>
+            <h1>Care schedule</h1>
+            <p>What your active plants need, and when.</p>
+        </div>
+        <button class="btn new-task"
+                data-open="{% url 'care:add' plant.pk %}"
+                {% if not plant.active %}disabled{% endif %}>{% icon 'plus' %} New task</button>
+    </div>
+</header>
