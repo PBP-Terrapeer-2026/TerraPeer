@@ -1,0 +1,112 @@
+/* Final desktop/mobile references, scoped to Plant Care. */
+.care-final { --tp-cream:#f4f1de; --tp-white:#fffef6; --tp-green:#245640; --tp-green-dark:#1c4033; --tp-ink:#1c4033; --tp-muted:#63736a; --tp-border:#dcdcc5; --tp-surface:#eeeedc; --tp-mint:#e3edd5; }
+.care-final .shell { max-width:1272px; width:calc(100% - 112px); }
+.care-final .care-header { padding-top:20px; }
+.care-final .nav { border:1px solid #fff; border-radius:50px; background:#fffef6; padding:12px 26px; box-shadow:0 12px 35px #203f3010; }
+.care-final .schedule-heading { display:flex; align-items:end; justify-content:space-between; gap:24px; padding:48px 0 10px; }
+.care-final .schedule-heading h1 { font-size:48px; margin:12px 0 14px; }
+.care-final .schedule-heading p { font-size:18px; color:var(--tp-muted); }
+.care-final .btn { border-radius:50px; min-height:48px; }
+.care-final .main { padding-top:24px; padding-bottom:64px; }
+.schedule-grid { display:grid; grid-template-columns:minmax(0,2.06fr) minmax(300px,1fr); gap:24px; align-items:start; }
+.calendar-card { grid-column:1; grid-row:1; border:1px solid var(--tp-border); background:var(--tp-white); border-radius:22px; padding:24px; }
+.calendar-head { display:flex; gap:12px; align-items:center; margin-bottom:20px; }
+.calendar-head h2 { font-size:19px; }
+.calendar-all { margin-left:auto; font-size:12px; text-decoration:underline; }
+.calendar-days { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; }
+.calendar-day { display:flex; flex-direction:column; align-items:center; gap:3px; border-radius:16px; background:#eeeedc; padding:12px 4px; font-size:12px; }
+.calendar-day strong { font:600 23px Lora,Georgia,serif; }
+.calendar-day.selected { background:var(--tp-green); color:white; }
+.weather-area { grid-column:2; grid-row:1 / span 2; }
+.schedule-tasks { grid-column:1; grid-row:2 / span 2; min-width:0; }
+.summary-area { grid-column:2; grid-row:3; }
+.care-final .panel.weather { background:linear-gradient(135deg,#deebef,#d9e8e8); border:0; border-radius:22px; padding:24px; }
+.care-final .weather.sunny { background:linear-gradient(135deg,#faf0c8,#e3edf0); }
+.care-final .weather.rainy { background:linear-gradient(135deg,#dbe7ed,#bdcedd); }
+.care-final .weather.cloudy { background:linear-gradient(135deg,#e2e9eb,#cddde2); }
+.care-final .weather-head { font-size:13px; letter-spacing:1px; text-transform:uppercase; }
+.care-final .weather-sky { gap:16px; }
+.care-final .weather-facts { background:#fffef9ba; border-radius:16px; padding:16px; }
+.care-final .weather-note { background:#fffef9; border-radius:16px; padding:16px; }
+.care-final .filters { border:0; padding:0; gap:12px; }
+.care-final .filters label { min-width:130px; }
+.status-tabs { display:flex; padding:4px; border-radius:50px; background:#eeeedc; width:100%; }
+.status-tabs button { flex:1; border:0; padding:12px 8px; border-radius:40px; background:none; }
+.status-tabs button[aria-pressed=true] { background:var(--tp-white); box-shadow:0 1px 5px #203f3015; font-weight:600; }
+.care-final input,.care-final select,.care-final textarea { border-color:#c5ceb5; border-radius:14px; }
+.list-caption { display:flex; justify-content:space-between; gap:12px; font-size:12px; color:var(--tp-muted); margin-top:24px; }
+.care-final .filter-note { margin:12px 0; }
+.care-final .task,.care-final .task:last-child { border:1px solid var(--tp-border); border-radius:22px; background:var(--tp-white); padding:20px; margin-bottom:12px; align-items:center; gap:14px; }
+.care-final .check { width:28px; height:28px; border-width:2px; margin:0; background:transparent; }
+.care-final .check.completed { background:var(--tp-green); opacity:1; }
+.action-badge { width:44px; height:44px; border-radius:14px; background:#eeeedc; display:grid; place-items:center; flex-shrink:0; }
+.action-badge.watering { background:#dfecf0; color:#3a7591; }
+.action-badge.inspection { background:#fbefce; color:#88601f; }
+.action-badge.pruning { background:#e3edd5; }
+.is-completed .task-title { text-decoration:line-through; color:var(--tp-muted); }
+.task-menu { position:relative; margin-left:auto; }
+.task-menu summary { list-style:none; border:1px solid var(--tp-border); border-radius:50%; width:44px; height:44px; display:grid; place-items:center; cursor:pointer; }
+.task-menu summary::-webkit-details-marker { display:none; }
+.care-final .task-actions { position:absolute; right:0; top:44px; z-index:4; background:var(--tp-white); border:1px solid var(--tp-border); border-radius:16px; padding:8px; box-shadow:0 8px 24px #203f3020; flex-direction:row; }
+.care-final .task-actions .iconbtn { width:44px; height:44px; }
+.summary-card,.finished-note,.mobile-tip { padding:24px; border:1px solid var(--tp-border); background:var(--tp-white); border-radius:22px; margin-bottom:16px; }
+.summary-card h2 { font-size:22px; }
+.summary-line { display:flex; justify-content:space-between; gap:10px; margin:16px 0 10px; }
+.summary-card progress { width:100%; height:8px; accent-color:var(--tp-green); margin-bottom:12px; }
+.finished-note { background:#eeeedc; border:0; }
+.finished-note p,.mobile-tip p { font-size:12px; color:var(--tp-muted); margin-top:8px; }
+.care-footer { padding:48px max(24px,calc((100vw - 1320px)/2)); background:#1c4033; color:#fffef6; display:block; }
+.care-footer p { margin-top:12px; color:#c7d5c5; }
+.care-footer small { display:block; border-top:1px solid #ffffff25; padding-top:22px; }
+.mobile-top,.mobile-bottom,.mobile-tip { display:none; }
+.care-final .dialog { background:var(--tp-white); border:1px solid var(--tp-border); border-radius:24px; width:min(840px,100%); max-width:840px; }
+.care-final .dialog-head h2 { font-size:32px; }
+.care-final .dialog-footer { justify-content:space-between; }
+.task-type-choice { position:relative; display:flex; align-items:center; gap:10px; border:1px solid #c5ceb5; border-radius:16px; padding:14px; cursor:pointer; }
+.task-type-choice input { width:18px; min-height:18px; accent-color:var(--tp-green); }
+.task-type-choice:has(input:checked) { background:#e3edd5; border-color:var(--tp-green); box-shadow:inset 0 0 0 1px var(--tp-green); }
+@media(max-width:1000px) { .care-final .shell { width:calc(100% - 48px); } .schedule-grid { grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr); gap:18px; } .calendar-card { padding:16px; } .calendar-head h2 { font-size:15px; } .care-final .task { padding:16px; gap:10px; } }
+@media(max-width:740px) {
+ .care-final .shell { width:calc(100% - 32px); } .care-final .care-header { padding-top:16px; }
+ .care-final .care-header .nav { display:none; } .mobile-top { display:flex; justify-content:space-between; align-items:center; } .mobile-top .btn { width:44px; height:44px; min-height:44px; padding:0; }
+ .care-final .schedule-heading { padding:20px 0 0; } .care-final .schedule-heading h1 { font-size:32px; margin:0 0 6px; } .care-final .schedule-heading p { font-size:13px; } .schedule-heading .eyebrow,.new-task { display:none; }
+ .care-final .main { padding-top:20px; padding-bottom:110px; }
+ .schedule-grid { display:flex; flex-direction:column; gap:16px; } .schedule-grid>* { width:100%; }
+ .calendar-card { background:none; border:0; padding:0; } .calendar-head { margin-bottom:12px; } .calendar-head h2 { font-size:14px; } .calendar-days { display:flex; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin; } .calendar-day { min-width:48px; flex:1; padding:10px 4px; } .calendar-day small { display:none; } .calendar-day strong { font-size:20px; }
+ .care-final .panel.weather { padding:16px; border-radius:18px; } .care-final .weather-sky { margin:8px 0; } .care-final .temperature { font-size:36px; } .care-final .sky-art { transform:scale(.65); transform-origin:right center; } .care-final .weather-facts,.care-final .weather-date { display:none; } .care-final .weather-note { font-size:12px; margin-top:8px; padding:12px; } .care-final .weather-place { font-size:12px; } .care-final .weather-credit { font-size:10px; }
+ .care-final .filters { gap:8px; } .care-final .filters label { min-width:100px; } .care-final .filters select { font-size:12px; } .status-tabs { order:-1; }
+ .care-final .task,.care-final .task:last-child { padding:14px; gap:10px; border-radius:20px; } .care-final .task-title { font-size:13px; } .care-final .task-meta { font-size:10px; gap:4px; } .task-meta>.icon { display:none; } .action-badge { width:40px; height:40px; border-radius:14px; } .care-final .task-tags { gap:4px; margin-top:5px; } .care-final .task-tags .pill { font-size:10px; padding:2px 6px; } .care-final .repeat { font-size:10px; } .task-menu summary { width:40px; height:44px; }
+ .summary-area { display:none; } .mobile-tip { display:block; margin-top:24px; padding:18px; } .care-footer { display:none; }
+ .mobile-bottom { display:flex; justify-content:space-around; position:fixed; z-index:10; bottom:calc(12px + env(safe-area-inset-bottom)); left:12px; right:12px; padding:8px; background:#fffef6; border:1px solid white; border-radius:50px; box-shadow:0 8px 30px #203f3020; }
+ .mobile-bottom a { display:flex; flex-direction:column; align-items:center; padding:8px 18px; gap:4px; font-size:11px; border-radius:30px; } .mobile-bottom a[aria-current] { background:#e3edd5; }
+ .care-final .backdrop { padding:12px; z-index:30; } .care-final .dialog { padding:20px; max-height:calc(100dvh - 24px); overflow:auto; } .care-final .dialog-head h2 { font-size:27px; } .task-type-choice { padding:10px; font-size:12px; }
+}
+
+.task-types { border:0; min-width:0; }
+
+.weather-brief { display:none; }
+.weather-expand summary { cursor:pointer; font-size:12px; margin-top:8px; }
+@media(min-width:741px) { .weather-expand summary { display:none; } }
+@media(max-width:740px) {
+ .care-final .weather-head,.care-final .weather-place { display:none; }
+ .weather-brief { display:flex; gap:10px; align-items:flex-start; font-size:12px; }
+ .weather-brief .icon { flex-shrink:0; }
+ .care-final .weather-credit { margin-top:8px; }
+ .care-final .task-meta { display:block; }
+ .care-final .task-meta>.icon { display:none; }
+ .care-final .task-tags .pill.pending { display:none; }
+ .care-final .task,.care-final .task:last-child { padding:12px; }
+}
+
+/* Bootstrap supplies row wrapping, column widths, and responsive gutters.
+   Do not override .row/.col-* with a second custom grid. */
+.care-final .task-type-choice {
+    height: 100%;
+    min-height: 64px;
+}
+.care-final .care-form-grid legend {
+    float: none;
+    width: auto;
+    padding: 0;
+}
+

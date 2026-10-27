@@ -1,0 +1,213 @@
+/* 1. Foundations: one source of truth for all TerraPeer pages. */
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+    --tp-green: #2f6b4f;
+    --tp-green-dark: #285b43;
+    --tp-ink: #18382a;
+    --tp-muted: #58705f;
+    --tp-border: #709582;
+    --tp-cream: #efedcf;
+    --tp-surface: #eef7f1;
+    --tp-white: #fffef8;
+    --tp-mint: #d9ebdd;
+    --tp-danger: #963d30;
+    --tp-radius-section: 50px;
+    --tp-radius-control: 16px;
+    --tp-gap: 24px;
+    --tp-content-width: 1280px;
+    --tp-font-body: 'Plus Jakarta Sans', Arial, sans-serif;
+    --tp-font-heading: 'Lora', Georgia, serif;
+    /* Aliases retained so the earlier prototype remains compatible. */
+    --green: var(--tp-green);
+    --ink: var(--tp-ink);
+    --muted: var(--tp-muted);
+    --border: var(--tp-border);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body.tp-page {
+    margin: 0;
+    background: var(--tp-cream);
+    color: var(--tp-ink);
+    font: 14px/1.5 var(--tp-font-body);
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+    color: inherit;
+}
+
+button,
+a {
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: default;
+    opacity: .6;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+p {
+    margin: 0;
+}
+
+h1,
+h2 {
+    font-family: var(--tp-font-heading);
+    font-weight: 600;
+    letter-spacing: -.6px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid #c65c46;
+    outline-offset: 3px;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* 2. Shared layout and controls; use these classes in other modules too. */
+.tp-container {
+    width: calc(100% - 112px);
+    max-width: var(--tp-content-width);
+    margin-inline: auto;
+}
+
+.tp-stack {
+    display: grid;
+    gap: var(--tp-gap);
+}
+
+.tp-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tp-button,
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 44px;
+    padding: 11px 20px;
+    border-radius: 50px;
+    border: 1px solid var(--tp-green);
+    background: var(--tp-green);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.tp-button--secondary,
+.btn.secondary,
+.btn.light {
+    background: var(--tp-surface);
+    color: var(--tp-green-dark);
+}
+
+.tp-button--danger,
+.btn.danger {
+    background: var(--tp-danger);
+    border-color: var(--tp-danger);
+}
+
+.tp-panel,
+.panel {
+    border: 1px solid var(--tp-border);
+    border-radius: var(--tp-radius-section);
+    background: var(--tp-surface);
+    padding: 28px;
+    min-width: 0;
+}
+
+.tp-nav,
+.nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    background: var(--tp-surface);
+    border-radius: 50px;
+    padding: 15px 24px;
+    min-height: 74px;
+    border: 1px solid #b8cdbd;
+}
+
+.tp-icon-button,
+.iconbtn {
+    height: 40px;
+    width: 40px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid #94b09c;
+    background: var(--tp-surface);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.icon {
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.tp-skip {
+    position: absolute;
+    left: 16px;
+    top: -80px;
+    z-index: 50;
+    background: var(--tp-surface);
+    border: 1px solid var(--tp-border);
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.tp-skip:focus {
+    top: 16px;
+}
+
+.errorlist {
+    margin: 4px 0;
+    padding-left: 16px;
+    color: var(--tp-danger);
+    font-size: 12px;
+}
+
+@media (max-width: 740px) {
+    .tp-container {
+        width: calc(100% - 28px);
+    }
+
+    .tp-panel {
+        border-radius: 32px;
+        padding: 22px;
+    }
+}
