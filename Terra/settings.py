@@ -17,6 +17,8 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 PERENUAL_API_KEY=os.environ.get("PERENUAL_API_KEY")
+API_URL=os.environ.get("API_URL", "")
+DJANGO_SECRET_KEY=os.environ.get("DJANGO_SECRET_KEY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9afwg_o9lm4+627gm!$87+f=wo+bksg9x@kz0uw6%)+q3dqa=3'
+SECRET_KEY = DJANGO_SECRET_KEY
 
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -55,7 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "main",
-    "garden-planning"
+    "garden_planning"
 ]
 
 MIDDLEWARE = [
@@ -149,7 +151,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 WHITENOISE_USE_FINDERS = True
@@ -162,4 +164,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SESSION_COOKIE_AGE= 3600
 
 SESSION_SAVE_EVERY_REQUEST = True
+
+LOGIN_URL="/login/"
 
