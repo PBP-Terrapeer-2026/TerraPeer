@@ -63,3 +63,61 @@ Setiap data tanaman yang bersifat personal, seperti Growing Spaces, Garden Plans
    Plant Care membantu pengguna mengelola tugas perawatan untuk tanaman yang sudah aktif, seperti menyiram, memangkas, memeriksa kondisi daun, penyangga, nutrisi, dan kesiapan panen. Pengguna dapat membuat, melihat, mengubah, menyelesaikan, menghapus, serta memfilter tugas berdasarkan waktu atau tanaman tertentu. Modul ini juga menampilkan informasi cuaca sebagai konteks pendukung agar pengguna lebih mudah menentukan apa yang perlu diperiksa dan kapan melakukannya.
 5. Garden Journal - Adinda Pika Fauziah
    Garden Journal membantu pengguna mencatat perkembangan tanaman aktif, seperti pertumbuhan, pembungaan, panen, atau masalah yang terjadi. Catatan ditampilkan dalam bentuk timeline dan dapat dilengkapi tanggal, keterangan, jumlah panen, serta konteks cuaca pada waktu tertentu. Modul ini membantu pengguna melihat riwayat kebun dan mengevaluasi pengalaman sebelumnya untuk perencanaan berikutnya.
+
+---
+
+# IMPLEMENTASI MODUL GARDEN SETUP
+
+Garden Setup memungkinkan pengguna yang sudah login menyimpan dan mengelola profil ruang tanam miliknya. Setiap profil memuat nama ruang, lingkungan indoor/outdoor, jenis ruang, lokasi, paparan cahaya, media tanam, akses hujan, ketersediaan penyangga, kapasitas pot, frekuensi perawatan, dan catatan opsional.
+
+Fitur yang dikembangkan:
+
+- **Create:** menambah Growing Space dengan validasi form dan lokasi.
+- **Read:** melihat daftar dan detail ruang tanam milik pengguna.
+- **Update:** memperbarui data Growing Space yang sudah tersimpan.
+- **Delete:** menghapus Growing Space melalui konfirmasi dan permintaan POST.
+- **Search & Filter:** mencari ruang berdasarkan nama/kota dan memfilter indoor/outdoor.
+- **Location Autocomplete:** mencari lokasi melalui Open-Meteo Geocoding API; ID lokasi diverifikasi kembali pada sisi server sebelum data disimpan.
+- **Dynamic Form:** menampilkan kolom `Please specify` ketika jenis ruang `Other` dipilih, serta memperbarui Live Preview menggunakan JavaScript.
+- **Access Control:** akses data dibatasi berdasarkan pengguna yang sedang login.
+
+## Rute Garden Setup
+
+| Rute | Fungsi |
+|---|---|
+| `/garden-setup/` | Daftar, pencarian, dan filter Growing Space |
+| `/garden-setup/create/` | Membuat Growing Space |
+| `/garden-setup/<int:pk>/` | Detail Growing Space |
+| `/garden-setup/<int:pk>/edit/` | Mengedit Growing Space |
+| `/garden-setup/<int:pk>/delete/` | Menghapus Growing Space melalui POST |
+| `/garden-setup/location-search/` | Endpoint JSON pencarian lokasi |
+
+## Pengujian Garden Setup
+
+Jalankan pengujian pada root proyek:
+
+```powershell
+python manage.py check
+python manage.py test garden_setup
+python manage.py makemigrations --check --dry-run
+```
+
+Untuk mengukur cakupan pengujian:
+
+```powershell
+python -m pip install coverage
+python -m coverage run --source=garden_setup manage.py test garden_setup
+python -m coverage report -m --omit="*/migrations/*,*/tests.py"
+```
+
+Pada pengujian lokal, seluruh test Garden Setup yang dijalankan berstatus **OK** dan hasil pengukuran menunjukkan **96% statement coverage**. Hasil dan jumlah test dapat berubah setelah perubahan kode atau penggabungan branch; pengujian perlu dijalankan ulang pada kode hasil integrasi.
+
+## Catatan Integrasi
+
+Garden Setup menyimpan metadata kota, koordinat, dan zona waktu untuk mendukung Garden Planning dan modul lain. `garden_setup/geocoding.py` digunakan untuk validasi lokasi pada sisi server. Integrasi shared `api.service.js`, weather, serta relasi model dengan modul lain perlu diverifikasi pada branch gabungan sebelum dinyatakan selesai secara kelompok.
+
+## AI USAGE DISCLOSURE
+
+ChatGPT digunakan sebagai alat bantu selama pengembangan, terutama untuk membahas pilihan implementasi Django, menyusun dan meninjau contoh kode, membantu penelusuran error, serta merancang skenario pengujian. Saran yang dihasilkan disesuaikan dengan struktur TerraPeer dan diperiksa melalui unit test serta pengujian manual di browser.
+
+Beberapa hasil bantuan AI juga direvisi, antara lain penyederhanaan struktur HTML, penghapusan teks antarmuka yang hanya menjelaskan status development, penyesuaian jenis ruang `Other`, dan pengujian tambahan untuk layanan geocoding. Bantuan AI memiliki keterbatasan karena tidak selalu mengetahui versi terbaru seluruh file maupun pekerjaan anggota tim; karena itu pemeriksaan kode aktual, validasi hasil, dan integrasi akhir tetap diperlukan.
