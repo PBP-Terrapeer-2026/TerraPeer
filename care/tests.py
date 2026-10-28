@@ -53,6 +53,14 @@ class CareTests(TestCase):
         data.update(overrides)
         return data
 
+    def test_plant_deletion_protects_task_history(self):
+        from django.db.models.deletion import ProtectedError
+        self.client.post(self.url("complete"))
+        with self.assertRaises(ProtectedError):
+            self.plant.delete()
+        self.assertTrue(Plant.objects.filter(pk=self.plant.pk).exists())
+        self.assertEqual(CareTask.objects.filter(plant=self.plant).count(), 2)
+
     def test_initial_page_and_templates(self):
         response = self.client.get(self.url("page", self.plant.pk))
         self.assertContains(response, "Care schedule")

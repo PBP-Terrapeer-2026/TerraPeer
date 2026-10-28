@@ -1,4 +1,7 @@
-"""GardenSpace dan Plant adalah adapter contoh. Ganti dengan model resmi kelompok."""
+"""Legacy standalone adapters, pending published My Plants migrations.
+Target contract: CareTask -> my_plants.Plant with PROTECT.
+Do not add a second official Plant or guess the Garden Setup relationship.
+"""
 
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from django.conf import settings
@@ -73,6 +76,7 @@ class Plant(models.Model):
 
 
 class CareTask(models.Model):
+    
     ACTIONS = [
         ("Watering", "Watering"),
         ("Fertilizing", "Fertilizing"),
@@ -81,7 +85,7 @@ class CareTask(models.Model):
         ("Repotting", "Repotting"),
     ]
     plant = models.ForeignKey(
-        Plant, on_delete=models.CASCADE, related_name="care_tasks"
+        Plant, on_delete=models.PROTECT, related_name="care_tasks"
     )
     title = models.CharField(max_length=160)
     action_type = models.CharField(max_length=20, choices=ACTIONS)
