@@ -1,0 +1,199 @@
+/* DESIGN TOKENS */
+
+body.gs-layout {
+    --gs-paper: #F4F1DE;
+    --gs-surface: #FFFDF5;
+    --gs-surface-2: #ECEEDD;
+    --gs-line: #DCDFC7;
+
+    --gs-ink: #1B4032;
+    --gs-primary: #24543F;
+    --gs-muted: #56635A;
+
+    --gs-moss: #8AAA72;
+    --gs-moss-light: #E3EDD7;
+
+    --gs-terracotta: #A9513A;
+    --gs-sun: #E7B64A;
+    --gs-sky-light: #DFEBEF;
+
+    --gs-danger: #A13A2C;
+    --gs-forest: #173D2E;
+
+    margin: 0;
+    background-color: var(--gs-paper);
+    color: var(--gs-ink);
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
+}
+
+/* PAGE AND CONTAINER */
+
+.gs-page {
+    min-height: 65vh;
+    padding: 48px 0 80px;
+    background-color: var(--gs-paper);
+}
+
+.gs-page .gs-container {
+    max-width: 1320px;
+}
+
+/* TYPOGRAPHY */
+
+.gs-page .gs-eyebrow {
+    margin-bottom: 12px;
+    color: var(--gs-primary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.gs-page .gs-title {
+    margin-bottom: 16px;
+    color: var(--gs-ink);
+    font-family: "Lora", Georgia, serif;
+    font-size: clamp(32px, 3.4vw, 48px);
+    font-weight: 700;
+    line-height: 1.125;
+}
+
+.gs-page .gs-section-title {
+    color: var(--gs-ink);
+    font-family: "Lora", Georgia, serif;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.gs-page .gs-description {
+    color: var(--gs-muted);
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+/* CARDS */
+
+.gs-page .gs-card {
+    padding: 24px;
+    border: 1px solid var(--gs-line);
+    border-radius: 20px;
+    background: var(--gs-surface);
+}
+
+.gs-page .gs-soft-card {
+    padding: 20px;
+    border-radius: 16px;
+    background: var(--gs-surface-2);
+}
+
+/* BUTTONS */
+
+.gs-page .btn.gs-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.gs-page .gs-btn-primary {
+    border: 1px solid var(--gs-primary);
+    background: var(--gs-primary);
+    color: white;
+}
+
+.gs-page .gs-btn-primary:hover,
+.gs-page .gs-btn-primary:focus-visible {
+    border-color: var(--gs-forest);
+    background: var(--gs-forest);
+    color: white;
+}
+
+.gs-page .gs-btn-outline {
+    border: 1px solid var(--gs-line);
+    background: transparent;
+    color: var(--gs-ink);
+}
+
+.gs-page .gs-btn-outline:hover {
+    background: var(--gs-moss-light);
+    color: var(--gs-ink);
+}
+
+.gs-page .gs-btn-danger {
+    border: 1px solid var(--gs-danger);
+    background: var(--gs-danger);
+    color: white;
+}
+
+/* FORM INPUTS */
+
+.gs-page .form-label {
+    color: var(--gs-ink);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.gs-page .form-control,
+.gs-page .form-select {
+    min-height: 44px;
+    border: 1px solid var(--gs-line);
+    border-radius: 12px;
+    background-color: var(--gs-surface);
+    color: var(--gs-ink);
+    font-family: inherit;
+}
+
+.gs-page .form-control:focus,
+.gs-page .form-select:focus {
+    border-color: var(--gs-moss);
+    box-shadow: 0 0 0 3px rgba(138, 170, 114, 0.22);
+}
+
+.gs-page .form-control.is-invalid,
+.gs-page .form-select.is-invalid {
+    border-color: var(--gs-danger);
+}
+
+/* BADGES */
+
+.gs-page .gs-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--gs-moss-light);
+    color: var(--gs-primary);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 767.98px) {
+    .gs-page {
+        padding: 28px 0 56px;
+    }
+
+    .gs-page .gs-card {
+        padding: 18px;
+    }
+
+    .gs-page .gs-title {
+        font-size: 34px;
+    }
+
+    .gs-page .gs-section-title {
+        font-size: 24px;
+    }
+
+    .gs-page .gs-description {
+        font-size: 16px;
+    }
+}
