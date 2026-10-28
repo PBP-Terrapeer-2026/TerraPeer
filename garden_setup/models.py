@@ -18,10 +18,13 @@ class GrowingSpace(models.Model):
 
     class SpaceType(models.TextChoices):
         BALCONY = "balcony", "Balcony"
-        YARD = "yard", "Yard"
+        TERRACE = "terrace", "Terrace"
+        YARD = "yard", "Backyard"
         ROOFTOP = "rooftop", "Rooftop"
-        ROOM = "room", "Room"
+        WINDOWSILL = "windowsill", "Windowsill"
+        ROOM = "room", "Indoor Room"
         OTHER = "other", "Other"
+
 
     class SunlightRange(models.TextChoices):
         HOURS_0_2 = "0-2", "0–2 hours/day"
@@ -36,7 +39,8 @@ class GrowingSpace(models.Model):
         MIXED = "mixed", "Mixed"
 
     class GrowingMedium(models.TextChoices):
-        SOIL = "soil", "Soil"
+        SOIL = "soil", "Potting Soil"
+        SOIL_MIX = "soil_mix", "Soil Mix"
         HYDROPONIC = "hydroponic", "Hydroponic"
         OTHER = "other", "Other"
 
@@ -52,6 +56,7 @@ class GrowingSpace(models.Model):
         DAILY = "daily", "Daily"
         SEVERAL = "several", "Several times a week"
         WEEKLY = "weekly", "Weekly"
+        RARELY = "rarely", "Rarely"
 
     # OWNERSHIP
     user = models.ForeignKey(

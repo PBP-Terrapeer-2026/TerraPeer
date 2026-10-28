@@ -80,6 +80,40 @@ class GrowingSpaceFormTest(TestCase):
             admin.site.is_registered(GrowingSpace)
         )
 
+    def test_terrace_space_type(self):
+        data = self.valid_data.copy()
+        data["space_type"] = "terrace"
+
+        form = GrowingSpaceForm(data=data)
+
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_indoor_windowsill(self):
+        data = self.valid_data.copy()
+        data["environment"] = "indoor"
+        data["space_type"] = "windowsill"
+        data["rain_access"] = "sheltered"
+
+        form = GrowingSpaceForm(data=data)
+
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_soil_mix_medium(self):
+        data = self.valid_data.copy()
+        data["growing_medium"] = "soil_mix"
+
+        form = GrowingSpaceForm(data=data)
+
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_rarely_care_availability(self):
+        data = self.valid_data.copy()
+        data["care_availability"] = "rarely"
+
+        form = GrowingSpaceForm(data=data)
+
+        self.assertTrue(form.is_valid(), form.errors)
+
 class GrowingSpaceModelTest(TestCase):
     def setUp(self):
         User = get_user_model()
