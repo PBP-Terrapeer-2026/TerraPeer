@@ -5,8 +5,9 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
-
 from .models import GardenJournalEntry
+from datetime import timedelta
+from django.utils import timezone
 
 
 class GardenJournalTests(TestCase):
@@ -268,4 +269,165 @@ class GardenJournalTests(TestCase):
             old_entry,
             response.context["entries"],
         )
+
+    #testing garden evaluation
+    
+class GardenJournalEvaluationTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="evaluation_owner",
+            password="TestPassword123!",
+        )
+        self.other_user = User.objects.create_user(
+            username="evaluation_other",
+            password="TestPassword123!",
+        )
+
+        self.today = timezone.localdate()
+        self.current_month = self.today.replace(day=1)
+        self.previous_month = (
+            self.current_month - timedelta(days=1)
+        ).replace(day=1)
+
+        self.entry = GardenJournalEntry.objects.create(
+            user=self.user,
+            plant_name="Basil",
+            entry_date=self.today,
+            entry_type="growth",
+            title="New basil leaves",
+            notes="Several new leaves appeared.",
+        )
+
+    def test_evaluation_requires_login(self):
+        response = self.client.get(
+            reverse("garden_journal_evaluation")
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login/", response.url)
+
+    def test_evaluation_counts_only_selected_month(self):
+        GardenJournalEntry.objects.create(
+            user=self.user,
+            plant_name="Tomato",
+            entry_date=self.previous_month.replace(day=10),
+            entry_type="harvest",
+            title="Tomato harvest",
+            notes="Collected ripe tomatoes.",
+            harvest_quantity="2.00",
+            harvest_unit="kg",
+        )
+
+        self.client.login(
+            username="evaluation_owner",
+            password="TestPassword123!",
+        )
+
+        response = self.client.get(
+            reverse("garden_journal_evaluation"),
+            {
+                "month": self.previous_month.strftime("%Y-%m"),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["total_entries"], 1)
+        self.assertEqual(response.context["harvest_count"], 1)
+        self.assertEqual(response.context["plant_count"], 1)
+        self.assertEqual(
+            response.context["selected_month"],
+            self.previous_month.strftime("%Y-%m"),
+        )
+
+    def test_evaluation_excludes_other_users_entries(self):
+        GardenJournalEntry.objects.create(
+            user=self.other_user,
+            plant_name="Rose",
+            entry_date=self.today,
+            entry_type="issue",
+            title="Private rose issue",
+            notes="This belongs to another user.",
+        )
+
+        self.client.login(
+            username="evaluation_owner",
+            password="TestPassword123!",
+        )
+
+        response = self.client.get(
+            reverse("garden_journal_evaluation"),
+            {
+                "month": self.current_month.strftime("%Y-%m"),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["total_entries"], 1)
+        self.assertEqual(response.context["problem_count"], 0)
+        self.assertNotContains(response, "Private rose issue")
+
+    def test_evaluation_handles_month_without_entries(self):
+        self.client.login(
+            username="evaluation_owner",
+            password="TestPassword123!",
+        )
+
+        response = self.client.get(
+            reverse("garden_journal_evaluation"),
+            {
+                "month": self.previous_month.strftime("%Y-%m"),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["total_entries"], 0)
+        self.assertEqual(response.context["harvest_count"], 0)
+        self.assertEqual(response.context["problem_count"], 0)
+        self.assertEqual(response.context["plant_count"], 0)
+        self.assertEqual(len(response.context["plant_summary"]), 0)
+        self.assertTrue(
+            all(
+                week["count"] == 0
+                for week in response.context["weekly_activity"]
+            )
+        )
+
+    def test_evaluation_aggregates_entries_by_plant(self):
+        GardenJournalEntry.objects.create(
+            user=self.user,
+            plant_name="Basil",
+            entry_date=self.today,
+            entry_type="harvest",
+            title="Basil harvest",
+            notes="Collected basil leaves.",
+            harvest_quantity="100.00",
+            harvest_unit="g",
+        )
+
+        self.client.login(
+            username="evaluation_owner",
+            password="TestPassword123!",
+        )
+
+        response = self.client.get(
+            reverse("garden_journal_evaluation"),
+            {
+                "month": self.current_month.strftime("%Y-%m"),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["total_entries"], 2)
+        self.assertEqual(response.context["harvest_count"], 1)
+
+        basil_summary = next(
+            item
+            for item in response.context["plant_summary"]
+            if item["plant_name"] == "Basil"
+        )
+
+        self.assertEqual(basil_summary["entry_count"], 2)
+        self.assertEqual(basil_summary["harvest_count"], 1)
+        self.assertEqual(basil_summary["issue_count"], 0)
+
 
