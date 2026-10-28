@@ -99,13 +99,13 @@ Record a gardening milestone, progress notes, harvest details, and observed weat
 
                                         <span class="journal-form-v2__event-icon"
                                               aria-hidden="true">
-                                            {% if radio.choice_value == "growth" %}
-                                                ♧
-                                            {% elif radio.choice_value == "flowering" %}
+                                            {% if radio.data.value == "growth" %}
+                                                ↗
+                                            {% elif radio.data.value == "flowering" %}
                                                 ♡
-                                            {% elif radio.choice_value == "harvest" %}
-                                                ◉
-                                            {% elif radio.choice_value == "issue" %}
+                                            {% elif radio.data.value == "harvest" %}
+                                                ▤
+                                            {% elif radio.data.value == "issue" %}
                                                 !
                                             {% else %}
                                                 ✎
