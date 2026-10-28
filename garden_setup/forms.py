@@ -9,6 +9,7 @@ class GrowingSpaceForm(forms.ModelForm):
             "name",
             "environment",
             "space_type",
+            "other_space_type",
             "city",
             "geocoding_id",
             "region",
@@ -36,6 +37,15 @@ class GrowingSpaceForm(forms.ModelForm):
                 "placeholder": "Search for a city...",
                 "autocomplete": "off",
             }),
+
+            "other_space_type": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Please specify",
+                    "maxlength": "60",
+                    "aria-label": "Please specify the space type",
+                }
+            ),
 
             "geocoding_id": forms.HiddenInput(),
             "region": forms.HiddenInput(),
@@ -77,6 +87,12 @@ class GrowingSpaceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.fields["space_type"].choices = [
+            (value, label)
+            for value, label in self.fields["space_type"].choices
+            if value != GrowingSpace.SpaceType.ROOM
+        ]
+
         for field in self.fields.values():
             widget = field.widget
 
@@ -93,3 +109,23 @@ class GrowingSpaceForm(forms.ModelForm):
             widget.attrs["class"] = (
                 f"{existing_class} {css_class}".strip()
             )
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        space_type = cleaned_data.get("space_type")
+        other_type = (cleaned_data.get("other_space_type") or "").strip()
+
+        if space_type == GrowingSpace.SpaceType.OTHER:
+            if not other_type:
+                self.add_error(
+                    "other_space_type",
+                    "Please specify the space type.",
+                )
+            else:
+                cleaned_data["other_space_type"] = other_type
+        else:
+            cleaned_data["other_space_type"] = ""
+
+        return cleaned_data
+

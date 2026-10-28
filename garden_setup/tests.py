@@ -6,8 +6,10 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 
+from unittest.mock import patch
 from .forms import GrowingSpaceForm
 from .models import GrowingSpace
+from .geocoding import GeocodingServiceError
 
 class GrowingSpaceFormTest(TestCase):
     def setUp(self):
@@ -114,6 +116,43 @@ class GrowingSpaceFormTest(TestCase):
         form = GrowingSpaceForm(data=data)
 
         self.assertTrue(form.is_valid(), form.errors)
+    
+    def test_indoor_room_not_in_form_choices(self):
+        form = GrowingSpaceForm()
+        choices = [value for value, label in form.fields["space_type"].choices]
+
+        self.assertNotIn("room", choices)
+        self.assertIn("other", choices)
+
+    def test_other_space_type_requires_description(self):
+        data = self.valid_data.copy()
+        data["space_type"] = "other"
+        data["other_space_type"] = ""
+
+        form = GrowingSpaceForm(data=data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("other_space_type", form.errors)
+
+    def test_other_space_type_accepts_description(self):
+        data = self.valid_data.copy()
+        data["space_type"] = "other"
+        data["other_space_type"] = "Greenhouse"
+
+        form = GrowingSpaceForm(data=data)
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["other_space_type"], "Greenhouse")
+
+    def test_other_description_cleared_for_normal_type(self):
+        data = self.valid_data.copy()
+        data["space_type"] = "balcony"
+        data["other_space_type"] = "Greenhouse"
+
+        form = GrowingSpaceForm(data=data)
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["other_space_type"], "")
 
 class GrowingSpaceModelTest(TestCase):
     def setUp(self):
@@ -294,3 +333,342 @@ class GrowingSpaceOverviewTest(TestCase):
         self.client.force_login(empty_user)
         response = self.client.get(self.url)
         self.assertContains(response, "No growing spaces yet")
+
+class GrowingSpaceCreateEditTest(TestCase):
+    def setUp(self):
+        User = get_user_model()
+
+        self.owner = User.objects.create_user(
+            username="form_owner",
+            password="test-pass-123",
+        )
+
+        self.other = User.objects.create_user(
+            username="form_other",
+            password="test-pass-123",
+        )
+
+        self.create_url = reverse(
+            "garden_setup:space_create"
+        )
+
+        self.search_url = reverse(
+            "garden_setup:location_search"
+        )
+
+        self.location = {
+            "id": 123456,
+            "name": "Depok",
+            "region": "West Java",
+            "country": "Indonesia",
+            "latitude": "-6.402500",
+            "longitude": "106.794200",
+            "timezone": "Asia/Jakarta",
+        }
+
+        self.data = {
+            "name": "My Balcony",
+            "environment": "outdoor",
+            "space_type": "balcony",
+            "geocoding_id": "123456",
+            "city": "Depok",
+            "region": "",
+            "country": "",
+            "latitude": "",
+            "longitude": "",
+            "timezone": "",
+            "sunlight_range": "4-6",
+            "light_exposure": "direct",
+            "growing_medium": "soil",
+            "rain_access": "exposed",
+            "support_available": "yes",
+            "pot_capacity": "4",
+            "care_availability": "daily",
+            "notes": "",
+        }
+
+    def make_space(self, user=None):
+        return GrowingSpace.objects.create(
+            user=user or self.owner,
+            name="My Balcony",
+            environment="outdoor",
+            space_type="balcony",
+            geocoding_id=123456,
+            city="Depok",
+            region="West Java",
+            country="Indonesia",
+            latitude=Decimal("-6.402500"),
+            longitude=Decimal("106.794200"),
+            timezone="Asia/Jakarta",
+            sunlight_range="4-6",
+            light_exposure="direct",
+            growing_medium="soil",
+            rain_access="exposed",
+            support_available="yes",
+            pot_capacity=4,
+            care_availability="daily",
+            notes="",
+        )
+
+    def test_create_requires_login(self):
+        response = self.client.get(self.create_url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(
+            reverse("login"),
+            response["Location"],
+        )
+
+    def test_create_form_loads(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.get(self.create_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "garden_setup/space_form.html",
+        )
+        self.assertContains(
+            response,
+            "Create Growing Space",
+        )
+
+    @patch("garden_setup.views.get_location_by_id")
+    def test_create_saves_space(self, mock_location):
+        mock_location.return_value = self.location
+
+        self.client.force_login(self.owner)
+
+        response = self.client.post(
+            self.create_url,
+            self.data,
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("garden_setup:space_list"),
+        )
+
+        space = GrowingSpace.objects.get(
+            name="My Balcony"
+        )
+
+        self.assertEqual(space.user, self.owner)
+        self.assertEqual(space.city, "Depok")
+        self.assertEqual(
+            space.latitude,
+            Decimal("-6.402500"),
+        )
+
+    def test_create_requires_valid_location(self):
+        self.client.force_login(self.owner)
+
+        data = self.data.copy()
+        data["geocoding_id"] = ""
+
+        response = self.client.post(
+            self.create_url,
+            data,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            GrowingSpace.objects.count(),
+            0,
+        )
+        self.assertContains(
+            response,
+            "Please select a city",
+        )
+
+    @patch("garden_setup.views.get_location_by_id")
+    def test_capacity_cannot_be_zero(self, mock_location):
+        mock_location.return_value = self.location
+
+        self.client.force_login(self.owner)
+
+        data = self.data.copy()
+        data["pot_capacity"] = "0"
+
+        response = self.client.post(
+            self.create_url,
+            data,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            "pot_capacity",
+            response.context["form"].errors,
+        )
+        self.assertEqual(
+            GrowingSpace.objects.count(),
+            0,
+        )
+
+    def test_edit_form_loads_existing_data(self):
+        space = self.make_space()
+        self.client.force_login(self.owner)
+
+        url = reverse(
+            "garden_setup:space_edit",
+            args=[space.pk],
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            "Edit Growing Space",
+        )
+        self.assertContains(
+            response,
+            "My Balcony",
+        )
+
+    def test_edit_updates_existing_space(self):
+        space = self.make_space()
+        self.client.force_login(self.owner)
+
+        url = reverse(
+            "garden_setup:space_edit",
+            args=[space.pk],
+        )
+
+        data = self.data.copy()
+        data["name"] = "Updated Balcony"
+        data["pot_capacity"] = "6"
+
+        # Simulasikan hidden input yang dimanipulasi.
+        data["latitude"] = "0"
+        data["longitude"] = "0"
+
+        response = self.client.post(url, data)
+
+        self.assertRedirects(
+            response,
+            reverse("garden_setup:space_list"),
+        )
+
+        space.refresh_from_db()
+
+        self.assertEqual(
+            space.name,
+            "Updated Balcony",
+        )
+        self.assertEqual(space.pot_capacity, 6)
+        self.assertEqual(
+            space.latitude,
+            Decimal("-6.402500"),
+        )
+        self.assertEqual(space.user, self.owner)
+
+    def test_cannot_edit_other_users_space(self):
+        space = self.make_space(user=self.other)
+        self.client.force_login(self.owner)
+
+        url = reverse(
+            "garden_setup:space_edit",
+            args=[space.pk],
+        )
+
+        get_response = self.client.get(url)
+        post_response = self.client.post(
+            url,
+            self.data,
+        )
+
+        self.assertEqual(get_response.status_code, 404)
+        self.assertEqual(post_response.status_code, 404)
+
+    def test_changed_city_requires_new_selection(self):
+        space = self.make_space()
+        self.client.force_login(self.owner)
+
+        url = reverse(
+            "garden_setup:space_edit",
+            args=[space.pk],
+        )
+
+        data = self.data.copy()
+        data["city"] = "Jakarta"
+
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 200)
+
+        space.refresh_from_db()
+        self.assertEqual(space.city, "Depok")
+
+        self.assertContains(
+            response,
+            "Please select the new city",
+        )
+
+    @patch("garden_setup.views.search_locations")
+    def test_location_search_returns_json(self, mock_search):
+        mock_search.return_value = [self.location]
+
+        self.client.force_login(self.owner)
+
+        response = self.client.get(
+            self.search_url,
+            {"q": "Depok"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json()["results"][0]["name"],
+            "Depok",
+        )
+
+    def test_location_search_requires_login(self):
+        response = self.client.get(
+            self.search_url,
+            {"q": "Depok"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+    @patch("garden_setup.views.search_locations")
+    def test_location_service_unavailable(self, mock_search):
+        mock_search.side_effect = GeocodingServiceError(
+            "Service unavailable"
+        )
+
+        self.client.force_login(self.owner)
+
+        response = self.client.get(
+            self.search_url,
+            {"q": "Depok"},
+        )
+
+        self.assertEqual(response.status_code, 503)
+        self.assertIn("error", response.json())
+
+    @patch("garden_setup.views.get_location_by_id")
+    def test_create_when_location_verification_fails(
+        self,
+        mock_location,
+    ):
+        mock_location.side_effect = GeocodingServiceError(
+            "Service unavailable"
+        )
+
+        self.client.force_login(self.owner)
+
+        response = self.client.post(
+            self.create_url,
+            self.data,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            GrowingSpace.objects.count(),
+            0,
+        )
+        self.assertContains(
+            response,
+            "Location service is unavailable",
+        )

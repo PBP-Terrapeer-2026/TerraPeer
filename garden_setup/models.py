@@ -81,6 +81,12 @@ class GrowingSpace(models.Model):
         choices=SpaceType.choices,
     )
 
+    other_space_type = models.CharField(
+        max_length=60,
+        blank=True,
+        default="",
+    )
+
     # LOCATION
     geocoding_id = models.PositiveBigIntegerField()
 
