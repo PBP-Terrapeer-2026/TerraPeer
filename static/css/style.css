@@ -1968,3 +1968,377 @@ a {
         width: 100%;
     }
 }
+
+.journal-v2__header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.6rem;
+}
+
+@media (max-width: 575.98px) {
+    .journal-v2__header-actions {
+        justify-content: flex-start;
+    }
+}
+
+
+/* GARDEN EVALUATION */
+
+body.journal-evaluation-body {
+    background: #F4F1DE;
+    color: #1B4032;
+}
+
+body.journal-evaluation-body #main-content {
+    background: #F4F1DE;
+}
+
+.journal-evaluation-page {
+    width: 100%;
+    max-width: 1320px !important;
+    margin-inline: auto;
+    padding: 42px 24px 64px !important;
+    color: #1B4032;
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
+}
+
+.journal-evaluation-page,
+.journal-evaluation-page * {
+    box-sizing: border-box;
+}
+
+/* Page header */
+
+.journal-evaluation-page__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "eyebrow controls"
+        "title controls"
+        "description controls";
+    column-gap: 2rem;
+    row-gap: .35rem;
+    align-items: center;
+}
+
+.journal-evaluation-page__header > p:first-of-type {
+    grid-area: eyebrow;
+    margin: 0;
+    color: #24543F;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.journal-evaluation-page__header > h1 {
+    grid-area: title;
+    margin: 0;
+    color: #1B4032;
+    font-family: "Lora", Georgia, serif;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.journal-evaluation-page__header > p:nth-of-type(2) {
+    grid-area: description;
+    max-width: 620px;
+    margin: .2rem 0 0;
+    color: #56635A;
+    font-size: .92rem;
+    line-height: 1.7;
+}
+
+.journal-evaluation-page__header > form {
+    grid-area: controls;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .55rem;
+}
+
+.journal-evaluation-page .form-select {
+    min-height: 42px;
+    border: 1px solid #CFD5C2;
+    border-radius: 999px;
+    background-color: #FFFDf5;
+    color: #1B4032;
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
+    font-size: .8rem;
+}
+
+.journal-evaluation-page .form-select:focus {
+    border-color: #24543F;
+    box-shadow: 0 0 0 .2rem rgba(36, 84, 63, .12);
+}
+
+.journal-evaluation-page .btn-success {
+    min-height: 42px;
+    padding: .6rem 1.1rem;
+    border: 1px solid #24543F;
+    border-radius: 999px;
+    background: #24543F;
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.journal-evaluation-page .btn-success:hover {
+    border-color: #1B4032;
+    background: #1B4032;
+}
+
+/* Four summary cards */
+
+.journal-evaluation-page__stats {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 1.8rem 0 1.15rem !important;
+}
+
+.journal-evaluation-page__stats > div {
+    width: auto !important;
+    min-width: 0;
+    padding: 0 !important;
+}
+
+.journal-evaluation-page .card {
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid #DFE1CE;
+    border-radius: 16px;
+    background: #FFFDf5;
+    color: #1B4032;
+    box-shadow: none;
+}
+
+.journal-evaluation-page__stats .card-body {
+    min-height: 145px;
+    padding: 1.2rem;
+}
+
+.journal-evaluation-page__stats .card-body p {
+    margin-bottom: .4rem;
+    color: #56635A !important;
+    font-size: .76rem;
+    line-height: 1.5;
+}
+
+.journal-evaluation-page__stats .card-body h2 {
+    margin: 0;
+    color: #1B4032;
+    font-family: "Lora", Georgia, serif;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* Weekly activity and weather panels */
+
+.journal-evaluation-page__analysis {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 1.1rem;
+    margin: 0 !important;
+}
+
+.journal-evaluation-page__analysis > section {
+    width: auto !important;
+    min-width: 0;
+    padding: 0 !important;
+}
+
+.journal-evaluation-page .card-body {
+    padding: 1.25rem;
+}
+
+.journal-evaluation-page .card-body > h2 {
+    margin: 0 0 1rem;
+    color: #1B4032;
+    font-family: "Lora", Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.journal-evaluation-page .progress {
+    height: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #E3EBD9;
+}
+
+.journal-evaluation-page .progress-bar {
+    background: #24543F !important;
+    border-radius: 999px;
+}
+
+.journal-evaluation-page .card-body .d-flex {
+    color: #56635A;
+    font-size: .78rem;
+}
+
+/* Weather notes */
+
+.journal-evaluation-page__analysis > section:nth-child(2) .card {
+    background: #DBE8EF;
+    border-color: transparent;
+}
+
+.journal-evaluation-page__analysis > section:nth-child(2) .card-body > p {
+    margin-bottom: .6rem;
+    color: #31566A;
+    font-size: .83rem;
+    line-height: 1.65;
+}
+
+.journal-evaluation-page__analysis > section:nth-child(2) .card-body > p strong {
+    color: #1B4032;
+}
+
+/* Plant-by-plant table */
+
+.journal-evaluation-page > .card {
+    margin-top: 1.2rem !important;
+}
+
+.journal-evaluation-page .table-responsive {
+    overflow-x: auto;
+}
+
+.journal-evaluation-page .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: #1B4032;
+    --bs-table-border-color: #E0E2D0;
+    margin-bottom: 0;
+    font-size: .8rem;
+}
+
+.journal-evaluation-page .table thead th {
+    padding: .75rem .65rem;
+    color: #56635A;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.journal-evaluation-page .table tbody td {
+    padding: .8rem .65rem;
+    vertical-align: middle;
+}
+
+/* What went well / Try next month */
+
+.journal-evaluation-page > .row:not(.journal-evaluation-page__stats) {
+    row-gap: 1rem;
+}
+
+.journal-evaluation-page > .row.mt-1 {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-inline: 0 !important;
+}
+
+.journal-evaluation-page > .row.mt-1 > section {
+    width: auto !important;
+    min-width: 0;
+    padding: 0 !important;
+}
+
+.journal-evaluation-page > .row.mt-1 > section:first-child .card {
+    background: #E3EDD7;
+    border-color: #D4E3C8;
+}
+
+.journal-evaluation-page > .row.mt-1 > section:last-child .card {
+    background: #FBF0D1;
+    border-color: #EFDEAB;
+}
+
+.journal-evaluation-page ul {
+    padding-left: 1.2rem;
+}
+
+.journal-evaluation-page li {
+    margin-bottom: .6rem;
+    color: #40594B;
+    font-size: .8rem;
+    line-height: 1.7;
+}
+
+/* Return link */
+
+.journal-evaluation-page > .mt-4 .btn-outline-success {
+    border-color: #CFD5C2;
+    border-radius: 999px;
+    color: #24543F;
+    font-size: .8rem;
+}
+
+.journal-evaluation-page > .mt-4 .btn-outline-success:hover {
+    border-color: #24543F;
+    background: #E3EDD7;
+    color: #1B4032;
+}
+
+/* Responsive */
+
+@media (max-width: 991.98px) {
+    .journal-evaluation-page__stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .journal-evaluation-page__analysis {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .journal-evaluation-page__header {
+        column-gap: 1rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .journal-evaluation-page {
+        padding: 28px 18px 44px !important;
+    }
+
+    .journal-evaluation-page__header {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "eyebrow"
+            "title"
+            "description"
+            "controls";
+        gap: .6rem;
+    }
+
+    .journal-evaluation-page__header > form {
+        justify-content: flex-start;
+        margin-top: .75rem;
+    }
+
+    .journal-evaluation-page__stats {
+        gap: .7rem;
+        margin-top: 1.3rem !important;
+    }
+
+    .journal-evaluation-page__stats .card-body {
+        min-height: 110px;
+        padding: 1rem;
+    }
+
+    .journal-evaluation-page__stats .card-body h2 {
+        font-size: 1.6rem;
+    }
+
+    .journal-evaluation-page > .row.mt-1 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

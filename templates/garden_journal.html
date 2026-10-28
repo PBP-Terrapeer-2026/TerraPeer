@@ -23,13 +23,22 @@ Record your plants' growth, harvests, and gardening milestones with TerraPeer Ga
                 </p>
             </div>
 
-            <a
-                href="{% url 'garden_journal_create' %}"
-                class="btn journal-v2__primary-btn"
-            >
-                <span aria-hidden="true">+</span>
-                New entry
-            </a>
+            <div class="journal-v2__header-actions">
+                <a
+                    href="{% url 'garden_journal_evaluation' %}"
+                    class="btn journal-v2__outline-btn"
+                >
+                    Evaluations
+                </a>
+
+                <a
+                    href="{% url 'garden_journal_create' %}"
+                    class="btn journal-v2__primary-btn"
+                >
+                    <span aria-hidden="true">+</span>
+                    New entry
+                </a>
+            </div>
         </header>
 
         <!-- Success and error messages -->

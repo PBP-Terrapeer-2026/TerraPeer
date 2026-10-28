@@ -11,6 +11,8 @@ from .forms import GardenJournalEntryForm
 from datetime import timedelta
 from django.db.models import Count, Q
 from django.utils import timezone
+import calendar
+from datetime import date
 
 
 def show_main(request):
@@ -167,6 +169,204 @@ def garden_journal(request):
         context,
     )
 
+
+@login_required
+def garden_journal_evaluation(request):
+    today = timezone.localdate()
+    current_month = today.replace(day=1)
+
+    # Prepare the current month and previous 11 months.
+    month_options = []
+    cursor = current_month
+
+    for _ in range(12):
+        month_options.append({
+            "value": cursor.strftime("%Y-%m"),
+            "label": cursor.strftime("%B %Y"),
+        })
+        cursor = (cursor - timedelta(days=1)).replace(day=1)
+
+    valid_months = {
+        option["value"] for option in month_options
+    }
+
+    selected_month = request.GET.get(
+        "month",
+        current_month.strftime("%Y-%m"),
+    )
+
+    # Ignore unsupported or invalid month values.
+    if selected_month not in valid_months:
+        selected_month = current_month.strftime("%Y-%m")
+
+    month_start = date.fromisoformat(
+        f"{selected_month}-01"
+    )
+
+    next_month_start = (
+        month_start.replace(day=28) + timedelta(days=4)
+    ).replace(day=1)
+
+    # Restrict every query to the authenticated user.
+    month_entries = GardenJournalEntry.objects.filter(
+        user=request.user,
+        entry_date__gte=month_start,
+        entry_date__lt=next_month_start,
+    ).order_by("-entry_date", "-created_at")
+
+    total_entries = month_entries.count()
+
+    harvest_count = month_entries.filter(
+        entry_type="harvest"
+    ).count()
+
+    problem_count = month_entries.filter(
+        entry_type="issue"
+    ).count()
+
+    plant_count = (
+        month_entries.order_by()
+        .values("plant_name")
+        .distinct()
+        .count()
+    )
+
+    growth_count = month_entries.filter(
+        entry_type="growth"
+    ).count()
+
+    flowering_count = month_entries.filter(
+        entry_type="flowering"
+    ).count()
+
+    # Group entries by plant name for the monthly table.
+    plant_summary = (
+        month_entries.order_by()
+        .values("plant_name")
+        .annotate(
+            entry_count=Count("pk"),
+            harvest_count=Count(
+                "pk",
+                filter=Q(entry_type="harvest"),
+            ),
+            issue_count=Count(
+                "pk",
+                filter=Q(entry_type="issue"),
+            ),
+        )
+        .order_by("plant_name")
+    )
+
+    # List distinct weather notes actually recorded this month.
+    weather_notes = (
+        month_entries.exclude(weather_summary="")
+        .order_by()
+        .values("weather_summary")
+        .annotate(entry_count=Count("pk"))
+        .order_by("-entry_count", "weather_summary")
+    )
+
+    # Build weekly entry counts using calendar weeks.
+    first_weekday, days_in_month = calendar.monthrange(
+        month_start.year,
+        month_start.month,
+    )
+
+    week_count = (
+        first_weekday + days_in_month + 6
+    ) // 7
+
+    weekly_activity = [
+        {
+            "label": f"Week {index + 1}",
+            "count": 0,
+            "bar_height": 0,
+        }
+        for index in range(week_count)
+    ]
+
+    for entry in month_entries:
+        week_index = (
+            entry.entry_date.day - 1 + first_weekday
+        ) // 7
+
+        weekly_activity[week_index]["count"] += 1
+
+    max_week_count = max(
+        (week["count"] for week in weekly_activity),
+        default=0,
+    )
+
+    for week in weekly_activity:
+        if max_week_count:
+            week["bar_height"] = round(
+                week["count"] / max_week_count * 100
+            )
+
+    # Generate summaries from actual recorded activity.
+    what_went_well = []
+
+    if total_entries:
+        what_went_well.append(
+            f"You recorded {total_entries} journal entries this month."
+        )
+
+    if growth_count or flowering_count:
+        what_went_well.append(
+            f"You recorded {growth_count} growth and "
+            f"{flowering_count} flowering entries."
+        )
+
+    if harvest_count:
+        what_went_well.append(
+            f"You recorded {harvest_count} harvest entries."
+        )
+
+    if not what_went_well:
+        what_went_well.append(
+            "No journal activity has been recorded for this month yet."
+        )
+
+    next_month_suggestions = []
+
+    if problem_count:
+        next_month_suggestions.append(
+            f"Review the {problem_count} problem entries and "
+            "record any changes in plant condition."
+        )
+
+    if harvest_count:
+        next_month_suggestions.append(
+            "Continue recording harvest quantities and units "
+            "to compare future harvests."
+        )
+
+    if not next_month_suggestions:
+        next_month_suggestions.append(
+            "Record growth, flowering, harvests, or problems "
+            "you observe during the next month."
+        )
+
+    context = {
+        "selected_month": selected_month,
+        "selected_month_label": month_start.strftime("%B %Y"),
+        "month_options": month_options,
+        "total_entries": total_entries,
+        "harvest_count": harvest_count,
+        "problem_count": problem_count,
+        "plant_count": plant_count,
+        "plant_summary": plant_summary,
+        "weather_notes": weather_notes,
+        "weekly_activity": weekly_activity,
+        "what_went_well": what_went_well,
+        "next_month_suggestions": next_month_suggestions,
+    }
+
+    return render(
+        request,
+        "garden_journal_evaluation.html",
+        context,
+    )
 
 
 @login_required
