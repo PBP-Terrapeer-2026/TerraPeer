@@ -192,7 +192,7 @@ def garden_journal_create(request):
         "garden_journal_form.html",
         {
             "form": form,
-            "page_title": "Add Journal Entry",
+            "page_title": "New journal entry",
         },
     )
 
@@ -227,7 +227,7 @@ def garden_journal_edit(request, entry_id):
         "garden_journal_form.html",
         {
             "form": form,
-            "page_title": "Edit Catatan Jurnal",
+            "page_title": "Edit journal entry",
         },
     )
 

@@ -3,17 +3,315 @@
 
 {% block title %}{{ page_title }} — TerraPeer{% endblock %}
 
+{% block meta_description %}
+Record a gardening milestone, progress notes, harvest details, and observed weather.
+{% endblock %}
+
+{% block body_class %}journal-body{% endblock %}
+
 {% block content %}
-<section class="journal-form-page">
-    <h1>{{ page_title }}</h1>
+<div class="journal-form-v2">
+    <div class="container-xxl journal-form-v2__shell">
 
-    <form method="post">
-        {% csrf_token %}
+        <nav aria-label="Breadcrumb" class="journal-form-v2__breadcrumb">
+            <a href="{% url 'garden_journal' %}">Garden Journal</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">{{ page_title }}</span>
+        </nav>
 
-        {{ form.as_p }}
+        <header class="journal-form-v2__header">
+            <p class="journal-form-v2__eyebrow">GARDEN JOURNAL</p>
+            <h1>{{ page_title }}</h1>
+            <p>Record a moment in your garden.</p>
+        </header>
 
-        <button type="submit">Save Journal Entry</button>
-        <a href="{% url 'garden_journal' %}">Cancel</a>
-    </form>
-</section>
+        {% if messages %}
+            <div aria-live="polite">
+                {% for message in messages %}
+                    <div class="alert alert-success" role="status">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="row g-4 align-items-start">
+            <!-- Main form -->
+            <div class="col-12 col-lg-8">
+                <section class="journal-form-v2__card">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {% for error in form.non_field_errors %}
+                                    <p class="mb-1">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Plant and date -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label"
+                                       for="{{ form.plant_name.id_for_label }}">
+                                    Plant <span class="text-danger">*</span>
+                                </label>
+                                {{ form.plant_name }}
+
+                                {% for error in form.plant_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                                <div class="form-text">
+                                    Enter the plant name for this journal entry.
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label"
+                                       for="{{ form.entry_date.id_for_label }}">
+                                    Entry date <span class="text-danger">*</span>
+                                </label>
+                                {{ form.entry_date }}
+
+                                {% for error in form.entry_date.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Milestone type -->
+                        <fieldset class="journal-form-v2__fieldset mb-4">
+                            <legend class="form-label">
+                                Milestone type <span class="text-danger">*</span>
+                            </legend>
+
+                            <div class="journal-form-v2__event-grid">
+                                {% for radio in form.entry_type %}
+                                    <label class="journal-form-v2__event-option"
+                                           for="{{ radio.id_for_label }}">
+                                        {{ radio.tag }}
+
+                                        <span class="journal-form-v2__event-icon"
+                                              aria-hidden="true">
+                                            {% if radio.choice_value == "growth" %}
+                                                ♧
+                                            {% elif radio.choice_value == "flowering" %}
+                                                ♡
+                                            {% elif radio.choice_value == "harvest" %}
+                                                ◉
+                                            {% elif radio.choice_value == "issue" %}
+                                                !
+                                            {% else %}
+                                                ✎
+                                            {% endif %}
+                                        </span>
+
+                                        <span class="journal-form-v2__event-label">
+                                            {{ radio.choice_label }}
+                                        </span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+
+                            {% for error in form.entry_type.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </fieldset>
+
+                        <!-- Title -->
+                        <div class="mb-4">
+                            <label class="form-label"
+                                   for="{{ form.title.id_for_label }}">
+                                Title <span class="text-danger">*</span>
+                            </label>
+                            {{ form.title }}
+
+                            {% for error in form.title.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Harvest details -->
+                        <section
+                            id="journal-harvest-panel"
+                            class="journal-form-v2__harvest mb-4"
+                            {% if form.entry_type.value != "harvest" %}hidden{% endif %}
+                        >
+                            <h2>Harvest details</h2>
+                            <p class="journal-form-v2__section-note">
+                                Record the amount you collected.
+                            </p>
+
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label"
+                                           for="{{ form.harvest_quantity.id_for_label }}">
+                                        Harvest quantity
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.harvest_quantity }}
+
+                                    {% for error in form.harvest_quantity.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <label class="form-label"
+                                           for="{{ form.harvest_unit.id_for_label }}">
+                                        Harvest unit
+                                    </label>
+                                    {{ form.harvest_unit }}
+
+                                    {% for error in form.harvest_unit.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ error }}
+                                        </div>
+                                    {% endfor %}
+
+                                    <div class="form-text">
+                                        e.g. grams, kilograms, pieces, bunches.
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Progress notes -->
+                        <div class="mb-4">
+                            <label class="form-label"
+                                   for="{{ form.notes.id_for_label }}">
+                                Progress notes <span class="text-danger">*</span>
+                            </label>
+                            {{ form.notes }}
+
+                            {% for error in form.notes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                            <div class="form-text">
+                                Describe what changed, what you observed,
+                                or any problem that needs attention.
+                            </div>
+                        </div>
+
+                        <!-- Weather conditions -->
+                        <div class="mb-4">
+                            <label class="form-label"
+                                   for="{{ form.weather_summary.id_for_label }}">
+                                Weather conditions
+                            </label>
+                            {{ form.weather_summary }}
+
+                            {% for error in form.weather_summary.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                            <div class="form-text">
+                                Optional. Enter weather conditions you observed.
+                                Automatic weather lookup is not connected here yet.
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="journal-form-v2__actions">
+                            <a href="{% url 'garden_journal' %}"
+                               class="btn journal-form-v2__cancel-btn">
+                                Cancel
+                            </a>
+
+                            <button type="submit"
+                                    class="btn journal-form-v2__save-btn">
+                                Save entry
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+
+            <!-- Context sidebar -->
+            <aside class="col-12 col-lg-4 journal-form-v2__sidebar">
+                <section class="journal-form-v2__weather-panel">
+                    <p class="journal-form-v2__eyebrow">
+                        WEATHER SNAPSHOT
+                    </p>
+                    <h2>Garden conditions</h2>
+                    <p>
+                        Weather notes are optional. Record what you observe
+                        in the weather field so the information stays with
+                        this journal entry.
+                    </p>
+                    <span class="journal-form-v2__info-tag">
+                        Manual entry
+                    </span>
+                </section>
+
+                <section class="journal-form-v2__hint-panel">
+                    <span class="journal-form-v2__hint-icon"
+                          aria-hidden="true">✿</span>
+                    <h2>A moment worth remembering</h2>
+                    <p>
+                        Give your entry a clear title and describe the changes
+                        you noticed. These details will help you review
+                        your garden's progress later.
+                    </p>
+                </section>
+            </aside>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+    const eventInputs = document.querySelectorAll(
+        '.journal-form-v2 input[name="entry_type"]'
+    );
+    const harvestPanel = document.getElementById(
+        'journal-harvest-panel'
+    );
+    const harvestQuantity = document.getElementById(
+        'id_harvest_quantity'
+    );
+
+    if (!harvestPanel || !eventInputs.length) {
+        return;
+    }
+
+    function updateHarvestPanel() {
+        const selected = document.querySelector(
+            '.journal-form-v2 input[name="entry_type"]:checked'
+        );
+        const isHarvest = selected && selected.value === 'harvest';
+
+        harvestPanel.hidden = !isHarvest;
+
+        if (harvestQuantity) {
+            harvestQuantity.required = Boolean(isHarvest);
+        }
+    }
+
+    eventInputs.forEach(function (input) {
+        input.addEventListener('change', updateHarvestPanel);
+    });
+
+    updateHarvestPanel();
+})();
+</script>
 {% endblock %}

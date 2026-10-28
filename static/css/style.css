@@ -1583,3 +1583,388 @@ a {
         padding: 1rem;
     }
 }
+
+
+
+/* GARDEN JOURNAL (updated) New/Edit Entry form*/
+
+.journal-form-v2 {
+    --jf-paper: #F4F1DE;
+    --jf-surface: #FFFDf5;
+    --jf-ink: #1B4032;
+    --jf-primary: #24543F;
+    --jf-muted: #56635A;
+    --jf-line: #DCDCC7;
+    --jf-moss: #E3EDD7;
+    --jf-clay: #F6DED8;
+    --jf-terracotta: #A9513A;
+    --jf-sky: #DBE8EF;
+
+    padding: clamp(1.8rem, 4vw, 3rem) 0 4rem;
+    background: var(--jf-paper);
+    color: var(--jf-ink);
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
+}
+
+.journal-form-v2,
+.journal-form-v2 * {
+    box-sizing: border-box;
+}
+
+.journal-form-v2__shell {
+    max-width: 1320px;
+}
+
+.journal-form-v2__breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .55rem;
+    margin-bottom: 1.3rem;
+    color: var(--jf-muted);
+    font-size: .78rem;
+}
+
+.journal-form-v2__breadcrumb a {
+    color: var(--jf-primary);
+    text-decoration: none;
+}
+
+.journal-form-v2__breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.journal-form-v2__header {
+    margin-bottom: 1.7rem;
+}
+
+.journal-form-v2__eyebrow {
+    margin: 0 0 .6rem;
+    color: var(--jf-primary);
+    font-size: .69rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.journal-form-v2__header h1 {
+    margin: 0;
+    color: var(--jf-ink);
+    font-family: "Lora", Georgia, serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -.035em;
+}
+
+.journal-form-v2__header > p:last-child {
+    margin: .55rem 0 0;
+    color: var(--jf-muted);
+    font-size: .94rem;
+    line-height: 1.7;
+}
+
+.journal-form-v2__card {
+    padding: clamp(1.1rem, 3vw, 1.8rem);
+    border: 1px solid var(--jf-line);
+    border-radius: 18px;
+    background: var(--jf-surface);
+}
+
+.journal-form-v2 .form-label,
+.journal-form-v2__fieldset legend {
+    display: block;
+    margin-bottom: .5rem;
+    color: var(--jf-ink);
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.journal-form-v2 .form-control {
+    min-height: 44px;
+    padding: .65rem .8rem;
+    border: 1px solid #CDD5C3;
+    border-radius: 10px;
+    background-color: #FFFEFA;
+    color: var(--jf-ink);
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
+    font-size: .84rem;
+}
+
+.journal-form-v2 textarea.form-control {
+    min-height: 125px;
+    resize: vertical;
+}
+
+.journal-form-v2 .form-control:focus {
+    border-color: var(--jf-primary);
+    outline: 0;
+    box-shadow: 0 0 0 .2rem rgba(36, 84, 63, .12);
+}
+
+.journal-form-v2 .form-text {
+    margin-top: .4rem;
+    color: var(--jf-muted);
+    font-size: .72rem;
+    line-height: 1.6;
+}
+
+.journal-form-v2 .invalid-feedback {
+    font-size: .75rem;
+}
+
+.journal-form-v2__fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.journal-form-v2__fieldset legend {
+    float: none;
+    width: auto;
+    padding: 0;
+}
+
+.journal-form-v2__event-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .65rem;
+}
+
+.journal-form-v2__event-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    min-width: 0;
+    min-height: 60px;
+    padding: .7rem;
+    border: 1px solid #D0D8C5;
+    border-radius: 13px;
+    background: #FFFEFA;
+    color: var(--jf-ink);
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+.journal-form-v2__event-option:has(input:checked) {
+    border: 2px solid var(--jf-primary);
+    padding: calc(.7rem - 1px);
+    background: var(--jf-moss);
+}
+
+.journal-form-v2__event-option:has(input:focus-visible) {
+    outline: 3px solid #D6A443;
+    outline-offset: 3px;
+}
+
+.journal-form-v2__event-input {
+    flex: 0 0 auto;
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: var(--jf-primary);
+}
+
+.journal-form-v2__event-icon {
+    display: inline-flex;
+    flex: 0 0 32px;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--jf-moss);
+    color: var(--jf-primary);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.journal-form-v2__event-option:has(input:checked)
+.journal-form-v2__event-icon {
+    background: var(--jf-surface);
+}
+
+.journal-form-v2__event-label {
+    min-width: 0;
+    font-size: .77rem;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.journal-form-v2__harvest {
+    padding: 1.2rem;
+    border: 1px solid #EFCFC4;
+    border-radius: 15px;
+    background: var(--jf-clay);
+}
+
+.journal-form-v2__harvest[hidden] {
+    display: none !important;
+}
+
+.journal-form-v2__harvest h2 {
+    margin: 0;
+    color: #8D402D;
+    font-family: "Lora", Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.journal-form-v2__section-note {
+    margin: .4rem 0 1rem;
+    color: #775749;
+    font-size: .76rem;
+    line-height: 1.5;
+}
+
+.journal-form-v2__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+    padding-top: .5rem;
+}
+
+.journal-form-v2 .journal-form-v2__cancel-btn,
+.journal-form-v2 .journal-form-v2__save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: .7rem 1.3rem;
+    border-radius: 999px;
+    font-size: .82rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.journal-form-v2 .journal-form-v2__cancel-btn {
+    border: 1px solid #CDD5C3;
+    background: transparent;
+    color: var(--jf-ink);
+}
+
+.journal-form-v2 .journal-form-v2__cancel-btn:hover {
+    background: var(--jf-moss);
+}
+
+.journal-form-v2 .journal-form-v2__save-btn {
+    border: 1px solid var(--jf-primary);
+    background: var(--jf-primary);
+    color: #fff;
+}
+
+.journal-form-v2 .journal-form-v2__save-btn:hover {
+    border-color: var(--jf-ink);
+    background: var(--jf-ink);
+    color: #fff;
+}
+
+/* Sidebar */
+
+.journal-form-v2__sidebar {
+    display: grid;
+    gap: 1rem;
+}
+
+.journal-form-v2__weather-panel,
+.journal-form-v2__hint-panel {
+    padding: 1.3rem;
+    border: 1px solid transparent;
+    border-radius: 17px;
+}
+
+.journal-form-v2__weather-panel {
+    background: var(--jf-sky);
+    color: #31566A;
+}
+
+.journal-form-v2__weather-panel .journal-form-v2__eyebrow {
+    color: #31566A;
+}
+
+.journal-form-v2__weather-panel h2,
+.journal-form-v2__hint-panel h2 {
+    margin: .35rem 0 .7rem;
+    color: var(--jf-ink);
+    font-family: "Lora", Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.journal-form-v2__weather-panel > p:not(.journal-form-v2__eyebrow),
+.journal-form-v2__hint-panel p {
+    margin: 0;
+    color: #3F6070;
+    font-size: .8rem;
+    line-height: 1.7;
+}
+
+.journal-form-v2__info-tag {
+    display: inline-flex;
+    margin-top: .9rem;
+    padding: .35rem .65rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .65);
+    color: #31566A;
+    font-size: .7rem;
+    font-weight: 600;
+}
+
+.journal-form-v2__hint-panel {
+    border-color: var(--jf-line);
+    background: var(--jf-surface);
+}
+
+.journal-form-v2__hint-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    margin-bottom: .3rem;
+    border-radius: 50%;
+    background: var(--jf-moss);
+    color: var(--jf-primary);
+    font-size: 1.1rem;
+}
+
+.journal-form-v2__hint-panel p {
+    color: var(--jf-muted);
+}
+
+/* Responsive */
+
+@media (max-width: 767.98px) {
+    .journal-form-v2__event-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .journal-form-v2__sidebar {
+        margin-top: .25rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .journal-form-v2__event-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .journal-form-v2__event-option {
+        min-height: 54px;
+    }
+
+    .journal-form-v2__actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .journal-form-v2 .journal-form-v2__cancel-btn,
+    .journal-form-v2 .journal-form-v2__save-btn {
+        width: 100%;
+    }
+}
