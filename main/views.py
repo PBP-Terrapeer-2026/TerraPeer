@@ -163,9 +163,16 @@ def garden_journal(request):
         "latest_weather_entry": latest_weather_entry,
     }
 
+    # HTMX hanya membutuhkan bagian hasil jurnal.
+    # Request biasa tetap menampilkan seluruh halaman.
+    if request.headers.get("HX-Request") == "true":
+        template_name = "partials/garden_journal_results.html"
+    else:
+        template_name = "garden_journal.html"
+
     return render(
         request,
-        "garden_journal.html",
+        template_name,
         context,
     )
 

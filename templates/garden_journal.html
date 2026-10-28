@@ -93,6 +93,11 @@ Record your plants' growth, harvests, and gardening milestones with TerraPeer Ga
             method="get"
             action="{% url 'garden_journal' %}"
             class="journal-v2__filters"
+            hx-get="{% url 'garden_journal' %}"
+            hx-trigger="submit"
+            hx-target="#journal-results"
+            hx-swap="innerHTML"
+            hx-push-url="true"
         >
             <div class="journal-v2__search">
                 <label class="visually-hidden" for="journal-search">
@@ -176,121 +181,8 @@ Record your plants' growth, harvests, and gardening milestones with TerraPeer Ga
         <!-- Timeline and sidebar -->
         <div class="row g-4 journal-v2__content">
 
-            <div class="col-12 col-lg-8">
-                <div class="journal-v2__section-heading">
-                    <h2>Journal timeline</h2>
-                    <span>{{ entries|length }} shown</span>
-                </div>
-
-                {% if entries %}
-                    <div class="journal-v2__timeline">
-                        {% for entry in entries %}
-                            <article class="journal-v2__entry">
-
-                                <span
-                                    class="journal-v2__timeline-dot journal-v2__dot-{{ entry.entry_type }}"
-                                    aria-hidden="true"
-                                ></span>
-
-                                <div class="journal-v2__entry-card">
-                                    <div class="journal-v2__entry-top">
-                                        <p class="journal-v2__entry-meta">
-                                            {{ entry.entry_date|date:"d M Y" }}
-                                            <span aria-hidden="true">·</span>
-                                            {{ entry.plant_name }}
-                                        </p>
-
-                                        <div class="dropdown">
-                                            <button
-                                                class="journal-v2__more-btn"
-                                                type="button"
-                                                data-bs-toggle="dropdown"
-                                                aria-expanded="false"
-                                                aria-label="Actions for {{ entry.title }}"
-                                            >
-                                                &hellip;
-                                            </button>
-
-                                            <ul class="dropdown-menu dropdown-menu-end">
-                                                <li>
-                                                    <a
-                                                        class="dropdown-item"
-                                                        href="{% url 'garden_journal_edit' entry.id %}"
-                                                    >
-                                                        Edit entry
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a
-                                                        class="dropdown-item text-danger"
-                                                        href="{% url 'garden_journal_delete' entry.id %}"
-                                                    >
-                                                        Delete entry
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <h3>{{ entry.title }}</h3>
-
-                                    <p class="journal-v2__notes">
-                                        {{ entry.notes|linebreaksbr }}
-                                    </p>
-
-                                    <div class="journal-v2__badges">
-                                        <span class="journal-v2__badge journal-v2__badge-event">
-                                            {{ entry.get_entry_type_display }}
-                                        </span>
-
-                                        {% if entry.weather_summary %}
-                                            <span class="journal-v2__badge journal-v2__badge-weather">
-                                                {{ entry.weather_summary }}
-                                            </span>
-                                        {% endif %}
-
-                                        {% if entry.harvest_quantity != None %}
-                                            <span class="journal-v2__badge journal-v2__badge-harvest">
-                                                Harvest: {{ entry.harvest_quantity|floatformat:2 }}
-                                                {{ entry.harvest_unit }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </article>
-                        {% endfor %}
-                    </div>
-
-                {% elif total_entries %}
-                    <div class="journal-v2__empty">
-                        <span class="journal-v2__empty-icon" aria-hidden="true">⌕</span>
-                        <h3>No matching entries</h3>
-                        <p>
-                            Try another search term or change your filters
-                            to find the journal entries you need.
-                        </p>
-                        <a href="{% url 'garden_journal' %}"
-                           class="btn journal-v2__outline-btn">
-                            Clear filters
-                        </a>
-                    </div>
-
-                {% else %}
-                    <div class="journal-v2__empty">
-                        <span class="journal-v2__empty-icon" aria-hidden="true">✿</span>
-                        <h3>Your garden story starts here</h3>
-                        <p>
-                            Record a new leaf, a flower, a harvest,
-                            or a challenge you noticed in your garden.
-                        </p>
-                        <a
-                            href="{% url 'garden_journal_create' %}"
-                            class="btn journal-v2__primary-btn"
-                        >
-                            Create your first entry
-                        </a>
-                    </div>
-                {% endif %}
+            <div class="col-12 col-lg-8" id="journal-results">
+                {% include "partials/garden_journal_results.html" %}
             </div>
 
             <!-- Sidebar -->
