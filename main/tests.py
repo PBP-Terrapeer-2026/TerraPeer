@@ -172,3 +172,100 @@ class GardenJournalTests(TestCase):
                 pk=self.entry.pk
             ).exists()
         )
+
+    
+    def test_search_filters_journal_entries(self):
+        self.client.login(
+            username="journal_owner",
+            password="TestPassword123!",
+        )
+
+        response = self.client.get(
+            reverse("garden_journal"),
+            {"q": "New leaves"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            list(response.context["entries"]),
+            [self.entry],
+        )
+
+    def test_filter_by_plant(self):
+        mint_entry = GardenJournalEntry.objects.create(
+            user=self.user,
+            plant_name="Mint",
+            entry_type="growth",
+            title="Mint is growing",
+            notes="New mint leaves appeared.",
+        )
+
+        self.client.login(
+            username="journal_owner",
+            password="TestPassword123!",
+        )
+
+        response = self.client.get(
+            reverse("garden_journal"),
+            {"plant": "Mint", "period": "all"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            list(response.context["entries"]),
+            [mint_entry],
+        )
+
+    def test_filter_by_event_type(self):
+        harvest_entry = GardenJournalEntry.objects.create(
+            user=self.user,
+            plant_name="Basil",
+            entry_type="harvest",
+            title="First harvest",
+            notes="Collected fresh basil leaves.",
+        )
+
+        self.client.login(
+            username="journal_owner",
+            password="TestPassword123!",
+        )
+
+        response = self.client.get(
+            reverse("garden_journal"),
+            {"event": "harvest", "period": "all"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            list(response.context["entries"]),
+            [harvest_entry],
+        )
+
+    def test_all_period_includes_older_entries(self):
+        from datetime import date
+
+        old_entry = GardenJournalEntry.objects.create(
+            user=self.user,
+            plant_name="Rose",
+            entry_type="flowering",
+            title="An older rose entry",
+            notes="The rose was flowering.",
+            entry_date=date(2026, 1, 1),
+        )
+
+        self.client.login(
+            username="journal_owner",
+            password="TestPassword123!",
+        )
+
+        response = self.client.get(
+            reverse("garden_journal"),
+            {"period": "all"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            old_entry,
+            response.context["entries"],
+        )
+
