@@ -1,0 +1,164 @@
+
+{% extends "garden_setup/layout.html" %}
+
+{% block title %}{{ space.name }} — TerraPeer{% endblock %}
+
+{% block gs_content %}
+<section class="gs-detail">
+    <a href="{% url 'garden_setup:space_list' %}" class="gs-back-link">
+        &larr; Back to My Growing Spaces
+    </a>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mt-4 mb-4">
+        <div>
+            <p class="gs-eyebrow">Garden Setup</p>
+            <h1 class="gs-title mb-2">{{ space.name }}</h1>
+            <p class="gs-description mb-0">
+                {{ space.city }}{% if space.region %}, {{ space.region }}{% endif %}
+                · {% if space.space_type == "other" and space.other_space_type %}{{ space.other_space_type }}{% else %}{{ space.get_space_type_display }}{% endif %}
+            </p>
+        </div>
+
+        <span class="gs-badge">{{ space.get_environment_display }}</span>
+    </div>
+
+    {% if delete_blocked %}
+        <div class="alert alert-danger mb-4" role="alert">
+            This space is linked to other records and cannot be deleted.
+        </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <section class="gs-card mb-4">
+                <h2 class="gs-section-title mb-4">Growing Conditions</h2>
+
+                <div class="row g-3">
+                    <div class="col-12 col-sm-6">
+                        <div class="gs-detail-item">
+                            <span>Daily Sunlight</span>
+                            <strong>{{ space.get_sunlight_range_display }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <div class="gs-detail-item">
+                            <span>Light Exposure</span>
+                            <strong>{{ space.get_light_exposure_display }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <div class="gs-detail-item">
+                            <span>Growing Medium</span>
+                            <strong>{{ space.get_growing_medium_display }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <div class="gs-detail-item">
+                            <span>Rain Access</span>
+                            <strong>{{ space.get_rain_access_display }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <div class="gs-detail-item">
+                            <span>Plant Support</span>
+                            <strong>{{ space.get_support_available_display }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-sm-6">
+                        <div class="gs-detail-item">
+                            <span>Care Availability</span>
+                            <strong>{{ space.get_care_availability_display }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {% if space.notes %}
+                <section class="gs-card mb-4">
+                    <h2 class="gs-section-title mb-3">Additional Notes</h2>
+                    <div class="gs-detail-notes">{{ space.notes|linebreaksbr }}</div>
+                </section>
+            {% endif %}
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <section class="gs-card mb-4">
+                <p class="gs-eyebrow">Pot Capacity</p>
+                <p class="gs-detail-capacity mb-1">{{ space.pot_capacity }}</p>
+                <p class="gs-detail-muted mb-0">Maximum pots</p>
+            </section>
+
+            <section class="gs-card mb-4">
+                <h2 class="gs-section-title mb-3">Location</h2>
+
+                <div class="gs-detail-location">
+                    <div>
+                        <span>City</span>
+                        <strong>{{ space.city }}</strong>
+                    </div>
+
+                    {% if space.region %}
+                        <div>
+                            <span>Region</span>
+                            <strong>{{ space.region }}</strong>
+                        </div>
+                    {% endif %}
+
+                    <div>
+                        <span>Country</span>
+                        <strong>{{ space.country }}</strong>
+                    </div>
+
+                    <div>
+                        <span>Timezone</span>
+                        <strong>{{ space.timezone }}</strong>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-3 mt-2">
+        <a href="{% url 'garden_setup:space_edit' space.pk %}" class="btn gs-btn gs-btn-primary">
+            Edit space
+        </a>
+
+        <button type="button" class="btn gs-btn gs-btn-danger"
+                data-bs-toggle="modal" data-bs-target="#gs-delete-modal">
+            Delete space
+        </button>
+    </div>
+</section>
+
+<div class="modal fade" id="gs-delete-modal" tabindex="-1" aria-labelledby="gs-delete-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content gs-delete-modal">
+            <div class="modal-header border-0">
+                <h2 class="modal-title fs-5" id="gs-delete-title">Delete growing space?</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong>{{ space.name }}</strong>?</p>
+                <p class="gs-detail-muted mb-0">This action cannot be undone.</p>
+            </div>
+
+            <div class="modal-footer border-0">
+                <button type="button" class="btn gs-btn gs-btn-outline" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <form method="post" action="{% url 'garden_setup:space_delete' space.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn gs-btn gs-btn-danger">Delete space</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

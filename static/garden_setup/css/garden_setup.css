@@ -607,6 +607,114 @@ body.gs-layout .site-header .gs-nav-link[aria-current="page"] {
     width: 100%;
 }
 
+/* SPACE DETAIL */
+
+.gs-page .gs-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    min-height: 90px;
+    padding: 16px;
+    border-radius: 14px;
+    background: var(--gs-surface-2);
+}
+
+.gs-page .gs-detail-item span,
+.gs-page .gs-detail-location span {
+    color: var(--gs-muted);
+    font-size: 13px;
+}
+
+.gs-page .gs-detail-item strong {
+    color: var(--gs-ink);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.gs-page .gs-detail-capacity {
+    color: var(--gs-primary);
+    font-family: "Lora", Georgia, serif;
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.gs-page .gs-detail-muted {
+    color: var(--gs-muted);
+    font-size: 14px;
+}
+
+.gs-page .gs-detail-notes {
+    color: var(--gs-ink);
+    font-size: 14px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.gs-page .gs-detail-location > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gs-line);
+}
+
+.gs-page .gs-detail-location > div:last-child {
+    border-bottom: none;
+}
+
+.gs-page .gs-detail-location strong {
+    max-width: 65%;
+    color: var(--gs-ink);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+/* DELETE MODAL */
+
+.gs-page .gs-delete-modal {
+    border: 1px solid var(--gs-line);
+    border-radius: 20px;
+    background: var(--gs-surface);
+    color: var(--gs-ink);
+}
+
+.gs-page .gs-delete-modal .modal-title {
+    font-family: "Lora", Georgia, serif;
+    font-weight: 600;
+}
+
+.gs-page .gs-delete-modal .btn-close {
+    box-shadow: none;
+}
+
+.gs-page .gs-btn-danger:hover,
+.gs-page .gs-btn-danger:focus-visible {
+    border-color: var(--gs-danger);
+    background: #872F24;
+    color: white;
+}
+
+@media (max-width: 575.98px) {
+    .gs-page .gs-detail-item {
+        min-height: auto;
+    }
+
+    .gs-page .gs-detail-location > div {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .gs-page .gs-detail-location strong {
+        max-width: 100%;
+        text-align: left;
+    }
+}
+
+
 /* Mobile */
 
 @media (max-width: 991.98px) {

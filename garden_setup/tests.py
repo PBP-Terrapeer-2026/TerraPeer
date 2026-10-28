@@ -672,3 +672,115 @@ class GrowingSpaceCreateEditTest(TestCase):
             response,
             "Location service is unavailable",
         )
+
+    def test_detail_requires_login(self):
+        space = self.make_space()
+        url = reverse("garden_setup:space_detail", args=[space.pk])
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response["Location"])
+
+    def test_owner_can_view_detail(self):
+        space = self.make_space()
+        self.client.force_login(self.owner)
+
+        url = reverse("garden_setup:space_detail", args=[space.pk])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "garden_setup/space_detail.html")
+        self.assertContains(response, "My Balcony")
+        self.assertContains(response, "Depok")
+        self.assertContains(response, "Pot Capacity")
+
+    def test_other_user_cannot_view_detail(self):
+        space = self.make_space(user=self.other)
+        self.client.force_login(self.owner)
+
+        url = reverse("garden_setup:space_detail", args=[space.pk])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_requires_login(self):
+        space = self.make_space()
+        url = reverse("garden_setup:space_delete", args=[space.pk])
+
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(GrowingSpace.objects.filter(pk=space.pk).exists())
+
+    def test_delete_does_not_accept_get(self):
+        space = self.make_space()
+        self.client.force_login(self.owner)
+
+        url = reverse("garden_setup:space_delete", args=[space.pk])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(GrowingSpace.objects.filter(pk=space.pk).exists())
+
+    def test_owner_can_delete_space(self):
+        space = self.make_space()
+        self.client.force_login(self.owner)
+
+        url = reverse("garden_setup:space_delete", args=[space.pk])
+        response = self.client.post(url)
+
+        self.assertRedirects(
+            response,
+            reverse("garden_setup:space_list"),
+        )
+        self.assertFalse(GrowingSpace.objects.filter(pk=space.pk).exists())
+
+    def test_other_user_cannot_delete_space(self):
+        space = self.make_space(user=self.other)
+        self.client.force_login(self.owner)
+
+        url = reverse("garden_setup:space_delete", args=[space.pk])
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(GrowingSpace.objects.filter(pk=space.pk).exists())
+
+    @patch("garden_setup.views._has_related_records", return_value=True)
+    def test_delete_blocked_when_space_has_related_records(self, mock_check):
+        space = self.make_space()
+        self.client.force_login(self.owner)
+
+        url = reverse("garden_setup:space_delete", args=[space.pk])
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, 409)
+        self.assertTrue(GrowingSpace.objects.filter(pk=space.pk).exists())
+        self.assertContains(response, "cannot be deleted", status_code=409)
+        mock_check.assert_called_once()
+
+    @patch("garden_setup.views.get_location_by_id")
+    def test_other_space_type_persists_after_create(self, mock_location):
+        mock_location.return_value = self.location
+        self.client.force_login(self.owner)
+
+        data = self.data.copy()
+        data["space_type"] = "other"
+        data["other_space_type"] = "Greenhouse"
+
+        response = self.client.post(self.create_url, data)
+
+        self.assertRedirects(
+            response,
+            reverse("garden_setup:space_list"),
+        )
+
+        space = GrowingSpace.objects.get(user=self.owner)
+        self.assertEqual(space.space_type, "other")
+        self.assertEqual(space.other_space_type, "Greenhouse")
+
+        edit_url = reverse("garden_setup:space_edit", args=[space.pk])
+        edit_response = self.client.get(edit_url)
+
+        self.assertEqual(edit_response.status_code, 200)
+        self.assertContains(edit_response, 'value="Greenhouse"')

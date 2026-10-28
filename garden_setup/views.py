@@ -1,12 +1,11 @@
-from django.contrib.auth.decorators import login_required
-from django.db.models import Q
-from django.shortcuts import render
-from .models import GrowingSpace
-
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError, transaction
+from django.db.models import Q
+from django.db.models.deletion import ProtectedError, RestrictedError
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect
-from django.views.decorators.http import require_GET
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_GET, require_POST
 
 from .forms import GrowingSpaceForm
 from .geocoding import (
@@ -14,6 +13,8 @@ from .geocoding import (
     get_location_by_id,
     search_locations,
 )
+
+from .models import GrowingSpace
 
 @login_required(login_url="login")
 def space_list(request):
@@ -214,3 +215,80 @@ def space_edit(request, pk):
     )
 
     return _space_form(request, instance=space)
+
+@login_required(login_url="login")
+@require_GET
+def space_detail(request, pk):
+    space = get_object_or_404(
+        GrowingSpace,
+        pk=pk,
+        user=request.user,
+    )
+
+    return render(
+        request,
+        "garden_setup/space_detail.html",
+        {"space": space},
+    )
+
+def _has_related_records(space):
+    for relation in space._meta.get_fields(include_hidden=True):
+        if not relation.auto_created or relation.concrete:
+            continue
+
+        if not (
+            relation.one_to_many
+            or relation.one_to_one
+            or relation.many_to_many
+        ):
+            continue
+
+        related_field = getattr(relation, "field", None)
+
+        if related_field is None:
+            continue
+
+        if relation.related_model._base_manager.filter(
+            **{related_field.name: space}
+        ).exists():
+            return True
+
+    return False
+
+@login_required(login_url="login")
+@require_POST
+def space_delete(request, pk):
+    try:
+        with transaction.atomic():
+            space = get_object_or_404(
+                GrowingSpace.objects.select_for_update(),
+                pk=pk,
+                user=request.user,
+            )
+
+            if _has_related_records(space):
+                return render(
+                    request,
+                    "garden_setup/space_detail.html",
+                    {"space": space, "delete_blocked": True},
+                    status=409,
+                )
+
+            space.delete()
+
+    except (ProtectedError, RestrictedError, IntegrityError):
+        space = get_object_or_404(
+            GrowingSpace,
+            pk=pk,
+            user=request.user,
+        )
+
+        return render(
+            request,
+            "garden_setup/space_detail.html",
+            {"space": space, "delete_blocked": True},
+            status=409,
+        )
+
+    messages.success(request, "Growing space deleted successfully.")
+    return redirect("garden_setup:space_list")

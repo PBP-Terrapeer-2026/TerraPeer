@@ -117,13 +117,14 @@
                                 </p>
 
                                 <div class="d-flex gap-2 mt-auto">
-                                    <a href="{% url 'garden_setup:space_edit' space.pk %}"
-                                       class="btn gs-btn gs-btn-outline flex-fill">
-                                        Edit space
+                                    <a href="{% url 'garden_setup:space_detail' space.pk %}"
+                                    class="btn gs-btn gs-btn-primary flex-fill">
+                                        View space
                                     </a>
-                                    <button type="button" class="btn gs-btn gs-btn-primary flex-fill" disabled>
-                                        Get plants
-                                    </button>
+                                    <a href="{% url 'garden_setup:space_edit' space.pk %}"
+                                    class="btn gs-btn gs-btn-outline flex-fill">
+                                        Edit
+                                    </a>
                                 </div>
                             </div>
 
