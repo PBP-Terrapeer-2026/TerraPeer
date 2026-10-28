@@ -197,3 +197,195 @@ body.gs-layout {
         font-size: 16px;
     }
 }
+
+body.gs-layout .site-header .navbar {
+    flex-wrap: nowrap;
+}
+
+body.gs-layout .site-header .nav-links {
+    gap: clamp(10px, 1.8vw, 24px);
+}
+
+body.gs-layout .site-header .gs-nav-link {
+    white-space: nowrap;
+}
+
+body.gs-layout .site-header .gs-nav-link[aria-current="page"] {
+    background: #E3EDD7; border-radius: 999px; padding: 8px 12px;
+}
+
+.gs-page .gs-search-input {
+    border-radius: 999px; padding-inline: 18px;
+}
+
+.gs-page .gs-filters {
+    background: var(--gs-surface-2); padding: 5px; border-radius: 999px;
+}
+
+.gs-page .gs-filter-pill {
+    padding: 10px 14px;
+    border-radius: 999px;
+    color: var(--gs-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    font-size: 13px;
+}
+
+.gs-page .gs-filter-pill.is-active {
+    background: var(--gs-surface);
+    color: var(--gs-ink);
+    font-weight: 700;
+    box-shadow: 0 1px 5px rgba(27,64,50,0.08);
+}
+
+.gs-page .gs-filter-pill:focus-visible {
+    outline: 2px solid var(--gs-primary);
+    outline-offset: 2px;
+}
+
+.gs-page .gs-space-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--gs-line);
+    border-radius: 20px;
+    background: var(--gs-surface);
+}
+
+.gs-page .gs-space-visual {
+    position: relative;
+    min-height: 132px;
+    background: radial-gradient(circle at 82% 23%,#e7b64a 0 15px,transparent 16px), linear-gradient(to top,#c6d7b8 0 31%,transparent 31%), linear-gradient(135deg,#dce8d3,#e6eddf);
+}
+
+.gs-page .gs-space-visual::before {
+    content: "";
+    position: absolute;
+    bottom: 29%;
+    left: 12%;
+    width: 20%;
+    height: 30px;
+    border: 3px solid rgba(27,64,50,.25);
+    border-bottom: 0;
+    box-shadow: 95px -9px 0 -3px transparent;
+}
+
+.gs-page .gs-space-visual.is-indoor {
+    background: radial-gradient(circle at 82% 23%,#e9d393 0 15px,transparent 16px), linear-gradient(to top,#cddfe3 0 31%,transparent 31%),linear-gradient(135deg,#dce9ed,#e6eff2);
+}
+
+.gs-page .gs-space-visual.is-rooftop {
+    background: radial-gradient(circle at 82% 23%,#e7b64a 0 15px,transparent 16px), linear-gradient(to top,#e8d8ae 0 31%,transparent 31%), linear-gradient(135deg,#f4e6c5,#f6ecd5);
+}
+
+.gs-page .gs-space-badge {
+    position: absolute;
+    right: 14px;
+    bottom: 12px;
+}
+
+.gs-page .gs-space-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 20px 22px 22px;
+}
+
+.gs-page .gs-space-name {
+    font: 700 22px/1.2 "Lora",Georgia,serif;
+    color: var(--gs-ink);
+    margin-bottom: 6px;
+}
+
+.gs-page .gs-space-location {
+    color: var(--gs-muted);
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.gs-page .gs-space-fact {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-height: 70px;
+    border-radius: 15px;
+    background: var(--gs-surface-2);
+    padding: 12px;
+}
+
+.gs-page .gs-space-fact span {
+    color: var(--gs-muted);
+    font-size: 12px;
+}
+
+.gs-page .gs-space-fact strong {
+    color: var(--gs-ink);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.gs-page .gs-space-capacity {
+    color: var(--gs-muted);
+    font-size: 13px;
+}
+
+.gs-page .gs-space-capacity strong {
+    color: var(--gs-ink);
+}
+
+.gs-page .gs-space-care,.gs-page .gs-overview-note {
+    color: var(--gs-muted);
+    font-size: 13px;
+}
+
+.gs-page .gs-space-content .gs-btn:disabled {
+    opacity: .58;
+    cursor: not-allowed;
+}
+
+.gs-page .gs-empty-state {
+    max-width: 600px;
+    margin-block: 46px 70px;
+    padding: 48px 24px;
+}
+
+.gs-page .gs-empty-icon {
+    font-size: 44px;
+    color: var(--gs-primary);
+}
+
+.gs-page .gs-empty-state p {
+    color: var(--gs-muted);
+}
+
+@media (max-width: 767.98px) {
+    body.gs-layout .site-header .navbar {
+        flex-wrap: wrap;
+        border-radius: 25px;
+        gap: 8px;
+    }
+
+    body.gs-layout .site-header .nav-links {
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    body.gs-layout .site-header .nav-username,
+    body.gs-layout .site-header .nav-more {
+        display: none;
+    }
+    .gs-page .gs-filters {
+        width: 100%;
+        overflow-x:
+        auto;
+    }
+
+    .gs-page .gs-filter-pill {
+        flex: 1;
+        text-align: center;
+    }
+
+    .gs-page .gs-space-visual {
+        min-height: 120px;
+    }
+}

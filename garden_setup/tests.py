@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.urls import reverse
 
 from .forms import GrowingSpaceForm
 from .models import GrowingSpace
@@ -202,3 +203,94 @@ class GrowingSpaceModelTest(TestCase):
 
         with self.assertRaises(ValidationError):
             space.full_clean()
+
+class GrowingSpaceOverviewTest(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.owner = User.objects.create_user(
+            username="overview_owner", password="test-pass-123"
+        )
+        self.other = User.objects.create_user(
+            username="overview_other", password="test-pass-123"
+        )
+        self.url = reverse("garden_setup:space_list")
+
+        base = {
+            "environment": "outdoor",
+            "space_type": "balcony",
+            "geocoding_id": 123456,
+            "city": "Depok",
+            "region": "West Java",
+            "country": "Indonesia",
+            "latitude": Decimal("-6.402500"),
+            "longitude": Decimal("106.794200"),
+            "timezone": "Asia/Jakarta",
+            "sunlight_range": "4-6",
+            "light_exposure": "direct",
+            "growing_medium": "soil",
+            "rain_access": "exposed",
+            "support_available": "yes",
+            "pot_capacity": 4,
+            "care_availability": "daily",
+        }
+        GrowingSpace.objects.create(user=self.owner, name="My Balcony", **base)
+
+        indoor = base.copy()
+        indoor.update(
+            environment="indoor",
+            space_type="windowsill",
+            rain_access="sheltered",
+            city="Bandung",
+        )
+        GrowingSpace.objects.create(user=self.owner, name="Kitchen Window", **indoor)
+
+        private = base.copy()
+        private.update(city="Jakarta", space_type="rooftop")
+        GrowingSpace.objects.create(user=self.other, name="Private Rooftop", **private)
+
+    def test_guests_are_redirected_to_login(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("login"), response["Location"])
+
+    def test_owner_sees_only_their_spaces(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "garden_setup/space_list.html")
+        self.assertContains(response, "My Balcony")
+        self.assertContains(response, "Kitchen Window")
+        self.assertNotContains(response, "Private Rooftop")
+
+    def test_search_by_name(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url, {"q": "balcony"})
+        self.assertContains(response, "My Balcony")
+        self.assertNotContains(response, "Kitchen Window")
+
+    def test_search_by_city(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url, {"q": "Bandung"})
+        self.assertContains(response, "Kitchen Window")
+        self.assertNotContains(response, "My Balcony")
+
+    def test_filter_indoor(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url, {"environment": "indoor"})
+        self.assertContains(response, "Kitchen Window")
+        self.assertNotContains(response, "My Balcony")
+
+    def test_search_no_results(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url, {"q": "lavender"})
+        self.assertContains(response, "No matching growing spaces")
+        self.assertNotContains(response, "My Balcony")
+
+    def test_empty_overview(self):
+        User = get_user_model()
+        empty_user = User.objects.create_user(
+            username="overview_empty", password="test-pass-123"
+        )
+        self.client.force_login(empty_user)
+        response = self.client.get(self.url)
+        self.assertContains(response, "No growing spaces yet")
