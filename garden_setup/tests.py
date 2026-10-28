@@ -3,13 +3,21 @@ from decimal import Decimal
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
+from io import BytesIO
+from urllib.error import URLError
 from unittest.mock import patch
 from .forms import GrowingSpaceForm
 from .models import GrowingSpace
-from .geocoding import GeocodingServiceError
+from .geocoding import (
+    GeocodingServiceError,
+    _fetch_json,
+    _normalize_location,
+    search_locations,
+    get_location_by_id,
+)
 
 class GrowingSpaceFormTest(TestCase):
     def setUp(self):
@@ -784,3 +792,155 @@ class GrowingSpaceCreateEditTest(TestCase):
 
         self.assertEqual(edit_response.status_code, 200)
         self.assertContains(edit_response, 'value="Greenhouse"')
+
+class GeocodingServiceTest(SimpleTestCase):
+    def setUp(self):
+        self.api_item = {
+            "id": 123456,
+            "name": "Depok",
+            "admin1": "West Java",
+            "country": "Indonesia",
+            "latitude": -6.4025,
+            "longitude": 106.7942,
+            "timezone": "Asia/Jakarta",
+        }
+
+    @patch("garden_setup.geocoding.urlopen")
+    def test_fetch_json_returns_data(self, mock_urlopen):
+        mock_urlopen.return_value = BytesIO(b'{"results": []}')
+
+        data = _fetch_json("search", {"name": "Depok"})
+
+        self.assertEqual(data, {"results": []})
+
+        request = mock_urlopen.call_args.args[0]
+        self.assertIn("name=Depok", request.full_url)
+        self.assertEqual(mock_urlopen.call_args.kwargs["timeout"], 5)
+
+    @patch("garden_setup.geocoding.urlopen")
+    def test_fetch_json_handles_network_error(self, mock_urlopen):
+        mock_urlopen.side_effect = URLError("Connection failed")
+
+        with self.assertRaises(GeocodingServiceError):
+            _fetch_json("search", {"name": "Depok"})
+
+    @patch("garden_setup.geocoding.urlopen")
+    def test_fetch_json_rejects_invalid_payload(self, mock_urlopen):
+        for payload in (b'[]', b'{"error": true}', b'{invalid json'):
+            with self.subTest(payload=payload):
+                mock_urlopen.return_value = BytesIO(payload)
+
+                with self.assertRaises(GeocodingServiceError):
+                    _fetch_json("search", {"name": "Depok"})
+
+    def test_normalize_location_valid(self):
+        result = _normalize_location(self.api_item)
+
+        self.assertEqual(result["id"], 123456)
+        self.assertEqual(result["name"], "Depok")
+        self.assertEqual(result["region"], "West Java")
+        self.assertEqual(result["latitude"], "-6.402500")
+        self.assertEqual(result["longitude"], "106.794200")
+
+    def test_normalize_location_rejects_invalid_values(self):
+        invalid_updates = (
+            {"id": 0},
+            {"id": 9223372036854775808},
+            {"latitude": "NaN"},
+            {"longitude": "Infinity"},
+            {"latitude": 91},
+            {"longitude": -181},
+            {"name": " "},
+            {"country": " "},
+            {"timezone": " "},
+        )
+
+        for updates in invalid_updates:
+            with self.subTest(updates=updates):
+                location = {**self.api_item, **updates}
+                self.assertIsNone(_normalize_location(location))
+
+    def test_normalize_location_rejects_malformed_payload(self):
+        without_id = {
+            key: value
+            for key, value in self.api_item.items()
+            if key != "id"
+        }
+
+        invalid_items = (
+            without_id,
+            {**self.api_item, "id": "invalid"},
+            None,
+        )
+
+        for item in invalid_items:
+            with self.subTest(item=item):
+                self.assertIsNone(_normalize_location(item))
+
+    @patch("garden_setup.geocoding._fetch_json")
+    def test_search_locations_skips_invalid_items(self, mock_fetch):
+        mock_fetch.return_value = {
+            "results": [
+                self.api_item,
+                {**self.api_item, "id": 0},
+                "not a location",
+            ]
+        }
+
+        results = search_locations("Depok")
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["name"], "Depok")
+        self.assertEqual(mock_fetch.call_args.args[0], "search")
+
+    @patch("garden_setup.geocoding._fetch_json")
+    def test_search_locations_short_name(self, mock_fetch):
+        self.assertEqual(search_locations(" D "), [])
+        mock_fetch.assert_not_called()
+
+    @patch("garden_setup.geocoding._fetch_json")
+    def test_search_locations_handles_empty_result(self, mock_fetch):
+        mock_fetch.return_value = {}
+
+        self.assertEqual(search_locations("Unknown City"), [])
+
+    @patch("garden_setup.geocoding._fetch_json")
+    def test_search_locations_rejects_invalid_results(self, mock_fetch):
+        mock_fetch.return_value = {"results": "invalid"}
+
+        with self.assertRaises(GeocodingServiceError):
+            search_locations("Depok")
+
+    @patch("garden_setup.geocoding._fetch_json")
+    def test_get_location_by_id_valid(self, mock_fetch):
+        mock_fetch.return_value = self.api_item
+
+        location = get_location_by_id(123456)
+
+        self.assertEqual(location["name"], "Depok")
+        self.assertEqual(mock_fetch.call_args.args[0], "get")
+        self.assertEqual(
+            mock_fetch.call_args.args[1],
+            {"id": 123456},
+        )
+
+    @patch("garden_setup.geocoding._fetch_json")
+    def test_get_location_by_id_rejects_invalid_id(self, mock_fetch):
+        for invalid_id in (0, 9223372036854775808):
+            with self.subTest(invalid_id=invalid_id):
+                self.assertIsNone(get_location_by_id(invalid_id))
+
+        mock_fetch.assert_not_called()
+
+    @patch("garden_setup.geocoding._fetch_json")
+    def test_get_location_by_id_rejects_mismatch_or_malformed(self, mock_fetch):
+        invalid_payloads = (
+            {**self.api_item, "id": 999999},
+            {"id": "bad"},
+        )
+
+        for payload in invalid_payloads:
+            with self.subTest(payload=payload):
+                mock_fetch.return_value = payload
+
+                self.assertIsNone(get_location_by_id(123456))
