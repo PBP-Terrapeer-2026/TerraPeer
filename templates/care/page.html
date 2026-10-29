@@ -1,21 +1,15 @@
-{% extends "terrapeer/base.html" %}
+{% extends "base.html" %}
 {% load static care_icons %}
-{% block framework_styles %}
-    <link rel="stylesheet"
-          href="{% static 'terrapeer/vendor/bootstrap/bootstrap-grid.min.css' %}">
-{% endblock %}
-{% block styles %}
+{% block title %}{{ title|default:"Plant Care · TerraPeer" }}{% endblock %}
+{% block body_class %}tp-page care-page care-final{% endblock %}
+{% block extra_head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'terrapeer/vendor/bootstrap/bootstrap-grid.min.css' %}">
+    <link rel="stylesheet" href="{% static 'terrapeer/css/shared.css' %}">
     <link rel="stylesheet" href="{% static 'terrapeer/css/plant-care.css' %}">
     <link rel="stylesheet" href="{% static 'terrapeer/css/care-final.css' %}">
 {% endblock %}
-{% block body_class %}care-page care-final{% endblock %}
 {% block content %}
-    {% include "care/topbar.html" %}
-    {% include "care/header.html" %}
-    <main id="main-content"
-          class="shell main"
-          data-list-url="{% url 'care:list' plant.pk %}"
-          data-weather-url="{% url 'care:weather' plant.pk %}">
         <div hidden>{% csrf_token %}</div>
         <div id="feedback" class="feedback" role="status" hidden></div>
         <div class="schedule-grid">
@@ -115,10 +109,9 @@
                 </a>
             {% endif %}
         </nav>
-    </main>
-    {% include "terrapeer/footer.html" %}
-    <div id="modal-root"></div>
 {% endblock %}
-{% block scripts %}
+{% block extra_scripts %}
+    {{ block.super }}
+    <div id="modal-root"></div>
     <script src="{% static 'terrapeer/js/plant-care.js' %}" defer></script>
 {% endblock %}

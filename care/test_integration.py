@@ -25,7 +25,8 @@ class ProjectIntegrationTests(TestCase):
         self.assertRedirects(response, "/plant-care/")
         page = self.client.get("/plant-care/")
         self.assertContains(page, "Your plants will appear here")
-        self.assertNotContains(page, "css/style.css")
+        self.assertContains(page, "css/style.css")
+        self.assertTemplateUsed(page, "base.html")
         self.assertContains(self.client.get("/"), 'href="/plant-care/"')
 
     def test_external_redirect_is_rejected(self):
@@ -44,3 +45,27 @@ class ProjectIntegrationTests(TestCase):
             self.client.get(reverse("care:landing")), reverse("show_main")
         )
 
+    def test_care_uses_common_base_without_duplicate_main_or_navigation(self):
+        from care.models import GardenSpace, Plant
+
+        garden = GardenSpace.objects.create(owner=self.user, name="Test balcony")
+        plant = Plant.objects.create(garden=garden, name="Mint", pot="A")
+        self.client.force_login(self.user)
+        page = self.client.get(reverse("care:page", args=[plant.pk]))
+        self.assertTemplateUsed(page, "base.html")
+        self.assertTemplateNotUsed(page, "terrapeer/base.html")
+        self.assertContains(page, 'id="main-content"', count=1)
+        self.assertContains(page, 'aria-label="Main navigation"', count=1)
+        self.assertContains(page, 'id="modal-root"', count=1)
+        self.assertContains(page, "terrapeer/css/care-final.css")
+        self.assertContains(page, "terrapeer/js/plant-care.js")
+        home = self.client.get("/")
+        login = self.client.get("/login/")
+        for response in (home, login):
+            self.assertNotContains(response, "terrapeer/css/care-final.css")
+            self.assertNotContains(response, 'class="care-topbar')
+
+    def test_login_without_next_parameter_renders(self):
+        response = self.client.get("/login/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'name="next" value=""')

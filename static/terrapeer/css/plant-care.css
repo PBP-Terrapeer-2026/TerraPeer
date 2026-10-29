@@ -1,38 +1,38 @@
 /* Plant Care layout only. Load shared.css first. */
-:root {
+.care-page {
     --green: var(--tp-green);
     --ink: var(--tp-ink);
     --muted: var(--tp-muted);
     --border: var(--tp-border)
 }
 
-h1 {
+.care-page h1 {
     font-size: 44px;
     line-height: 1.2
 }
 
-h2 {
+.care-page h2 {
     font-size: 25px
 }
 
-h3 {
+.care-page h3 {
     font-size: 16px
 }
 
-.shell {
+.care-page .shell {
     width: calc(100% - 112px);
     max-width: 1280px;
     margin: auto
 }
 
-.hero {
+.care-page .hero {
     position: relative;
     padding: 28px 0 44px;
     isolation: isolate;
     background: #2f4e36
 }
 
-.hero-photo {
+.care-page .hero-photo {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -41,14 +41,14 @@ h3 {
     z-index: -2
 }
 
-.hero-shade {
+.care-page .hero-shade {
     position: absolute;
     inset: 0;
     background: linear-gradient(90deg, rgba(17, 42, 33, .84), rgba(17, 42, 33, .35));
     z-index: -1
 }
 
-.brand {
+.care-page .brand {
     display: flex;
     align-items: center;
     gap: 7px;
@@ -58,31 +58,31 @@ h3 {
     margin-right: auto
 }
 
-.brand img {
+.care-page .brand img {
     width: 25px;
     height: 30px;
     object-fit: contain
 }
 
-.navlinks {
+.care-page .navlinks {
     display: flex;
     gap: 7px;
     align-items: center
 }
 
-.navlinks a,
-.navlinks span {
+.care-page .navlinks a,
+.care-page .navlinks span {
     padding: 10px 13px;
     font-size: 12px;
     border-radius: 30px
 }
 
-.navlinks .selected {
+.care-page .navlinks .selected {
     background: #d5e7df;
     font-weight: 700
 }
 
-.avatar {
+.care-page .avatar {
     background: #f4d577;
     width: 40px;
     height: 40px;
@@ -93,7 +93,7 @@ h3 {
     font-weight: 600
 }
 
-.crumb {
+.care-page .crumb {
     display: flex;
     gap: 10px;
     align-items: center;
@@ -102,7 +102,7 @@ h3 {
     margin: 24px 0 14px
 }
 
-.hero-title {
+.care-page .hero-title {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -110,18 +110,18 @@ h3 {
     color: #fffce7
 }
 
-.hero-title p {
+.care-page .hero-title p {
     margin-top: 8px;
     color: #e0eadc
 }
 
-.care-inline-row {
+.care-page .care-inline-row {
     display: flex;
     align-items: center;
     gap: 12px
 }
 
-.link {
+.care-page .link {
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -133,15 +133,15 @@ h3 {
     color: var(--tp-green)
 }
 
-.link.danger {
+.care-page .link.danger {
     color: var(--tp-danger)
 }
 
-.main {
+.care-page .main {
     padding: 26px 0 32px
 }
 
-.plant-context {
+.care-page .plant-context {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -153,32 +153,32 @@ h3 {
     margin-bottom: 24px
 }
 
-.plant-photo {
+.care-page .plant-photo {
     width: 58px;
     height: 64px;
     object-fit: cover;
     border-radius: 24px
 }
 
-.eyebrow {
+.care-page .eyebrow {
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 1.5px;
     text-transform: uppercase
 }
 
-.muted {
+.care-page .muted {
     color: var(--tp-muted);
     font-size: 12px
 }
 
-.plant-title {
+.care-page .plant-title {
     font-family: Lora, Georgia, serif;
     font-size: 22px;
     font-weight: 600
 }
 
-.pill {
+.care-page .pill {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -191,24 +191,24 @@ h3 {
     white-space: nowrap
 }
 
-.pill.pending {
+.care-page .pill.pending {
     background: #f7edc4;
     color: #695a2c
 }
 
-.pill.overdue {
+.care-page .pill.overdue {
     background: #f4ded5;
     color: var(--tp-danger)
 }
 
-.grid {
+.care-page .grid {
     display: grid;
     grid-template-columns: minmax(0, 1.7fr) minmax(340px, 1fr);
     gap: 24px;
     align-items: start
 }
 
-.section-head {
+.care-page .section-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -216,7 +216,7 @@ h3 {
     margin-bottom: 22px
 }
 
-.filters {
+.care-page .filters {
     display: flex;
     align-items: flex-end;
     gap: 12px;
@@ -225,12 +225,12 @@ h3 {
     flex-wrap: wrap
 }
 
-.filters label {
+.care-page .filters label {
     flex: 1;
     min-width: 130px
 }
 
-.field-label {
+.care-page .field-label {
     display: block;
     font-size: 12px;
     font-weight: 600;
@@ -238,9 +238,9 @@ h3 {
     margin-bottom: 6px
 }
 
-input,
-select,
-textarea {
+.care-page input,
+.care-page select,
+.care-page textarea {
     width: 100%;
     border: 1px solid #9db6a3;
     background: var(--tp-white);
@@ -250,28 +250,28 @@ textarea {
     min-height: 44px
 }
 
-textarea {
+.care-page textarea {
     resize: vertical;
     min-height: 100px
 }
 
-select {
+.care-page select {
     padding-right: 28px
 }
 
-input[aria-invalid=true],
-select[aria-invalid=true] {
+.care-page input[aria-invalid=true],
+.care-page select[aria-invalid=true] {
     border: 1.5px solid var(--tp-danger);
     background: #fff6f0
 }
 
-.filter-note {
+.care-page .filter-note {
     font-size: 11px;
     color: var(--tp-muted);
     margin: 16px 0 4px
 }
 
-.task {
+.care-page .task {
     padding: 20px 0;
     border-bottom: 1px solid #c9dccd;
     display: flex;
@@ -279,12 +279,12 @@ select[aria-invalid=true] {
     align-items: flex-start
 }
 
-.task:last-child {
+.care-page .task:last-child {
     border-bottom: 0;
     padding-bottom: 4px
 }
 
-.check {
+.care-page .check {
     border: 3px solid var(--tp-green);
     border-radius: 50%;
     width: 30px;
@@ -298,16 +298,16 @@ select[aria-invalid=true] {
     color: var(--tp-surface)
 }
 
-.check.completed {
+.care-page .check.completed {
     background: var(--tp-green)
 }
 
-.task-body {
+.care-page .task-body {
     flex: 1;
     min-width: 0
 }
 
-.task-title {
+.care-page .task-title {
     font-size: 15px;
     font-weight: 700;
     background: none;
@@ -317,11 +317,11 @@ select[aria-invalid=true] {
     line-height: 1.5
 }
 
-.task-title:hover {
+.care-page .task-title:hover {
     text-decoration: underline
 }
 
-.task-meta {
+.care-page .task-meta {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -331,35 +331,35 @@ select[aria-invalid=true] {
     margin-top: 5px
 }
 
-.task-meta .icon {
+.care-page .task-meta .icon {
     width: 15px;
     height: 15px
 }
 
-.task-tags {
+.care-page .task-tags {
     display: flex;
     gap: 7px;
     flex-wrap: wrap;
     margin-top: 10px
 }
 
-.task-actions {
+.care-page .task-actions {
     display: flex;
     gap: 6px;
     margin-top: 2px
 }
 
-.task-actions .iconbtn {
+.care-page .task-actions .iconbtn {
     width: 34px;
     height: 34px
 }
 
-.task-actions .icon {
+.care-page .task-actions .icon {
     width: 17px;
     height: 17px
 }
 
-.repeat {
+.care-page .repeat {
     font-size: 11px;
     display: inline-flex;
     align-items: center;
@@ -367,57 +367,57 @@ select[aria-invalid=true] {
     color: var(--tp-muted)
 }
 
-.repeat .icon {
+.care-page .repeat .icon {
     width: 14px;
     height: 14px
 }
 
-.weather {
+.care-page .weather {
     background: linear-gradient(135deg, #c4dfee, #e3ebd5 60%, #f9edbc);
     overflow: hidden
 }
 
-.weather-head {
+.care-page .weather-head {
     font-size: 11px;
     letter-spacing: 1.4px;
     font-weight: 600;
     text-transform: uppercase
 }
 
-.weather-place {
+.care-page .weather-place {
     font-size: 21px;
     font-family: Lora, Georgia, serif;
     margin-top: 9px;
     font-weight: 600
 }
 
-.weather-date {
+.care-page .weather-date {
     font-size: 12px;
     color: #466450;
     margin-top: 5px
 }
 
-.weather-sky {
+.care-page .weather-sky {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin: 23px 0 16px
 }
 
-.temperature {
+.care-page .temperature {
     font-family: Lora, Georgia, serif;
     font-size: 55px;
     line-height: 1.15;
     color: var(--tp-green)
 }
 
-.temperature span {
+.care-page .temperature span {
     font-family: Arial, sans-serif;
     font-size: 16px;
     margin-left: 5px
 }
 
-.sky-art {
+.care-page .sky-art {
     width: 106px;
     height: 106px;
     border-radius: 50%;
@@ -426,25 +426,25 @@ select[aria-invalid=true] {
     place-items: center
 }
 
-.sky-art .icon {
+.care-page .sky-art .icon {
     width: 68px;
     height: 68px;
     color: var(--tp-green)
 }
 
-.weather.rainy {
+.care-page .weather.rainy {
     background: linear-gradient(135deg, #b6cfde, #e0e9e9)
 }
 
-.weather.cloudy {
+.care-page .weather.cloudy {
     background: linear-gradient(135deg, #cfdee9, #e4e9da)
 }
 
-.weather.sunny {
+.care-page .weather.sunny {
     background: linear-gradient(135deg, #fff0b1, #d6e9df)
 }
 
-.weather-facts {
+.care-page .weather-facts {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
@@ -454,24 +454,24 @@ select[aria-invalid=true] {
     margin: 16px 0
 }
 
-.weather-facts strong {
+.care-page .weather-facts strong {
     display: block;
     font-size: 23px;
     font-weight: 600;
     margin: 7px 0 2px
 }
 
-.weather-facts .muted {
+.care-page .weather-facts .muted {
     font-size: 11px
 }
 
-.weather-days {
+.care-page .weather-days {
     display: flex;
     gap: 7px;
     margin-top: 22px
 }
 
-.weather-days button {
+.care-page .weather-days button {
     border: 1px solid #98b5a2;
     background: #ffffff55;
     border-radius: 18px;
@@ -481,25 +481,25 @@ select[aria-invalid=true] {
     padding: 8px
 }
 
-.weather-days button[aria-pressed=true] {
+.care-page .weather-days button[aria-pressed=true] {
     background: var(--tp-green);
     color: #fff;
     border-color: var(--tp-green)
 }
 
-.weather-note {
+.care-page .weather-note {
     font-size: 12px;
     margin-top: 19px;
     line-height: 1.7
 }
 
-.weather-credit {
+.care-page .weather-credit {
     font-size: 10px;
     margin-top: 15px;
     color: #466450
 }
 
-.small-panel {
+.care-page .small-panel {
     margin-top: 20px;
     padding: 24px 28px;
     background: var(--tp-mint);
@@ -507,18 +507,18 @@ select[aria-invalid=true] {
     border-radius: 32px
 }
 
-.small-panel h3 {
+.care-page .small-panel h3 {
     font-family: Lora, Georgia, serif;
     font-size: 19px;
     margin-bottom: 9px
 }
 
-.empty {
+.care-page .empty {
     text-align: center;
     padding: 42px 16px
 }
 
-.empty-symbol {
+.care-page .empty-symbol {
     display: grid;
     place-items: center;
     width: 74px;
@@ -528,25 +528,25 @@ select[aria-invalid=true] {
     border-radius: 50%
 }
 
-.empty-symbol .icon {
+.care-page .empty-symbol .icon {
     width: 38px;
     height: 38px
 }
 
-.empty h3 {
+.care-page .empty h3 {
     font-family: Lora, Georgia, serif;
     font-size: 23px;
     margin-bottom: 9px
 }
 
-.empty p {
+.care-page .empty p {
     font-size: 13px;
     color: var(--tp-muted);
     max-width: 330px;
     margin: 0 auto 20px
 }
 
-.feedback {
+.care-page .feedback {
     background: var(--tp-mint);
     border: 1px solid var(--tp-border);
     border-radius: 20px;
@@ -558,11 +558,11 @@ select[aria-invalid=true] {
     font-size: 13px
 }
 
-.feedback span {
+.care-page .feedback span {
     flex: 1
 }
 
-.footer {
+.care-page .footer {
     font-size: 11px;
     color: var(--tp-muted);
     display: flex;
@@ -571,7 +571,7 @@ select[aria-invalid=true] {
     gap: 20px
 }
 
-.backdrop {
+.care-page .backdrop {
     position: fixed;
     inset: 0;
     background: #102a2170;
@@ -582,7 +582,7 @@ select[aria-invalid=true] {
     z-index: 10
 }
 
-.dialog {
+.care-page .dialog {
     width: 660px;
     max-width: 100%;
     max-height: calc(100vh - 56px);
@@ -594,15 +594,15 @@ select[aria-invalid=true] {
     box-shadow: 0 24px 70px #102a2130
 }
 
-.dialog.small {
+.care-page .dialog.small {
     width: 540px
 }
 
-.dialog h2 {
+.care-page .dialog h2 {
     font-size: 29px
 }
 
-.dialog-head {
+.care-page .dialog-head {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -610,35 +610,35 @@ select[aria-invalid=true] {
     margin-bottom: 23px
 }
 
-.dialog-head p {
+.care-page .dialog-head p {
     margin-top: 6px;
     font-size: 12px;
     color: var(--tp-muted)
 }
 
-.formgrid {
+.care-page .formgrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 19px
 }
 
-.wide {
+.care-page .wide {
     grid-column: 1/-1
 }
 
-.error-text {
+.care-page .error-text {
     font-size: 11px;
     color: var(--tp-danger);
     margin-top: 6px
 }
 
-.help {
+.care-page .help {
     font-size: 11px;
     color: var(--tp-muted);
     margin-top: 7px
 }
 
-.hint {
+.care-page .hint {
     padding: 14px 17px;
     border-radius: 18px;
     background: #f7edc4;
@@ -647,7 +647,7 @@ select[aria-invalid=true] {
     margin-top: 18px
 }
 
-.dialog-footer {
+.care-page .dialog-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -657,30 +657,30 @@ select[aria-invalid=true] {
     margin-top: 24px
 }
 
-.dialog-footer .danger-link {
+.care-page .dialog-footer .danger-link {
     margin-right: auto
 }
 
-.detail-grid {
+.care-page .detail-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     margin: 23px 0
 }
 
-.detail-grid dt {
+.care-page .detail-grid dt {
     font-size: 11px;
     color: var(--tp-muted);
     margin-bottom: 5px
 }
 
-.detail-grid dd {
+.care-page .detail-grid dd {
     font-size: 15px;
     font-weight: 600;
     margin: 0
 }
 
-.instructions {
+.care-page .instructions {
     padding: 18px;
     background: var(--tp-white);
     border: 1px solid #cadbc9;
@@ -690,7 +690,7 @@ select[aria-invalid=true] {
     margin-top: 9px
 }
 
-.warn-icon {
+.care-page .warn-icon {
     background: #f4ded5;
     color: var(--tp-danger);
     border-radius: 50%;
@@ -701,173 +701,171 @@ select[aria-invalid=true] {
     margin-bottom: 16px
 }
 
-.loading-line {
+.care-page .loading-line {
     height: 12px;
     background: #c8dbd4;
     border-radius: 10px;
     margin: 16px 0
 }
 
-.loading-line.big {
+.care-page .loading-line.big {
     height: 60px;
     width: 55%;
     margin: 34px 0
 }
 
-@media(max-width:1000px) {
-    .shell {
+@media (max-width:1000px) {
+    .care-page .shell {
         width: calc(100% - 48px)
     }
 
-    .navlinks a,
-    .navlinks span {
+    .care-page .navlinks a,
+    .care-page .navlinks span {
         padding: 8px;
         font-size: 10px
     }
 
-    .grid {
+    .care-page .grid {
         grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr)
     }
 
-    .panel {
+    .care-page .panel {
         padding: 24px
     }
 
-    .task-actions {
+    .care-page .task-actions {
         flex-direction: column
     }
-
 }
 
-@media(max-width:740px) {
-    .shell {
+@media (max-width:740px) {
+    .care-page .shell {
         width: calc(100% - 28px)
     }
 
-    .nav {
+    .care-page .nav {
         flex-wrap: wrap;
         padding: 14px 18px;
         border-radius: 32px
     }
 
-    .navlinks {
+    .care-page .navlinks {
         order: 3;
         width: 100%;
         overflow: auto;
         gap: 4px
     }
 
-    .navlinks a,
-    .navlinks span {
+    .care-page .navlinks a,
+    .care-page .navlinks span {
         white-space: nowrap;
         font-size: 11px
     }
 
-    .grid {
+    .care-page .grid {
         grid-template-columns: 1fr
     }
 
-    .hero {
+    .care-page .hero {
         padding-top: 14px
     }
 
-    .hero-title {
+    .care-page .hero-title {
         align-items: flex-start
     }
 
-    h1 {
+    .care-page h1 {
         font-size: 35px
     }
 
-    .hero-title .btn {
+    .care-page .hero-title .btn {
         padding: 10px 13px
     }
 
-    .plant-context {
+    .care-page .plant-context {
         align-items: flex-start;
         flex-wrap: wrap
     }
 
-    .plant-context>.care-inline-row:last-child {
+    .care-page .plant-context>.care-inline-row:last-child {
         width: 100%
     }
 
-    .plant-context select {
+    .care-page .plant-context select {
         flex: 1
     }
 
-    .panel {
+    .care-page .panel {
         border-radius: 32px;
         padding: 22px
     }
 
-    .task {
+    .care-page .task {
         gap: 10px
     }
 
-    .dialog {
+    .care-page .dialog {
         padding: 23px;
         border-radius: 28px
     }
 
-    .backdrop {
+    .care-page .backdrop {
         padding: 14px
     }
 
-    .formgrid {
+    .care-page .formgrid {
         grid-template-columns: 1fr
     }
 
-    .wide {
+    .care-page .wide {
         grid-column: auto
     }
 
-    .footer {
+    .care-page .footer {
         flex-wrap: wrap
     }
 
-    .task-actions {
+    .care-page .task-actions {
         flex-direction: column
     }
 
-    .weather-sky {
+    .care-page .weather-sky {
         justify-content: flex-start;
         gap: 40px
     }
 
-    .hero-title p {
+    .care-page .hero-title p {
         max-width: 240px
     }
 
-    .filters .link {
+    .care-page .filters .link {
         min-height: 40px
     }
 
-    .dialog-footer {
+    .care-page .dialog-footer {
         flex-wrap: wrap
     }
-
 }
 
-.feedback.error {
+.care-page .feedback.error {
     background: #f4ded5;
     border-color: #b77864
 }
 
-.error-text .errorlist {
+.care-page .error-text .errorlist {
     padding: 0;
     list-style: none
 }
 
-.dialog:focus {
+.care-page .dialog:focus {
     outline: none
 }
 
-#task-list[aria-busy=true],
-#weather-slot[aria-busy=true] {
+.care-page #task-list[aria-busy=true],
+.care-page #weather-slot[aria-busy=true] {
     opacity: .65
 }
 
-.sky-art {
+.care-page .sky-art {
     flex-shrink: 0
 }

@@ -1,7 +1,5 @@
 /* 1. Foundations: one source of truth for all TerraPeer pages. */
-@import url('https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
-:root {
+.care-page {
     --tp-green: #2f6b4f;
     --tp-green-dark: #285b43;
     --tp-ink: #18382a;
@@ -16,8 +14,8 @@
     --tp-radius-control: 16px;
     --tp-gap: 24px;
     --tp-content-width: 1280px;
-    --tp-font-body: 'Plus Jakarta Sans', Arial, sans-serif;
-    --tp-font-heading: 'Lora', Georgia, serif;
+    --tp-font-body: "Plus Jakarta Sans", Arial, sans-serif;
+    --tp-font-heading: "Lora", Georgia, serif;
     /* Aliases retained so the earlier prototype remains compatible. */
     --green: var(--tp-green);
     --ink: var(--tp-ink);
@@ -25,87 +23,88 @@
     --border: var(--tp-border);
 }
 
-* {
+.care-page,
+.care-page * {
     box-sizing: border-box;
 }
 
-body.tp-page {
+body.care-page.tp-page {
     margin: 0;
     background: var(--tp-cream);
     color: var(--tp-ink);
     font: 14px/1.5 var(--tp-font-body);
 }
 
-button,
-input,
-select,
-textarea {
+.care-page button,
+.care-page input,
+.care-page select,
+.care-page textarea {
     font: inherit;
     color: inherit;
 }
 
-button,
-a {
+.care-page button,
+.care-page a {
     cursor: pointer;
 }
 
-button:disabled {
+.care-page button:disabled {
     cursor: default;
     opacity: .6;
 }
 
-a {
+.care-page a {
     color: inherit;
     text-decoration: none;
 }
 
-h1,
-h2,
-h3,
-p {
+.care-page h1,
+.care-page h2,
+.care-page h3,
+.care-page p {
     margin: 0;
 }
 
-h1,
-h2 {
+.care-page h1,
+.care-page h2 {
     font-family: var(--tp-font-heading);
     font-weight: 600;
     letter-spacing: -.6px;
 }
 
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
+.care-page button:focus-visible,
+.care-page a:focus-visible,
+.care-page input:focus-visible,
+.care-page select:focus-visible,
+.care-page textarea:focus-visible {
     outline: 3px solid #c65c46;
     outline-offset: 3px;
 }
 
-[hidden] {
+.care-page [hidden] {
     display: none !important;
 }
 
 /* 2. Shared layout and controls; use these classes in other modules too. */
-.tp-container {
+.care-page .tp-container {
     width: calc(100% - 112px);
     max-width: var(--tp-content-width);
     margin-inline: auto;
 }
 
-.tp-stack {
+.care-page .tp-stack {
     display: grid;
     gap: var(--tp-gap);
 }
 
-.tp-row {
+.care-page .tp-row {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.tp-button,
-.btn {
+.care-page .tp-button,
+.care-page .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -120,21 +119,21 @@ textarea:focus-visible {
     font-size: 13px;
 }
 
-.tp-button--secondary,
-.btn.secondary,
-.btn.light {
+.care-page .tp-button--secondary,
+.care-page .btn.secondary,
+.care-page .btn.light {
     background: var(--tp-surface);
     color: var(--tp-green-dark);
 }
 
-.tp-button--danger,
-.btn.danger {
+.care-page .tp-button--danger,
+.care-page .btn.danger {
     background: var(--tp-danger);
     border-color: var(--tp-danger);
 }
 
-.tp-panel,
-.panel {
+.care-page .tp-panel,
+.care-page .panel {
     border: 1px solid var(--tp-border);
     border-radius: var(--tp-radius-section);
     background: var(--tp-surface);
@@ -142,8 +141,8 @@ textarea:focus-visible {
     min-width: 0;
 }
 
-.tp-nav,
-.nav {
+.care-page .tp-nav,
+.care-page .nav {
     display: flex;
     gap: 20px;
     align-items: center;
@@ -154,8 +153,8 @@ textarea:focus-visible {
     border: 1px solid #b8cdbd;
 }
 
-.tp-icon-button,
-.iconbtn {
+.care-page .tp-icon-button,
+.care-page .iconbtn {
     height: 40px;
     width: 40px;
     display: inline-grid;
@@ -166,20 +165,20 @@ textarea:focus-visible {
     flex-shrink: 0;
 }
 
-.icon {
+.care-page .icon {
     width: 22px;
     height: 22px;
     display: inline-block;
     flex-shrink: 0;
 }
 
-.icon svg {
+.care-page .icon svg {
     display: block;
     width: 100%;
     height: 100%;
 }
 
-.tp-skip {
+.care-page .tp-skip {
     position: absolute;
     left: 16px;
     top: -80px;
@@ -190,11 +189,11 @@ textarea:focus-visible {
     border-radius: 12px;
 }
 
-.tp-skip:focus {
+.care-page .tp-skip:focus {
     top: 16px;
 }
 
-.errorlist {
+.care-page .errorlist {
     margin: 4px 0;
     padding-left: 16px;
     color: var(--tp-danger);
@@ -202,11 +201,11 @@ textarea:focus-visible {
 }
 
 @media (max-width: 740px) {
-    .tp-container {
+    .care-page .tp-container {
         width: calc(100% - 28px);
     }
 
-    .tp-panel {
+    .care-page .tp-panel {
         border-radius: 32px;
         padding: 22px;
     }

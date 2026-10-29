@@ -1,21 +1,18 @@
-{% extends "terrapeer/base.html" %}
-{% load static %}
-{% block framework_styles %}
-    <link rel="stylesheet"
-          href="{% static 'terrapeer/vendor/bootstrap/bootstrap-grid.min.css' %}">
-{% endblock %}
-{% block styles %}
+{% extends "base.html" %}
+{% load static care_icons %}
+{% block title %}{{ title|default:"Plant Care · TerraPeer" }}{% endblock %}
+{% block body_class %}tp-page care-page care-final{% endblock %}
+{% block extra_head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'terrapeer/vendor/bootstrap/bootstrap-grid.min.css' %}">
+    <link rel="stylesheet" href="{% static 'terrapeer/css/shared.css' %}">
     <link rel="stylesheet" href="{% static 'terrapeer/css/plant-care.css' %}">
     <link rel="stylesheet" href="{% static 'terrapeer/css/care-final.css' %}">
 {% endblock %}
-{% block body_class %}care-page care-final{% endblock %}
 {% block content %}
-    {% include "care/topbar.html" %}
-    <main id="main-content" class="shell main">
         <section class="panel empty">
             <h1>Your plants will appear here</h1>
             <p>Once your plants are connected, you can plan and track their care here.</p>
             <a class="btn" href="{% url 'show_main' %}">Back to home</a>
         </section>
-    </main>
 {% endblock %}

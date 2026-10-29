@@ -1,5 +1,5 @@
 /* Final desktop/mobile references, scoped to Plant Care. */
-.care-final {
+.care-page.care-final {
     --tp-cream: #f4f1de;
     --tp-white: #fffef6;
     --tp-green: #245640;
@@ -11,16 +11,16 @@
     --tp-mint: #e3edd5;
 }
 
-.care-final .shell {
+.care-page.care-final .shell {
     max-width: 1272px;
     width: calc(100% - 112px);
 }
 
-.care-final .care-header {
+.care-page.care-final .care-header {
     padding-top: 20px;
 }
 
-.care-final .nav {
+.care-page.care-final .nav {
     border: 1px solid #fff;
     border-radius: 50px;
     background: #fffef6;
@@ -28,7 +28,7 @@
     box-shadow: 0 12px 35px #203f3010;
 }
 
-.care-final .schedule-heading {
+.care-page.care-final .schedule-heading {
     display: flex;
     align-items: end;
     justify-content: space-between;
@@ -36,34 +36,34 @@
     padding: 48px 0 10px;
 }
 
-.care-final .schedule-heading h1 {
+.care-page.care-final .schedule-heading h1 {
     font-size: 48px;
     margin: 12px 0 14px;
 }
 
-.care-final .schedule-heading p {
+.care-page.care-final .schedule-heading p {
     font-size: 18px;
     color: var(--tp-muted);
 }
 
-.care-final .btn {
+.care-page.care-final .btn {
     border-radius: 50px;
     min-height: 48px;
 }
 
-.care-final .main {
+.care-page.care-final .main {
     padding-top: 24px;
     padding-bottom: 64px;
 }
 
-.schedule-grid {
+.care-page .schedule-grid {
     display: grid;
     grid-template-columns: minmax(0, 2.06fr) minmax(300px, 1fr);
     gap: 24px;
     align-items: start;
 }
 
-.calendar-card {
+.care-page .calendar-card {
     grid-column: 1;
     grid-row: 1;
     border: 1px solid var(--tp-border);
@@ -72,30 +72,30 @@
     padding: 24px;
 }
 
-.calendar-head {
+.care-page .calendar-head {
     display: flex;
     gap: 12px;
     align-items: center;
     margin-bottom: 20px;
 }
 
-.calendar-head h2 {
+.care-page .calendar-head h2 {
     font-size: 19px;
 }
 
-.calendar-all {
+.care-page .calendar-all {
     margin-left: auto;
     font-size: 12px;
     text-decoration: underline;
 }
 
-.calendar-days {
+.care-page .calendar-days {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 8px;
 }
 
-.calendar-day {
+.care-page .calendar-day {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -106,16 +106,16 @@
     font-size: 12px;
 }
 
-.calendar-day strong {
+.care-page .calendar-day strong {
     font: 600 23px Lora, Georgia, serif;
 }
 
-.calendar-day.selected {
+.care-page .calendar-day.selected {
     background: var(--tp-green);
     color: white;
 }
 
-.weather-area {
+.care-page .weather-area {
     grid-column: 2;
     grid-row: 1 / span 2;
     display: flex;
@@ -123,68 +123,68 @@
     gap: 24px;
 }
 
-.schedule-tasks {
+.care-page .schedule-tasks {
     grid-column: 1;
     grid-row: 2;
     min-width: 0;
 }
 
-.summary-area {
+.care-page .summary-area {
     display: block;
 }
 
-.care-final .panel.weather {
+.care-page.care-final .panel.weather {
     background: linear-gradient(135deg, #deebef, #d9e8e8);
     border: 0;
     border-radius: 22px;
     padding: 24px;
 }
 
-.care-final .weather.sunny {
+.care-page.care-final .weather.sunny {
     background: linear-gradient(135deg, #faf0c8, #e3edf0);
 }
 
-.care-final .weather.rainy {
+.care-page.care-final .weather.rainy {
     background: linear-gradient(135deg, #dbe7ed, #bdcedd);
 }
 
-.care-final .weather.cloudy {
+.care-page.care-final .weather.cloudy {
     background: linear-gradient(135deg, #e2e9eb, #cddde2);
 }
 
-.care-final .weather-head {
+.care-page.care-final .weather-head {
     font-size: 13px;
     letter-spacing: 1px;
     text-transform: uppercase;
 }
 
-.care-final .weather-sky {
+.care-page.care-final .weather-sky {
     gap: 16px;
 }
 
-.care-final .weather-facts {
+.care-page.care-final .weather-facts {
     background: #fffef9ba;
     border-radius: 16px;
     padding: 16px;
 }
 
-.care-final .weather-note {
+.care-page.care-final .weather-note {
     background: #fffef9;
     border-radius: 16px;
     padding: 16px;
 }
 
-.care-final .filters {
+.care-page.care-final .filters {
     border: 0;
     padding: 0;
     gap: 12px;
 }
 
-.care-final .filters label {
+.care-page.care-final .filters label {
     min-width: 130px;
 }
 
-.status-tabs {
+.care-page .status-tabs {
     display: flex;
     padding: 4px;
     border-radius: 50px;
@@ -192,7 +192,7 @@
     width: 100%;
 }
 
-.status-tabs button {
+.care-page .status-tabs button {
     flex: 1;
     border: 0;
     padding: 12px 8px;
@@ -200,20 +200,20 @@
     background: none;
 }
 
-.status-tabs button[aria-pressed=true] {
+.care-page .status-tabs button[aria-pressed=true] {
     background: var(--tp-white);
     box-shadow: 0 1px 5px #203f3015;
     font-weight: 600;
 }
 
-.care-final input,
-.care-final select,
-.care-final textarea {
+.care-page.care-final input,
+.care-page.care-final select,
+.care-page.care-final textarea {
     border-color: #c5ceb5;
     border-radius: 14px;
 }
 
-.list-caption {
+.care-page .list-caption {
     display: flex;
     justify-content: space-between;
     gap: 12px;
@@ -222,12 +222,12 @@
     margin-top: 24px;
 }
 
-.care-final .filter-note {
+.care-page.care-final .filter-note {
     margin: 12px 0;
 }
 
-.care-final .task,
-.care-final .task:last-child {
+.care-page.care-final .task,
+.care-page.care-final .task:last-child {
     border: 1px solid var(--tp-border);
     border-radius: 22px;
     background: var(--tp-white);
@@ -237,7 +237,7 @@
     gap: 14px;
 }
 
-.care-final .check {
+.care-page.care-final .check {
     width: 28px;
     height: 28px;
     border-width: 2px;
@@ -245,12 +245,12 @@
     background: transparent;
 }
 
-.care-final .check.completed {
+.care-page.care-final .check.completed {
     background: var(--tp-green);
     opacity: 1;
 }
 
-.action-badge {
+.care-page .action-badge {
     width: 44px;
     height: 44px;
     border-radius: 14px;
@@ -260,31 +260,31 @@
     flex-shrink: 0;
 }
 
-.action-badge.watering {
+.care-page .action-badge.watering {
     background: #dfecf0;
     color: #3a7591;
 }
 
-.action-badge.inspection {
+.care-page .action-badge.inspection {
     background: #fbefce;
     color: #88601f;
 }
 
-.action-badge.pruning {
+.care-page .action-badge.pruning {
     background: #e3edd5;
 }
 
-.is-completed .task-title {
+.care-page .is-completed .task-title {
     text-decoration: line-through;
     color: var(--tp-muted);
 }
 
-.task-menu {
+.care-page .task-menu {
     position: relative;
     margin-left: auto;
 }
 
-.task-menu summary {
+.care-page .task-menu summary {
     list-style: none;
     border: 1px solid var(--tp-border);
     border-radius: 50%;
@@ -295,11 +295,11 @@
     cursor: pointer;
 }
 
-.task-menu summary::-webkit-details-marker {
+.care-page .task-menu summary::-webkit-details-marker {
     display: none;
 }
 
-.care-final .task-actions {
+.care-page.care-final .task-actions {
     position: absolute;
     right: 0;
     top: 44px;
@@ -312,14 +312,14 @@
     flex-direction: row;
 }
 
-.care-final .task-actions .iconbtn {
+.care-page.care-final .task-actions .iconbtn {
     width: 44px;
     height: 44px;
 }
 
-.summary-card,
-.finished-note,
-.mobile-tip {
+.care-page .summary-card,
+.care-page .finished-note,
+.care-page .mobile-tip {
     padding: 24px;
     border: 1px solid var(--tp-border);
     background: var(--tp-white);
@@ -327,61 +327,61 @@
     margin-bottom: 16px;
 }
 
-.summary-card h2 {
+.care-page .summary-card h2 {
     font-size: 22px;
 }
 
-.summary-line {
+.care-page .summary-line {
     display: flex;
     justify-content: space-between;
     gap: 10px;
     margin: 16px 0 10px;
 }
 
-.summary-card progress {
+.care-page .summary-card progress {
     width: 100%;
     height: 8px;
     accent-color: var(--tp-green);
     margin-bottom: 12px;
 }
 
-.finished-note {
+.care-page .finished-note {
     background: #eeeedc;
     border: 0;
 }
 
-.finished-note p,
-.mobile-tip p {
+.care-page .finished-note p,
+.care-page .mobile-tip p {
     font-size: 12px;
     color: var(--tp-muted);
     margin-top: 8px;
 }
 
-.care-footer {
+.care-page .care-footer {
     padding: 48px max(24px, calc((100vw - 1320px)/2));
     background: #1c4033;
     color: #fffef6;
     display: block;
 }
 
-.care-footer p {
+.care-page .care-footer p {
     margin-top: 12px;
     color: #c7d5c5;
 }
 
-.care-footer small {
+.care-page .care-footer small {
     display: block;
     border-top: 1px solid #ffffff25;
     padding-top: 22px;
 }
 
-.mobile-top,
-.mobile-bottom,
-.mobile-tip {
+.care-page .mobile-top,
+.care-page .mobile-bottom,
+.care-page .mobile-tip {
     display: none;
 }
 
-.care-final .dialog {
+.care-page.care-final .dialog {
     background: var(--tp-white);
     border: 1px solid var(--tp-border);
     border-radius: 24px;
@@ -389,15 +389,15 @@
     max-width: 840px;
 }
 
-.care-final .dialog-head h2 {
+.care-page.care-final .dialog-head h2 {
     font-size: 32px;
 }
 
-.care-final .dialog-footer {
+.care-page.care-final .dialog-footer {
     justify-content: space-between;
 }
 
-.task-type-choice {
+.care-page .task-type-choice {
     position: relative;
     display: flex;
     align-items: center;
@@ -408,249 +408,249 @@
     cursor: pointer;
 }
 
-.task-type-choice input {
+.care-page .task-type-choice input {
     width: 18px;
     min-height: 18px;
     accent-color: var(--tp-green);
 }
 
-.task-type-choice:has(input:checked) {
+.care-page .task-type-choice:has(input:checked) {
     background: #e3edd5;
     border-color: var(--tp-green);
     box-shadow: inset 0 0 0 1px var(--tp-green);
 }
 
-@media(max-width:1000px) {
-    .care-final .shell {
+@media (max-width:1000px) {
+    .care-page.care-final .shell {
         width: calc(100% - 48px);
     }
 
-    .schedule-grid {
+    .care-page .schedule-grid {
         grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr);
         gap: 18px;
     }
 
-    .calendar-card {
+    .care-page .calendar-card {
         padding: 16px;
     }
 
-    .calendar-head h2 {
+    .care-page .calendar-head h2 {
         font-size: 15px;
     }
 
-    .care-final .task {
+    .care-page.care-final .task {
         padding: 16px;
         gap: 10px;
     }
 }
 
-@media(max-width:740px) {
-    .care-final .shell {
+@media (max-width:740px) {
+    .care-page.care-final .shell {
         width: calc(100% - 32px);
     }
 
-    .care-final .care-header {
+    .care-page.care-final .care-header {
         padding-top: 16px;
     }
 
-    .care-final .care-header .nav {
+    .care-page.care-final .care-header .nav {
         display: none;
     }
 
-    .mobile-top {
+    .care-page .mobile-top {
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
 
-    .mobile-top .btn {
+    .care-page .mobile-top .btn {
         width: 44px;
         height: 44px;
         min-height: 44px;
         padding: 0;
     }
 
-    .care-final .schedule-heading {
+    .care-page.care-final .schedule-heading {
         padding: 20px 0 0;
     }
 
-    .care-final .schedule-heading h1 {
+    .care-page.care-final .schedule-heading h1 {
         font-size: 32px;
         margin: 0 0 6px;
     }
 
-    .care-final .schedule-heading p {
+    .care-page.care-final .schedule-heading p {
         font-size: 13px;
     }
 
-    .schedule-heading .eyebrow,
-    .new-task {
+    .care-page .schedule-heading .eyebrow,
+    .care-page .new-task {
         display: none;
     }
 
-    .care-final .main {
+    .care-page.care-final .main {
         padding-top: 20px;
         padding-bottom: 110px;
     }
 
-    .schedule-grid {
+    .care-page .schedule-grid {
         display: flex;
         flex-direction: column;
         gap: 16px;
     }
 
-    .schedule-grid>* {
+    .care-page .schedule-grid>* {
         width: 100%;
     }
 
-    .calendar-card {
+    .care-page .calendar-card {
         background: none;
         border: 0;
         padding: 0;
     }
 
-    .calendar-head {
+    .care-page .calendar-head {
         margin-bottom: 12px;
     }
 
-    .calendar-head h2 {
+    .care-page .calendar-head h2 {
         font-size: 14px;
     }
 
-    .calendar-days {
+    .care-page .calendar-days {
         display: flex;
         overflow-x: auto;
         padding-bottom: 4px;
         scrollbar-width: thin;
     }
 
-    .calendar-day {
+    .care-page .calendar-day {
         min-width: 48px;
         flex: 1;
         padding: 10px 4px;
     }
 
-    .calendar-day small {
+    .care-page .calendar-day small {
         display: none;
     }
 
-    .calendar-day strong {
+    .care-page .calendar-day strong {
         font-size: 20px;
     }
 
-    .care-final .panel.weather {
+    .care-page.care-final .panel.weather {
         padding: 16px;
         border-radius: 18px;
     }
 
-    .care-final .weather-sky {
+    .care-page.care-final .weather-sky {
         margin: 8px 0;
     }
 
-    .care-final .temperature {
+    .care-page.care-final .temperature {
         font-size: 36px;
     }
 
-    .care-final .sky-art {
+    .care-page.care-final .sky-art {
         transform: scale(.65);
         transform-origin: right center;
     }
 
-    .care-final .weather-facts,
-    .care-final .weather-date {
+    .care-page.care-final .weather-facts,
+    .care-page.care-final .weather-date {
         display: none;
     }
 
-    .care-final .weather-note {
+    .care-page.care-final .weather-note {
         font-size: 12px;
         margin-top: 8px;
         padding: 12px;
     }
 
-    .care-final .weather-place {
+    .care-page.care-final .weather-place {
         font-size: 12px;
     }
 
-    .care-final .weather-credit {
+    .care-page.care-final .weather-credit {
         font-size: 10px;
     }
 
-    .care-final .filters {
+    .care-page.care-final .filters {
         gap: 8px;
     }
 
-    .care-final .filters label {
+    .care-page.care-final .filters label {
         min-width: 100px;
     }
 
-    .care-final .filters select {
+    .care-page.care-final .filters select {
         font-size: 12px;
     }
 
-    .status-tabs {
+    .care-page .status-tabs {
         order: -1;
     }
 
-    .care-final .task,
-    .care-final .task:last-child {
+    .care-page.care-final .task,
+    .care-page.care-final .task:last-child {
         padding: 14px;
         gap: 10px;
         border-radius: 20px;
     }
 
-    .care-final .task-title {
+    .care-page.care-final .task-title {
         font-size: 13px;
     }
 
-    .care-final .task-meta {
+    .care-page.care-final .task-meta {
         font-size: 10px;
         gap: 4px;
     }
 
-    .task-meta>.icon {
+    .care-page .task-meta>.icon {
         display: none;
     }
 
-    .action-badge {
+    .care-page .action-badge {
         width: 40px;
         height: 40px;
         border-radius: 14px;
     }
 
-    .care-final .task-tags {
+    .care-page.care-final .task-tags {
         gap: 4px;
         margin-top: 5px;
     }
 
-    .care-final .task-tags .pill {
+    .care-page.care-final .task-tags .pill {
         font-size: 10px;
         padding: 2px 6px;
     }
 
-    .care-final .repeat {
+    .care-page.care-final .repeat {
         font-size: 10px;
     }
 
-    .task-menu summary {
+    .care-page .task-menu summary {
         width: 40px;
         height: 44px;
     }
 
-    .summary-area {
+    .care-page .summary-area {
         display: none;
     }
 
-    .mobile-tip {
+    .care-page .mobile-tip {
         display: block;
         margin-top: 24px;
         padding: 18px;
     }
 
-    .care-footer {
+    .care-page .care-footer {
         display: none;
     }
 
-    .mobile-bottom {
+    .care-page .mobile-bottom {
         display: flex;
         justify-content: space-around;
         position: fixed;
@@ -665,7 +665,7 @@
         box-shadow: 0 8px 30px #203f3020;
     }
 
-    .mobile-bottom a {
+    .care-page .mobile-bottom a {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -675,178 +675,177 @@
         border-radius: 30px;
     }
 
-    .mobile-bottom a[aria-current] {
+    .care-page .mobile-bottom a[aria-current] {
         background: #e3edd5;
     }
 
-    .care-final .backdrop {
+    .care-page.care-final .backdrop {
         padding: 12px;
         z-index: 30;
     }
 
-    .care-final .dialog {
+    .care-page.care-final .dialog {
         padding: 20px;
         max-height: calc(100dvh - 24px);
         overflow: auto;
     }
 
-    .care-final .dialog-head h2 {
+    .care-page.care-final .dialog-head h2 {
         font-size: 27px;
     }
 
-    .task-type-choice {
+    .care-page .task-type-choice {
         padding: 10px;
         font-size: 12px;
     }
 }
 
-.task-types {
+.care-page .task-types {
     border: 0;
     min-width: 0;
 }
 
-.weather-brief {
+.care-page .weather-brief {
     display: none;
 }
 
-.weather-expand summary {
+.care-page .weather-expand summary {
     cursor: pointer;
     font-size: 12px;
     margin-top: 8px;
 }
 
-@media(min-width:741px) {
-    .weather-expand summary {
+@media (min-width:741px) {
+    .care-page .weather-expand summary {
         display: none;
     }
 }
 
-@media(max-width:740px) {
+@media (max-width:740px) {
 
-    .care-final .weather-head,
-    .care-final .weather-place {
+    .care-page.care-final .weather-head,
+    .care-page.care-final .weather-place {
         display: none;
     }
 
-    .weather-brief {
+    .care-page .weather-brief {
         display: flex;
         gap: 10px;
         align-items: flex-start;
         font-size: 12px;
     }
 
-    .weather-brief .icon {
+    .care-page .weather-brief .icon {
         flex-shrink: 0;
     }
 
-    .care-final .weather-credit {
+    .care-page.care-final .weather-credit {
         margin-top: 8px;
     }
 
-    .care-final .task-meta {
+    .care-page.care-final .task-meta {
         display: block;
     }
 
-    .care-final .task-meta>.icon {
+    .care-page.care-final .task-meta>.icon {
         display: none;
     }
 
-    .care-final .task-tags .pill.pending {
+    .care-page.care-final .task-tags .pill.pending {
         display: none;
     }
 
-    .care-final .task,
-    .care-final .task:last-child {
+    .care-page.care-final .task,
+    .care-page.care-final .task:last-child {
         padding: 12px;
     }
 }
 
 /* Bootstrap supplies row wrapping, column widths, and responsive gutters.
    Do not override .row/.col-* with a second custom grid. */
-.care-final .task-type-choice {
+.care-page.care-final .task-type-choice {
     height: 100%;
     min-height: 64px;
 }
 
-.care-final .care-form-grid legend {
+.care-page.care-final .care-form-grid legend {
     float: none;
     width: auto;
     padding: 0;
 }
 
-
 /* A body-level sticky bar remains visible after the title scrolls away. */
-.care-final .care-topbar {
+.care-page.care-final .care-topbar {
     position: sticky;
     top: 12px;
     z-index: 20;
     margin-top: 20px;
 }
 
-.care-final .care-header {
+.care-page.care-final .care-header {
     padding-top: 0;
 }
 
-.care-final .navlinks {
+.care-page.care-final .navlinks {
     gap: 2px;
     justify-content: center;
 }
 
-.care-final .navlinks a,
-.care-final .navlinks span {
+.care-page.care-final .navlinks a,
+.care-page.care-final .navlinks span {
     padding: 10px 12px;
     white-space: nowrap;
 }
 
-.care-final .navlinks .selected {
+.care-page.care-final .navlinks .selected {
     background: #e3edd5;
 }
 
-.care-final .nav-unavailable {
+.care-page.care-final .nav-unavailable {
     color: #657269;
     cursor: default;
 }
 
-.care-final .brand {
+.care-page.care-final .brand {
     flex-shrink: 0;
 }
 
-.care-final .avatar {
+.care-page.care-final .avatar {
     flex-shrink: 0;
 }
 
-.care-final .demo-banner {
+.care-page.care-final .demo-banner {
     font-size: 12px;
     color: #53634f;
     padding-top: 12px;
 }
 
-.care-final [id] {
+.care-page.care-final [id] {
     scroll-margin-top: 105px;
 }
 
-.care-final .backdrop {
+.care-page.care-final .backdrop {
     z-index: 50;
 }
 
 @media (min-width: 741px) and (max-width: 1150px) {
-    .care-final .nav {
+    .care-page.care-final .nav {
         padding: 10px 16px;
     }
 
-    .care-final .navlinks {
+    .care-page.care-final .navlinks {
         overflow-x: auto;
     }
 
-    .care-final .navlinks a,
-    .care-final .navlinks span {
+    .care-page.care-final .navlinks a,
+    .care-page.care-final .navlinks span {
         font-size: 11px;
         padding: 10px 8px;
     }
 }
 
 @media (max-width: 740px) {
-    .care-final .care-topbar {
+    .care-page.care-final .care-topbar {
         top: 0;
         margin-top: 0;
         width: 100%;
@@ -855,21 +854,21 @@
         border-bottom: 1px solid #dedec6;
     }
 
-    .care-final .care-topbar>.nav {
+    .care-page.care-final .care-topbar>.nav {
         display: none;
     }
 
-    .care-final .demo-banner {
+    .care-page.care-final .demo-banner {
         padding-top: 8px;
     }
 
-    .care-final .schedule-heading {
+    .care-page.care-final .schedule-heading {
         padding-top: 12px;
     }
 }
 
 /* A notification must not push the task list down after completion. */
-.care-final .feedback {
+.care-page.care-final .feedback {
     position: fixed;
     inset: auto 24px 24px auto;
     z-index: 40;
@@ -882,8 +881,8 @@
     box-shadow: 0 8px 30px #183c3026;
 }
 
-.feedback-undo,
-.feedback-dismiss {
+.care-page .feedback-undo,
+.care-page .feedback-dismiss {
     border: 1px solid currentColor;
     border-radius: 20px;
     background: transparent;
@@ -893,24 +892,24 @@
     cursor: pointer;
 }
 
-.feedback-undo {
+.care-page .feedback-undo {
     font-weight: 700;
 }
 
-.feedback-dismiss {
+.care-page .feedback-dismiss {
     margin-left: auto;
 }
 
-.care-final #task-list[aria-busy=true] {
+.care-page.care-final #task-list[aria-busy=true] {
     opacity: 1;
 }
 
-.care-final .check[aria-pressed=true] {
+.care-page.care-final .check[aria-pressed=true] {
     cursor: pointer;
 }
 
 @media (max-width: 740px) {
-    .care-final .feedback {
+    .care-page.care-final .feedback {
         inset: auto 16px 100px;
         max-width: none;
     }

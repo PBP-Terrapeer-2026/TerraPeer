@@ -13,7 +13,12 @@ NAV_ITEMS = (
 
 
 def care_navigation(request):
-    routes = {"home": "show_main", "care": "care:choose", "journal": "garden_journal"}
+    routes = {
+        "home": "show_main",
+        "care": "care:choose",
+        "plants": "my_plants:list",
+        "journal": "garden_journal",
+    }
     routes.update(getattr(settings, "CARE_NAV_ROUTES", {}))
     items = []
     for label, key in NAV_ITEMS:
@@ -22,4 +27,9 @@ def care_navigation(request):
         except (KeyError, NoReverseMatch):
             url = None
         items.append({"label": label, "key": key, "url": url, "active": key == "care"})
-    return {"care_nav_items": items, "care_demo": getattr(settings, "CARE_DEMO", False)}
+    match = getattr(request, "resolver_match", None)
+    return {
+        "care_nav_items": items,
+        "care_demo": getattr(settings, "CARE_DEMO", False),
+        "care_layout": bool(match and match.app_name == "care"),
+    }
