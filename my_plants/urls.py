@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.plant_list, name='list'),
     path('add/', views.plant_create, name='create'),
     path('fragment/', views.plant_fragment, name='fragment'),
+    path('bulk-delete/', views.plant_bulk_delete, name='bulk_delete'),
     path('api/', views.plant_api, name='api'),
     path('api/<int:pk>/', views.plant_detail_api, name='detail_api'),
     path('species/', views.species_api, name='species'),

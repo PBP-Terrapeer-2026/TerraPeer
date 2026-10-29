@@ -25,7 +25,7 @@ class BootstrapFormMixin:
                 if 'is-invalid' not in attrs.get('class', ''):
                     attrs['class'] = f"{attrs.get('class', '')} is-invalid".strip()
                 attrs['aria-invalid'] = 'true'
-                attrs['aria-describedby'] = f'{self.add_prefix(name)}-error'
+                attrs['aria-describedby'] = f'{self[name].id_for_label}-error' if name == 'photo' else f'{self.add_prefix(name)}-error'
 
 
 PHOTO_HELP = 'JPG, PNG or WebP, up to 5 MB. Location data is removed before saving.'
@@ -48,7 +48,23 @@ class PhotoCleanMixin:
         return upload
 
 
-class PlantForm(PhotoCleanMixin, BootstrapFormMixin, forms.ModelForm):
+class StagePhotoMixin(PhotoCleanMixin):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.original_stage = self.instance.growth_stage
+
+    @property
+    def stage_changed(self):
+        return self.cleaned_data.get('growth_stage', self.original_stage) != self.original_stage
+
+    def clean(self):
+        cleaned = super().clean()
+        if self.instance.pk and self.stage_changed and not cleaned.get('photo') and 'photo' not in self.errors:
+            self.add_error('photo', 'Add a photo of the plant at its new stage.')
+        return cleaned
+
+
+class PlantForm(StagePhotoMixin, BootstrapFormMixin, forms.ModelForm):
     photo = photo_field()
 
     def __init__(self, *args, **kwargs):
@@ -56,7 +72,7 @@ class PlantForm(PhotoCleanMixin, BootstrapFormMixin, forms.ModelForm):
         self.fields['planted_on'].widget.attrs['max'] = timezone.localdate().isoformat()
         if self.instance.pk:
             self.fields['photo'].label = 'Add a new photo'
-            self.fields['photo'].help_text = 'Optional. It is added to the photo diary. ' + PHOTO_HELP
+            self.fields['photo'].help_text = 'Required when changing growth stage; otherwise optional. ' + PHOTO_HELP
 
     class Meta:
         model = Plant
@@ -80,26 +96,13 @@ class PlantForm(PhotoCleanMixin, BootstrapFormMixin, forms.ModelForm):
         }
 
 
-class StageForm(PhotoCleanMixin, BootstrapFormMixin, forms.ModelForm):
+class StageForm(StagePhotoMixin, BootstrapFormMixin, forms.ModelForm):
     """Changing the stage requires a photo of the plant at its new stage."""
 
     photo = photo_field(label='Photo of the plant now')
+    photo.widget.attrs['id'] = 'stage_photo'
     caption = forms.CharField(required=False, max_length=200, label='Caption (optional)',
-                              widget=forms.TextInput(attrs={'placeholder': 'e.g. First flowers opened'}))
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.original_stage = self.instance.growth_stage
-
-    @property
-    def stage_changed(self):
-        return self.cleaned_data.get('growth_stage', self.original_stage) != self.original_stage
-
-    def clean(self):
-        cleaned = super().clean()
-        if self.stage_changed and not cleaned.get('photo') and 'photo' not in self.errors:
-            self.add_error('photo', 'Add a photo of the plant at its new stage.')
-        return cleaned
+                              widget=forms.TextInput(attrs={'placeholder': 'e.g. First flowers opened', 'id': 'stage_caption'}))
 
     class Meta:
         model = Plant
@@ -109,8 +112,9 @@ class StageForm(PhotoCleanMixin, BootstrapFormMixin, forms.ModelForm):
 
 class PhotoForm(PhotoCleanMixin, BootstrapFormMixin, forms.Form):
     photo = photo_field(required=True, label='Photo')
+    photo.widget.attrs['id'] = 'progress_photo'
     caption = forms.CharField(required=False, max_length=200, label='Caption (optional)',
-                              widget=forms.TextInput(attrs={'placeholder': 'What changed?'}))
+                              widget=forms.TextInput(attrs={'placeholder': 'What changed?', 'id': 'progress_caption'}))
 
 
 class PlantFilterForm(BootstrapFormMixin, forms.Form):
@@ -126,6 +130,18 @@ class PlantFilterForm(BootstrapFormMixin, forms.Form):
                               choices=[('', 'All stages'), *Plant.Stage.choices])
     status = forms.ChoiceField(required=False, label='Status', choices=STATUS_CHOICES, widget=forms.RadioSelect)
     sort = forms.ChoiceField(required=False, label='Sort by', choices=SORT_CHOICES)
+    health = forms.ChoiceField(required=False, label='Latest check-in', choices=[
+        ('', 'Any condition'), ('attention', 'Needs attention'), ('normal', 'Growing normally'), ('none', 'Not checked yet'),
+    ])
+    planted_from = forms.DateField(required=False, label='Planted from', widget=forms.DateInput(attrs={'type': 'date'}))
+    planted_to = forms.DateField(required=False, label='Planted until', widget=forms.DateInput(attrs={'type': 'date'}))
+
+    def clean(self):
+        cleaned = super().clean()
+        start, end = cleaned.get('planted_from'), cleaned.get('planted_to')
+        if start and end and start > end:
+            self.add_error('planted_to', 'End date must be on or after the start date.')
+        return cleaned
 
     ORDERING = {
         'newest': ['-created_at', '-pk'], 'oldest': ['created_at', 'pk'],

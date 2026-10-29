@@ -5,7 +5,7 @@
     <div class="flex-grow-1 min-w-0">
         <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required or required %} <span class="text-danger" aria-hidden="true">*</span>{% endif %}</label>
         {{ field }}
-        {% for error in field.errors %}<div class="invalid-feedback d-block" id="{{ field.html_name }}-error">{{ error }}</div>{% endfor %}
+        <div class="invalid-feedback d-block" data-field-error="{{ field.name }}" id="{{ field.id_for_label }}-error">{% for error in field.errors %}{{ error }} {% endfor %}</div>
         <div class="form-text" data-photo-help>{{ field.help_text }}</div>
     </div>
 </div>

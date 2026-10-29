@@ -32,9 +32,11 @@
         </section>
 
         <section class="col-12 col-lg-7 order-lg-2" aria-label="Plant details">
-            <form method="post" class="card" enctype="multipart/form-data" novalidate>
+            <form method="post" class="card" enctype="multipart/form-data" data-plant-form data-original-stage="{% if is_edit %}{{ plant.growth_stage }}{% endif %}" novalidate>
                 {% csrf_token %}
                 <div class="card-body">
+                    <div class="alert alert-danger d-none" role="alert" tabindex="-1" data-form-errors></div>
+                    <p class="small text-muted" role="status" aria-live="polite" data-form-status></p>
                     {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors|join:" " }}</div>{% endif %}
                     {{ form.perenual_species_id }}
                     {% for error in form.perenual_species_id.errors %}<div class="alert alert-danger" role="alert">Catalog reference: {{ error }}</div>{% endfor %}
@@ -46,7 +48,7 @@
                             <div class="{% if field.name == 'notes' %}col-12{% else %}col-12 col-md-6{% endif %}">
                                 <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="text-danger" aria-hidden="true">*</span>{% endif %}</label>
                                 {{ field }}
-                                {% for error in field.errors %}<div class="invalid-feedback d-block" id="{{ field.html_name }}-error">{{ error }}</div>{% endfor %}
+                                <div data-field-error="{{ field.name }}" class="invalid-feedback d-block" id="{{ field.html_name }}-error">{% for error in field.errors %}{{ error }} {% endfor %}</div>
                                 {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
                             </div>
                             {% endif %}

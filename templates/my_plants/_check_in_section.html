@@ -6,6 +6,7 @@
                     </div>
                     <form method="post" action="{% url 'my_plants:check_in_create' plant.pk %}" data-check-in-form novalidate>
                         {% csrf_token %}
+                        {% for error in check_in_form.non_field_errors %}<div class="alert alert-warning" role="alert">{{ error }}</div>{% endfor %}
                         <fieldset>
                             <legend class="visually-hidden">{{ check_in_form.condition.label }}</legend>
                             <div class="d-flex flex-wrap gap-2 mb-3">
@@ -21,7 +22,7 @@
                             <div class="flex-grow-1" style="min-width: 220px">{{ check_in_form.note }}</div>
                             <button type="submit" class="btn btn-primary">Save check-in</button>
                         </div>
-                        <div class="invalid-feedback d-block mt-2" data-check-in-error></div>
+                        <div class="invalid-feedback d-block mt-2" role="alert" data-check-in-error></div>
                     </form>
                     <ul class="list-group list-group-flush mt-3 mp-check-ins" data-check-in-list>
                         {% for check_in in check_ins %}{% include "my_plants/_check_in.html" %}{% endfor %}

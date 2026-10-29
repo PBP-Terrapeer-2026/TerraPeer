@@ -5,7 +5,6 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 
-
 class PlantQuerySet(models.QuerySet):
     def for_user(self, user):
         return self.filter(owner=user)
@@ -40,6 +39,7 @@ class Plant(models.Model):
 
     class Meta:
         ordering = ['-created_at', '-pk']
+        indexes = [models.Index(fields=['owner', 'planted_on'], name='mp_owner_planted_idx')]
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(growth_stage__in=[
@@ -87,9 +87,13 @@ class PlantCheckIn(models.Model):
     condition = models.CharField(max_length=20, choices=Condition.choices)
     note = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # NULL is reserved for older duplicate records preserved by the data migration.
+    checked_on = models.DateField(default=timezone.localdate, null=True, editable=False)
 
     class Meta:
         ordering = ['-created_at', '-pk']
+        indexes = [models.Index(fields=['plant', '-created_at', '-id'], name='mp_check_latest_idx')]
+        constraints = [models.UniqueConstraint(fields=['plant', 'checked_on'], name='my_plants_one_daily_check_in')]
 
     @property
     def needs_attention(self):
@@ -97,6 +101,19 @@ class PlantCheckIn(models.Model):
 
     def __str__(self):
         return f'{self.plant} · {self.get_condition_display()}'
+
+
+class RequestQuota(models.Model):
+    """One shared database counter per account/scope, including across PWS workers."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    scope = models.CharField(max_length=32)
+    window = models.BigIntegerField(default=0)
+    hits = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['user', 'scope'], name='my_plants_unique_request_quota')]
+
 
 class PlantPhotoQuerySet(models.QuerySet):
     def without_image(self):
@@ -126,6 +143,7 @@ class PlantPhoto(models.Model):
 
     class Meta:
         ordering = ['created_at', 'pk']
+        indexes = [models.Index(fields=['plant', '-created_at', '-id'], name='mp_photo_latest_idx')]
 
     def get_absolute_url(self):
         return reverse('my_plants:photo', args=[self.plant_id, self.pk])

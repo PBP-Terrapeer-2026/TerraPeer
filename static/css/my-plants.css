@@ -184,3 +184,13 @@
   .mp-strip { flex-wrap: wrap; overflow: visible; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+.mp-bulk-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; padding: .75rem 1rem; border: 1px solid var(--tp-line); border-radius: 14px; background: var(--tp-surface); }
+.mp-card-select { position: absolute; top: .75rem; left: .75rem; z-index: 2; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--tp-paper); cursor: pointer; }
+.mp-card-select .form-check-input { margin: 0; cursor: pointer; }
+.mp-card .mp-status { left: auto; right: 1rem; }
+.plants-page [aria-busy="true"] { cursor: progress; }
+.mp-pending { opacity: .6; }
+@media (prefers-reduced-motion: reduce) {
+  .plants-page *, .plants-page *::before, .plants-page *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

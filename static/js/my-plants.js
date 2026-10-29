@@ -1,14 +1,16 @@
-// My Plants client-side interactivity (Fetch/AJAX). Every feature also works without JS.
-(() => {
+// Progressive enhancement: each feature has an independent ES module.
+import { announce, requestJSON } from './my-plants/api.js';
+import { navigate, startNavigation } from './my-plants/navigation.js';
+import { mountPlantForm } from './my-plants/forms.js';
+import { mountBulkActions } from './my-plants/bulk.js';
+import { mountCheckIns } from './my-plants/check-ins.js';
+
+let lifetime;
+function mountPage() {
+  lifetime?.abort();
+  lifetime = new AbortController();
+  const { signal } = lifetime;
   document.documentElement.classList.add('js');
-
-  const live = document.createElement('p');
-  live.className = 'visually-hidden';
-  live.setAttribute('role', 'status');
-  live.setAttribute('aria-live', 'polite');
-  document.body.append(live);
-  const announce = (text) => { live.textContent = ''; window.setTimeout(() => { live.textContent = text; }, 30); };
-
   const redirectToLogin = (response) => {
     const login = new URL(response.url);
     login.searchParams.set('next', window.location.pathname + window.location.search);
@@ -39,7 +41,7 @@
         results.innerHTML = html;
         const url = new URL(window.location.href);
         url.search = params.toString();
-        window.history.replaceState({}, '', url);
+        window.history.replaceState({ plants: true }, '', url);
         const count = results.querySelector('[data-result-count]');
         status.textContent = count ? `${count.textContent}.` : 'Your plant list is up to date.';
       } catch (error) {
@@ -48,6 +50,7 @@
         if (pending === controller) results.removeAttribute('aria-busy');
       }
     };
+    signal.addEventListener('abort', () => { pending?.abort(); clearTimeout(timer); }, { once: true });
     const params = () => {
       const data = new URLSearchParams(new FormData(filters));
       for (const [key, value] of [...data.entries()]) if (!value) data.delete(key);
@@ -62,9 +65,16 @@
       if ((!reset && !page) || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
       event.preventDefault();
       clearTimeout(timer);
-      if (reset) { filters.reset(); filters.querySelector('[name=q]').value = ''; load(new URLSearchParams()); }
-      else { load(new URL(page.href).searchParams); results.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-    });
+      if (reset) {
+        for (const field of filters.elements) {
+          if (!field.name) continue;
+          if (field.type === 'radio') field.checked = field.value === '';
+          else field.value = field.name === 'sort' ? 'newest' : '';
+        }
+        load(new URLSearchParams());
+      }
+      else { load(new URL(page.href).searchParams); results.scrollIntoView({ behavior: 'auto', block: 'start' }); }
+    }, { signal });
   }
 
   // 2. Change the growth stage without reloading. A new stage needs a photo (checked again on the server).
@@ -126,7 +136,7 @@
         return;
       }
       if (select.value === 'finished' && changed
-          && !window.confirm('Mark this plant Finished? It stays in your garden history and stops new care tasks.')) return;
+          && !window.confirm('Mark this plant Finished? It stays in your garden history.')) return;
       button.disabled = true;
       try {
         const response = await fetch(stageForm.action, {
@@ -136,7 +146,7 @@
         const data = await response.json();
         if (!response.ok) {
           const errors = data.errors || {};
-          throw new Error((errors.photo || errors.growth_stage || errors.caption || [{}])[0].message || 'Could not save the stage.');
+          throw new Error(data.error || (errors.photo || errors.growth_stage || errors.caption || [{}])[0].message || 'Could not save the stage.');
         }
         const plant = data.plant;
         stageForm.dataset.originalStage = plant.growth_stage;
@@ -183,7 +193,7 @@
         const response = await fetch(photoForm.action, { method: 'POST', body: new FormData(photoForm), headers: { Accept: 'application/json' } });
         if (response.redirected) { redirectToLogin(response); return; }
         const data = await response.json();
-        if (!response.ok) throw new Error((data.errors?.photo || data.errors?.caption || [{}])[0].message || 'Could not save the photo.');
+        if (!response.ok) throw new Error(data.error || (data.errors?.photo || data.errors?.caption || [{}])[0].message || 'Could not save the photo.');
         addTile(data.html, data.count);
         setCover(data.photo.url, 'Latest photo');
         photoForm.reset();
@@ -200,16 +210,19 @@
     const form = event.target.closest('[data-photo-delete]');
     if (!form) return;
     event.preventDefault();
-    if (!window.confirm('Delete this photo? It will also disappear from the recap.')) return;
-    const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
-    if (response.redirected) { redirectToLogin(response); return; }
-    if (!response.ok) { announce('Could not delete the photo.'); return; }
-    const data = await response.json();
-    form.closest('[data-photo-tile]').remove();
-    if (photoCount) photoCount.textContent = `${data.count} photo${data.count === 1 ? '' : 's'} · stored privately in your account`;
-    photoEmpty?.classList.toggle('d-none', data.count > 0);
-    if (data.cover_photo_url) setCover(data.cover_photo_url, 'Latest photo'); else window.location.reload();
-    announce('Photo deleted.');
+    const button = form.querySelector('button');
+    if (button.disabled || !window.confirm('Delete this photo? It will also disappear from the recap.')) return;
+    button.disabled = true;
+    try {
+      const data = await requestJSON(form.action, { method: 'POST', body: new FormData(form) });
+      form.closest('[data-photo-tile]').remove();
+      if (photoCount) photoCount.textContent = `${data.count} photo${data.count === 1 ? '' : 's'} · stored privately in your account`;
+      photoEmpty?.classList.toggle('d-none', data.count > 0);
+      if (data.cover_photo_url) setCover(data.cover_photo_url, 'Latest photo');
+      else await navigate(location.href, { replace: true });
+      announce('Photo deleted.');
+    } catch (error) { announce(error.message); }
+    finally { button.disabled = false; }
   });
 
   // Preview a chosen photo and catch files over 5 MB before uploading.
@@ -219,6 +232,7 @@
     const help = picker.querySelector('[data-photo-help]');
     const defaultHelp = help?.textContent || '';
     let objectUrl;
+    signal.addEventListener('abort', () => { if (objectUrl) URL.revokeObjectURL(objectUrl); }, { once: true });
     input?.addEventListener('change', () => {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
       preview.querySelector('img')?.remove();
@@ -244,68 +258,25 @@
 
   document.querySelector('[data-print]')?.addEventListener('click', () => window.print());
 
-  // 3. Delete from the confirmation modal; a 409 (linked records) is shown inside the modal.
+  // Delete from the modal, then fetch the garden without a document reload.
   const deleteForm = document.querySelector('[data-delete-form]');
   if (deleteForm) {
-    const error = deleteForm.querySelector('[data-delete-error]');
     deleteForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const response = await fetch(deleteForm.action, {
-        method: 'POST', body: new FormData(deleteForm), headers: { Accept: 'application/json' },
-      });
-      if (response.redirected) { redirectToLogin(response); return; }
-      if (response.ok) { window.location.assign(deleteForm.dataset.listUrl || '/my-plants/'); return; }
-      const data = await response.json().catch(() => ({}));
-      error.textContent = data.error || 'Could not delete this plant. Try again.';
-      error.classList.remove('d-none');
-    });
-  }
-
-  // 4. One-tap condition check-ins on the plant page.
-  const checkInForm = document.querySelector('[data-check-in-form]');
-  if (checkInForm) {
-    const list = document.querySelector('[data-check-in-list]');
-    const empty = document.querySelector('[data-check-in-empty]');
-    const count = document.querySelector('[data-check-in-count]');
-    const error = checkInForm.querySelector('[data-check-in-error]');
-    const setCount = (n) => {
-      count.textContent = `${n} check-in${n === 1 ? '' : 's'}`;
-      empty.classList.toggle('d-none', n > 0);
-    };
-    checkInForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      error.textContent = '';
-      if (!checkInForm.querySelector('[name=condition]:checked')) { error.textContent = 'Choose how the plant looks first.'; return; }
-      const button = checkInForm.querySelector('button[type=submit]');
-      button.disabled = true;
+      const error = deleteForm.querySelector('[data-delete-error]');
+      const button = deleteForm.querySelector('[type=submit]');
+      if (button.disabled) return;
+      button.disabled = true; error.classList.add('d-none');
+      let deleted = false;
       try {
-        const response = await fetch(checkInForm.action, {
-          method: 'POST', body: new FormData(checkInForm), headers: { Accept: 'application/json' },
-        });
-        if (response.redirected) { redirectToLogin(response); return; }
-        const data = await response.json();
-        if (!response.ok) throw new Error(Object.values(data.errors || {})[0]?.[0]?.message || 'Could not save the check-in.');
-        list.insertAdjacentHTML('afterbegin', data.html);
-        setCount(data.count);
-        checkInForm.reset();
-        announce(`Check-in saved: ${data.check_in.condition_label}.`);
-      } catch (err) {
-        error.textContent = err.message;
-      } finally {
-        button.disabled = false;
-      }
-    });
-    list.addEventListener('submit', async (event) => {
-      const form = event.target.closest('[data-check-in-delete]');
-      if (!form) return;
-      event.preventDefault();
-      const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
-      if (response.redirected) { redirectToLogin(response); return; }
-      if (!response.ok) { announce('Could not remove the check-in.'); return; }
-      const data = await response.json();
-      form.closest('[data-check-in]').remove();
-      setCount(data.count);
-      announce('Check-in removed.');
+        await requestJSON(deleteForm.action, { method: 'POST', body: new FormData(deleteForm) });
+        deleted = true;
+        await navigate(deleteForm.dataset.listUrl || '/my-plants/');
+        announce('Plant deleted.');
+      } catch (failure) {
+        error.textContent = deleted ? 'The plant was deleted. Open My Plants to refresh your garden.' : failure.message;
+        error.classList.remove('d-none');
+      } finally { button.disabled = deleted; }
     });
   }
 
@@ -360,4 +331,12 @@
     button.addEventListener('click', search);
     query.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); if (!button.disabled) search(); } });
   }
-})();
+  mountPlantForm();
+  mountBulkActions();
+  mountCheckIns();
+}
+
+mountPage();
+document.addEventListener('plants:mount', mountPage);
+document.addEventListener('plants:unmount', () => lifetime?.abort());
+startNavigation();

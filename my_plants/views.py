@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Count, OuterRef, Q, Subquery
 from django.db.models.deletion import ProtectedError, RestrictedError
 from django.http import HttpResponse, JsonResponse
@@ -13,6 +13,7 @@ from django.views.decorators.http import require_GET, require_http_methods, requ
 from .forms import CheckInForm, PhotoForm, PlantFilterForm, PlantForm, StageForm
 from .models import Plant, PlantCheckIn, PlantPhoto
 from .services import CatalogUnavailable, search_species
+from .security import account_rate_limit
 
 PAGE_SIZE = 12
 
@@ -91,13 +92,24 @@ def _stats(owned):
 def _list_context(request):
     owned = Plant.objects.for_user(request.user)
     form = PlantFilterForm(request.GET)
-    plants = owned.annotate(cover_id=_latest_photo_id())
+    latest_condition = PlantCheckIn.objects.filter(plant=OuterRef('pk')).order_by('-created_at', '-pk').values('condition')[:1]
+    plants = owned.annotate(cover_id=_latest_photo_id(), latest_condition=Subquery(latest_condition))
     if form.is_valid():
         values = form.cleaned_data
         if values['q']:
             plants = plants.filter(Q(name__icontains=values['q']) | Q(species_name__icontains=values['q']))
         if values['stage']:
             plants = plants.filter(growth_stage=values['stage'])
+        if values['planted_from']:
+            plants = plants.filter(planted_on__gte=values['planted_from'])
+        if values['planted_to']:
+            plants = plants.filter(planted_on__lte=values['planted_to'])
+        if values['health'] == 'attention':
+            plants = plants.filter(latest_condition__isnull=False).exclude(latest_condition=PlantCheckIn.Condition.NORMAL)
+        elif values['health'] == 'normal':
+            plants = plants.filter(latest_condition=PlantCheckIn.Condition.NORMAL)
+        elif values['health'] == 'none':
+            plants = plants.filter(latest_condition__isnull=True)
         if values['status'] == 'active':
             plants = plants.active()
         elif values['status'] == 'finished':
@@ -110,7 +122,7 @@ def _list_context(request):
     query.pop('page', None)
     return {
         'filter_form': form, 'page_obj': page, 'querystring': query.urlencode(),
-        'is_filtered': any(request.GET.get(key) for key in ('q', 'stage', 'status')),
+        'is_filtered': any(request.GET.get(key) for key in ('q', 'stage', 'status', 'health', 'planted_from', 'planted_to')),
         'stats': _stats(owned),
     }
 
@@ -156,6 +168,7 @@ def plant_detail(request, pk):
 
 @login_required
 @require_http_methods(['GET', 'POST'])
+@account_rate_limit('write')
 def plant_create(request):
     form = PlantForm(request.POST, request.FILES) if request.method == 'POST' else PlantForm(
         initial={'species_name': request.GET.get('species', '')[:160]})
@@ -177,13 +190,14 @@ def plant_create(request):
 
 @login_required
 @require_http_methods(['GET', 'POST'])
+@account_rate_limit('write')
 def plant_edit(request, pk):
     plant = _owned_plant(request, pk)
     form = PlantForm(request.POST, request.FILES, instance=plant) if request.method == 'POST' else PlantForm(instance=plant)
     if request.method == 'POST' and form.is_valid():
         with transaction.atomic():
             plant = form.save()
-            _save_photo(plant, form, PlantPhoto.Kind.PROGRESS)
+            _save_photo(plant, form, PlantPhoto.Kind.STAGE if form.stage_changed else PlantPhoto.Kind.PROGRESS)
         if _wants_json(request):
             return JsonResponse({'plant': _serialize(plant)})
         messages.success(request, 'Plant details updated.')
@@ -196,6 +210,7 @@ def plant_edit(request, pk):
 
 @login_required
 @require_POST
+@account_rate_limit('write')
 def plant_stage(request, pk):
     plant = _owned_plant(request, pk)
     form = StageForm(request.POST, request.FILES, instance=plant)
@@ -225,6 +240,7 @@ def plant_stage(request, pk):
 
 @login_required
 @require_http_methods(['GET', 'POST'])
+@account_rate_limit('write')
 def plant_delete(request, pk):
     plant = _owned_plant(request, pk)
     if request.method == 'POST':
@@ -241,6 +257,36 @@ def plant_delete(request, pk):
         messages.success(request, f'{plant.name} was deleted.')
         return redirect('my_plants:list')
     return render(request, 'my_plants/confirm_delete.html', {'plant': plant})
+
+
+@login_required
+@require_POST
+@account_rate_limit('bulk_delete', limit=10)
+def plant_bulk_delete(request):
+    raw_ids = request.POST.getlist('plant_ids')
+    if not 1 <= len(raw_ids) <= 50 or any(not value.isascii() or not value.isdigit() or len(value) > 18 or int(value) < 1 for value in raw_ids):
+        error, status = 'Select between 1 and 50 valid plants.', 400
+    else:
+        ids = set(map(int, raw_ids))
+        try:
+            with transaction.atomic():
+                plants = list(Plant.objects.for_user(request.user).select_for_update().filter(pk__in=ids).order_by('pk'))
+                if len(plants) != len(ids):
+                    error, status = 'One or more selected plants are unavailable.', 404
+                else:
+                    for plant in plants:
+                        plant.delete()
+                    if _wants_json(request):
+                        return JsonResponse({'deleted_count': len(plants)})
+                    messages.success(request, f'{len(plants)} plants deleted.')
+                    return redirect('my_plants:list')
+        except (ProtectedError, RestrictedError):
+            error, status = 'No plants were deleted. A selected plant has linked records; mark it Finished instead.', 409
+    if _wants_json(request):
+        return JsonResponse({'error': error}, status=status)
+    context = _list_context(request)
+    context['bulk_error'] = error
+    return render(request, 'my_plants/list.html', context, status=status)
 
 
 @login_required
@@ -268,6 +314,7 @@ def plant_detail_api(request, pk):
 
 @login_required
 @require_GET
+@account_rate_limit('species', limit=10, methods=('GET',))
 def species_api(request):
     query = request.GET.get('q', '').strip()
     indoor = request.GET.get('indoor', '')
@@ -282,6 +329,7 @@ def species_api(request):
 
 @login_required
 @require_POST
+@account_rate_limit('write')
 def check_in_create(request, pk):
     plant = _owned_plant(request, pk)
     form = CheckInForm(request.POST)
@@ -291,7 +339,18 @@ def check_in_create(request, pk):
         return render(request, 'my_plants/detail.html', _detail_context(plant, check_in_form=form), status=400)
     check_in = form.save(commit=False)
     check_in.plant = plant
-    check_in.save()
+    check_in.checked_on = timezone.localdate()
+    try:
+        with transaction.atomic():
+            check_in.save()
+    except IntegrityError:
+        if not plant.check_ins.filter(checked_on=check_in.checked_on).exists():
+            raise
+        error = 'You already saved a check-in for this plant today.'
+        if _wants_json(request):
+            return JsonResponse({'error': error}, status=409)
+        form.add_error(None, error)
+        return render(request, 'my_plants/detail.html', _detail_context(plant, check_in_form=form), status=409)
     if _wants_json(request):
         html = render_to_string('my_plants/_check_in.html', {'check_in': check_in, 'plant': plant}, request=request)
         return JsonResponse({'check_in': _serialize_check_in(check_in), 'html': html,
@@ -302,6 +361,7 @@ def check_in_create(request, pk):
 
 @login_required
 @require_POST
+@account_rate_limit('write')
 def check_in_delete(request, pk, check_in_pk):
     plant = _owned_plant(request, pk)
     check_in = get_object_or_404(PlantCheckIn, pk=check_in_pk, plant=plant)
@@ -326,6 +386,7 @@ def photo_view(request, pk, photo_pk):
 
 @login_required
 @require_POST
+@account_rate_limit('write')
 def photo_add(request, pk):
     plant = _owned_plant(request, pk)
     form = PhotoForm(request.POST, request.FILES)
@@ -343,6 +404,7 @@ def photo_add(request, pk):
 
 @login_required
 @require_POST
+@account_rate_limit('write')
 def photo_delete(request, pk, photo_pk):
     plant = _owned_plant(request, pk)
     get_object_or_404(PlantPhoto, pk=photo_pk, plant=plant).delete()

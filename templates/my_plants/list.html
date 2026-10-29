@@ -47,6 +47,14 @@
             <button type="submit" class="btn btn-outline-primary w-100 mp-nojs">Filter</button>
             <a href="{% url 'my_plants:list' %}" class="btn btn-link px-0" data-reset>Reset</a>
         </div>
+        <details class="col-12"{% if filter_form.health.value or filter_form.planted_from.value or filter_form.planted_to.value %} open{% endif %}>
+            <summary class="small fw-semibold text-success py-2">More filters</summary>
+            <div class="row g-3 mt-0 pb-2">
+                <div class="col-12 col-md-4"><label class="form-label" for="{{ filter_form.health.id_for_label }}">{{ filter_form.health.label }}</label>{{ filter_form.health }}</div>
+                <div class="col-6 col-md-4"><label class="form-label" for="{{ filter_form.planted_from.id_for_label }}">{{ filter_form.planted_from.label }}</label>{{ filter_form.planted_from }}</div>
+                <div class="col-6 col-md-4"><label class="form-label" for="{{ filter_form.planted_to.id_for_label }}">{{ filter_form.planted_to.label }}</label>{{ filter_form.planted_to }}</div>
+            </div>
+        </details>
     </form>
     <p class="small text-muted mb-3" id="filter-status" role="status" aria-live="polite"></p>
 

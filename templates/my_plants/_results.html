@@ -1,14 +1,27 @@
 {% if filter_form.errors %}
     <div class="alert alert-danger" role="alert">Some filters were not valid. <a href="{% url 'my_plants:list' %}" data-reset>Reset filters</a>.</div>
+    {% for field in filter_form %}{% for error in field.errors %}<p class="small text-danger" role="alert">{{ field.label }}: {{ error }}</p>{% endfor %}{% endfor %}
 {% endif %}
+{% if bulk_error %}<div class="alert alert-danger" role="alert">{{ bulk_error }}</div>{% endif %}
 <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-3">
     <h2 class="h4 mb-0">{% if is_filtered %}Matching plants{% else %}Your little green world{% endif %}</h2>
     <span class="small text-muted" data-result-count>Showing {{ page_obj|length }} of {{ page_obj.paginator.count }} plant{{ page_obj.paginator.count|pluralize }}</span>
 </div>
+<form method="post" action="{% url 'my_plants:bulk_delete' %}" data-bulk-form>
+{% csrf_token %}
+{% if page_obj %}
+<div class="mp-bulk-bar mb-3">
+    <label class="d-flex align-items-center gap-2"><input class="form-check-input mt-0" type="checkbox" data-select-page> Select this page</label>
+    <span class="small text-muted" data-selected-count>0 selected</span>
+    <button class="btn btn-sm btn-outline-danger ms-sm-auto" type="submit">Delete selected</button>
+    <p class="small text-danger mb-0 w-100" role="alert" data-bulk-error></p>
+</div>
+{% endif %}
 <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
 {% for plant in page_obj %}
     <div class="col">
         <article class="card h-100 mp-card">
+            <label class="mp-card-select"><input class="form-check-input" type="checkbox" name="plant_ids" value="{{ plant.pk }}" aria-label="Select {{ plant.name }}"></label>
             <div class="mp-art mp-art-{{ plant.growth_stage }}{% if plant.cover_id %} has-photo{% endif %}" aria-hidden="true">
                 {% if plant.cover_id %}{% url 'my_plants:photo' plant.pk plant.cover_id as cover_url %}{% include "my_plants/_plant_visual.html" %}{% else %}{% include "my_plants/_botanical.html" %}{% endif %}
                 <span class="badge mp-status">{{ plant.status|capfirst }}</span>
@@ -41,6 +54,7 @@
     </div>
 {% endfor %}
 </div>
+</form>
 {% if page_obj.has_other_pages %}
 <nav class="mt-4" aria-label="Plant pages">
     <ul class="pagination justify-content-center flex-wrap">

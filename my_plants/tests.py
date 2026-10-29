@@ -141,7 +141,7 @@ class PlantTests(TestCase):
 
     def test_stage_and_edit_html_success_redirect(self):
         self.assertRedirects(self.client.post(self.url('stage'), {'growth_stage': 'flowering', 'photo': photo_upload()}), self.plant.get_absolute_url())
-        self.assertRedirects(self.client.post(self.url('edit'), self.data), self.plant.get_absolute_url())
+        self.assertRedirects(self.client.post(self.url('edit'), {**self.data, 'growth_stage': 'flowering'}), self.plant.get_absolute_url())
 
     def test_delete_requires_post_and_preserves_plant_on_confirmation_page(self):
         self.client.get(self.url('delete'))
@@ -529,7 +529,7 @@ class PlantPhotoTests(TestCase):
             self.stage(stage, photo=photo_upload())
             PlantPhoto.objects.filter(stage=stage).update(created_at=timezone.now() - timedelta(days=days_ago))
         PlantCheckIn.objects.create(plant=self.plant, condition='normal')
-        PlantCheckIn.objects.create(plant=self.plant, condition='pests')
+        PlantCheckIn.objects.create(plant=self.plant, condition='pests', checked_on=today - timedelta(days=1))
         response = self.client.get(reverse('my_plants:recap', args=[self.plant.pk]))
         self.assertContains(response, 'Growing recap')
         ctx = response.context
