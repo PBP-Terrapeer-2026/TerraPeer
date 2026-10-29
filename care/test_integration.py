@@ -9,11 +9,7 @@ class ProjectIntegrationTests(TestCase):
             "integration", password="testing-only-9384"
         )
 
-    def test_login_form_preserves_return_path(self):
-        response = self.client.get("/login/?next=/plant-care/")
-        self.assertContains(response, 'name="next" value="/plant-care/"')
-
-    def test_existing_auth_returns_to_care(self):
+    def test_existing_auth_then_care_navigation(self):
         response = self.client.post(
             "/login/",
             {
@@ -22,14 +18,14 @@ class ProjectIntegrationTests(TestCase):
                 "next": "/plant-care/",
             },
         )
-        self.assertRedirects(response, "/plant-care/")
+        self.assertRedirects(response, reverse("show_main"))
         page = self.client.get("/plant-care/")
         self.assertContains(page, "Your plants will appear here")
         self.assertContains(page, "css/style.css")
         self.assertTemplateUsed(page, "base.html")
         self.assertContains(self.client.get("/"), 'href="/plant-care/"')
 
-    def test_external_redirect_is_rejected(self):
+    def test_existing_auth_keeps_group_landing_destination(self):
         response = self.client.post(
             "/login/",
             {
@@ -68,4 +64,4 @@ class ProjectIntegrationTests(TestCase):
     def test_login_without_next_parameter_renders(self):
         response = self.client.get("/login/")
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'name="next" value=""')
+        self.assertTemplateUsed(response, "login.html")

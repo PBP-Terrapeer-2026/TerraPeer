@@ -157,6 +157,4 @@ WHITENOISE_USE_FINDERS = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Plant Care uses the existing main authentication.
-LOGIN_URL = "login"
 WEATHER_DEMO = os.getenv("WEATHER_DEMO", "0") == "1"

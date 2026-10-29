@@ -139,7 +139,7 @@ def list_context(request, plant):
     }
 
 
-@login_required
+@login_required(login_url="login")
 @require_GET
 def choose(request):
     plants = Plant.objects.filter(garden__owner=request.user).select_related("garden")
@@ -149,7 +149,7 @@ def choose(request):
     return render(request, "care/no_plants.html")
 
 
-@login_required
+@login_required(login_url="login")
 @require_GET
 def page(request, pk):
     plant = owned_plant(request, pk)
