@@ -48,10 +48,14 @@
         ></span>
         Cari Cuaca
       </button>
+          <div id="weather-summary" class="d-flex flex-wrap gap-2 mt-3 d-none"></div>
+           <button id="refresh-button" class="flex-column btn btn-success rounded-pill fw-bold px-4 py-2">
+      refresh
+    </button> 
     </form>
-    <div id="weather-summary" class="d-flex flex-wrap gap-2 mt-3 d-none"></div>
-  </div>
 
+
+  </div>
   <div
     id="rec-section"
     class="card shadow-sm border-0 rounded-4 p-4 p-lg-5 mb-4 text-success-emphasis d-none"
@@ -70,7 +74,7 @@
       id="pot-rec"
       class="d-inline-flex align-items-center gap-3 bg-success-subtle border border-success-subtle rounded-3 p-3 fw-semibold text-success-emphasis mb-4"
     >
-      <span>🪴</span>
+      <span>🪴</span> 
       <div>
         <div id="pot-name">—</div>
         <div class="small fw-normal text-secondary" id="pot-detail">—</div>
@@ -131,35 +135,32 @@
 
     <div class="border-top pt-4 mt-3">
       <h3 class="h5 mb-3">🪴 Pot Saya</h3>
-      <div class="d-flex flex-wrap align-items-end gap-3 mb-3">
-        <input
-          class="form-control flex-grow-1"
-          id="pot-name-input"
-          type="text"
-          placeholder="Nama pot"
-        />
-        <input
-          class="form-control flex-grow-1"
-          id="pot-size-input"
-          type="number"
-          min="1"
-          placeholder="Ukuran (cm)"
-        />
-        <select
-          class="form-select flex-grow-1"
-          id="pot-material-input"
-          required
-        >
-          <option value="">Pilih bahan pot</option>
-          <option value="plastik">Plastik</option>
-          <option value="terakota">Terakota</option>
-          <option value="keramik glazed">Keramik glazed</option>
-          <option value="kayu/plastik">Kayu/plastik</option>
-        </select>
-        <button class="btn btn-success btn-sm" onclick="createPot()" >
-          + Tambah Pot
-        </button>
-      </div>
+      {% for message in messages %}
+        <div class="alert alert-success" role="status">{{ message }}</div>
+      {% endfor %}
+      <form method="post" action="{% url 'garden_planning:index' %}?plan_id={{ plan_id }}#pot-name-input" class="row g-2 align-items-end mb-3">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="pot_create" />
+        <input type="hidden" name="plan_id" value="{{ plan_id }}" />
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="{{ pot_form.name.id_for_label }}">{{ pot_form.name.label }}</label>
+          {{ pot_form.name }}
+          {% for error in pot_form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label" for="{{ pot_form.size_cm.id_for_label }}">{{ pot_form.size_cm.label }}</label>
+          {{ pot_form.size_cm }}
+          {% for error in pot_form.size_cm.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label" for="{{ pot_form.material.id_for_label }}">{{ pot_form.material.label }}</label>
+          {{ pot_form.material }}
+          {% for error in pot_form.material.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-12 col-md-2">
+          <button class="btn btn-success btn-sm w-100" type="submit">+ Tambah Pot</button>
+        </div>
+      </form>
       <ul id="pot-list" class="list-unstyled d-flex flex-column gap-2"></ul>
     </div>
 

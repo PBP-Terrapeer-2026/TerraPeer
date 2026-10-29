@@ -1,8 +1,10 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.conf import settings
 
 import requests
@@ -12,6 +14,7 @@ import math
 from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
 
 from .models import Plant, Pot, Plan, PlanPlant
+from .forms import PotForm
 
 
 
@@ -68,7 +71,7 @@ def build_perenual_filters(profile) -> dict: #input berupa dict
 
 
 
-def recommend_pot(profile: dict) -> dict:
+def recommend_pot(profile) : #profile bertipe dictiopnary
     """
     Memilih pot yang paling sesuai dari POTS berdasarkan profil cuaca. (pilihan pot disini hardcode karena tidak terdapat di perenual)
       - Hujan deras / outdoor: pot besar dengan drainase baik (terakota/kayu)
@@ -188,8 +191,27 @@ def get_or_cache_plant(Pdata) : #param=dictionary
 @login_required
 def garden_planning_page(request):
     """Render halaman utama Garden Planning."""
+    pot_form = PotForm()
+    plan_id = request.GET.get("plan_id", "")
+    if request.method == "POST" and request.POST.get("form_type") == "pot_create":
+        pot_form = PotForm(request.POST)
+        plan_id = request.POST.get("plan_id", "")
+        if pot_form.is_valid():
+            plan = get_object_or_404(Plan, pk=plan_id, owner=request.user) if plan_id.isdigit() else None
+            pot = pot_form.save(commit=False)
+            pot.owner = request.user
+            pot.save()
+            messages.success(request, "Pot berhasil ditambahkan.")
+            if plan:
+                return redirect("garden_planning:plan_summary", pk=plan.pk)
+            return redirect(f"{reverse('garden_planning:index')}#pot-name-input")
+
     plans = Plan.objects.filter(owner=request.user).order_by("-created_at")
-    return render(request, "garden_planning_template/index.html", {"plans": plans})
+    return render(request, "garden_planning_template/index.html", {
+        "plans": plans,
+        "pot_form": pot_form,
+        "plan_id": plan_id,
+    })
 
 
 @login_required
@@ -267,7 +289,7 @@ def recommend_plants(request):
     try:
         profile = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({"error": "Body bukan JSON valid."}, status=400)
+        return JsonResponse({"error": "Body bukan JSON valid."}, status=400) #validasi json
 
 
     filters = build_perenual_filters(profile)
