@@ -29,6 +29,26 @@ class PotFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("material", form.errors)
 
+    def test_removes_html_and_script_content_from_pot_name(self):
+        form = PotForm({
+            "name": "<script>alert('xss')</script><b>Pot Aman</b>",
+            "size_cm": 25,
+            "material": "terakota",
+        })
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["name"], "Pot Aman")
+
+    def test_rejects_name_that_contains_only_active_content(self):
+        form = PotForm({
+            "name": "<script>alert('xss')</script>",
+            "size_cm": 25,
+            "material": "terakota",
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("name", form.errors)
+
 
 class RecommendPlantsTests(TestCase):
     def setUp(self):

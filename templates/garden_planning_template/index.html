@@ -38,20 +38,26 @@
         />
         <div id="city-suggestions" class="position-absolute top-100 start-0 w-100 shadow rounded-3 z-3"></div>
       </div>
-      <button
-        class="btn btn-success rounded-pill fw-bold px-4 py-2"
-        type="submit"
-      >
-        <span
-          id="search-spin"
-          class="spinner-border spinner-border-sm text-success d-none"
-        ></span>
-        Cari Cuaca
-      </button>
-          <div id="weather-summary" class="d-flex flex-wrap gap-2 mt-3 d-none"></div>
-           <button id="refresh-button" class="flex-column btn btn-success rounded-pill fw-bold px-4 py-2">
-      refresh
-    </button> 
+      <div class="d-flex flex-column gap-2">
+        <button
+          class="btn btn-success rounded-pill fw-bold px-4 py-2"
+          type="submit"
+        >
+          <span
+            id="search-spin"
+            class="spinner-border spinner-border-sm text-success d-none"
+          ></span>
+          Cari Cuaca
+        </button>
+        <button
+          id="refresh-button"
+          class="btn btn-outline-success rounded-pill fw-bold px-4 py-2"
+          type="button"
+        >
+          Refresh
+        </button>
+      </div>
+      <div id="weather-summary" class="w-100 d-flex flex-wrap gap-2 mt-3 d-none"></div>
     </form>
 
 

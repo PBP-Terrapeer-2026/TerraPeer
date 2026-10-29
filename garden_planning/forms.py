@@ -3,6 +3,7 @@ from django import forms
 from .models import Pot
 
 
+
 class PotForm(forms.ModelForm):
 
     MATERIAL_CHOICES = [
@@ -42,4 +43,10 @@ class PotForm(forms.ModelForm):
                 "placeholder": "Nama pot",
             }),
         }
+
+    def clean_name(self):
+        name = strip_tags(self.cleaned_data["name"].stript())
+        if not name:
+            raise forms.ValidationError("Nama pot tidak boleh kosong.")
+        return name
 
