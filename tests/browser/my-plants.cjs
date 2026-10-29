@@ -16,9 +16,22 @@ const { chromium } = require('playwright');
     await page.screenshot({ path: `test-results/${name}.png`, fullPage: true });
   };
   const waitPath = (pattern) => page.waitForURL(pattern);
+  const checkResponsive = async (screen) => {
+    for (const width of [320, 390, 768, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      const layout = await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth > innerWidth + 1,
+        duplicates: [...document.querySelectorAll('#main-content [id]')].map((node) => node.id)
+          .filter((id, index, ids) => ids.indexOf(id) !== index),
+      }));
+      assert.equal(layout.overflow, false, `${screen}: horizontal overflow at ${width}px`);
+      assert.deepEqual(layout.duplicates, [], `${screen}: duplicate element IDs`);
+    }
+  };
   const create = async (name) => {
     await page.getByRole('link', { name: 'Add a plant', exact: true }).click();
     await waitPath('**/my-plants/add/');
+    await checkResponsive('Create form');
     await page.getByLabel('Nickname', { exact: false }).fill(name);
     await page.locator('#id_species_name').fill('Tomato');
     await page.getByRole('button', { name: 'Add to My Plants' }).click();
@@ -35,6 +48,7 @@ const { chromium } = require('playwright');
     await create('Browser Tomato');
     await page.getByRole('link', { name: 'Edit', exact: true }).click();
     await waitPath('**/edit/');
+    await checkResponsive('Edit form');
     await page.locator('#id_growth_stage').selectOption('flowering');
     await page.getByRole('button', { name: 'Save changes' }).click();
     await page.locator('[data-field-error=photo]').filter({ hasText: 'Add a photo' }).waitFor();
@@ -55,6 +69,7 @@ const { chromium } = require('playwright');
     });
     await page.locator('[data-stage-form] button[type=submit]').click();
     await page.locator('[data-stage-badge]').filter({ hasText: 'Flowering' }).waitFor();
+    await checkResponsive('Detail and photo diary');
     // Hold the real request long enough to observe the pending optimistic row.
     await page.route('**/check-ins/', async (route) => {
       await new Promise((resolve) => setTimeout(resolve, 250));
@@ -87,10 +102,7 @@ const { chromium } = require('playwright');
     await page.getByRole('button', { name: 'Delete selected' }).click();
     await page.locator('[data-bulk-error]').filter({ hasText: 'Linked records' }).waitFor();
     assert.equal(await page.locator('.mp-card:visible').count(), 2);
-    for (const width of [320, 390, 1280]) {
-      await page.setViewportSize({ width, height: 900 });
-      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `Overflow at ${width}px`);
-    }
+    await checkResponsive('List and bulk selection');
     await screenshot('my-plants-desktop');
     await page.getByRole('button', { name: 'Delete selected' }).click();
     await page.getByText('Every garden starts with one plant.', { exact: true }).waitFor();

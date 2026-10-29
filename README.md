@@ -68,6 +68,18 @@ Setiap data tanaman yang bersifat personal, seperti Growing Spaces, Garden Plans
 
 Modul My Plants ada di `/my-plants/` (wajib login). Jalankan `python manage.py migrate` lalu `python manage.py test`.
 
+Untuk menjalankan pengujian browser, aktifkan virtualenv Python dan siapkan Node.js:
+
+```powershell
+npm --prefix tests/browser install
+npm --prefix tests/browser exec -- playwright install chromium
+npm --prefix tests/browser test
+```
+
+Pencarian spesies memerlukan `PERENUAL_API_KEY` pada environment lokal/PWS. Tanpa key, spesies masih bisa diisi manual.
+
+OpenAI Codex digunakan untuk membantu analisis, implementasi, dan pengujian. Perubahan diverifikasi menggunakan test Django serta pengujian browser.
+
 | Ketentuan | Implementasi |
 | --- | --- |
 | Models | `my_plants.Plant`, `my_plants.PlantCheckIn`, dan `my_plants.PlantPhoto` (buatan sendiri), `User` dari Django sebagai pemilik. `Plant` disediakan untuk dipakai Plant Care dan Journal lewat ForeignKey. |
