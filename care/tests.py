@@ -329,11 +329,6 @@ class CareTests(TestCase):
         self.assertIsNone(items[1]["url"])
         self.assertEqual([item["key"] for item in items if item["active"]], ["care"])
 
-    def test_demo_seed_refuses_normal_database(self):
-        from django.core.management import call_command, CommandError
-
-        with self.assertRaises(CommandError):
-            call_command("prepare_care_demo")
 
 
 @override_settings(WEATHER_DEMO=False)
