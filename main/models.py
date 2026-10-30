@@ -20,6 +20,15 @@ class GardenJournalEntry(models.Model):
         related_name="garden_journal_entries",
     )
     #Nama tanaman sementara, hubungan dengan model My Plant
+    plant = models.ForeignKey(
+        "my_plants.Plant",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="journal_entries",
+    )
+
+    # Snapshot nama tanaman untuk mempertahankan riwayat jurnal.
     plant_name = models.CharField(max_length=120)
 
     # Informasi utama jurnal
