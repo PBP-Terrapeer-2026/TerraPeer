@@ -16,6 +16,7 @@
             <ul class="navbar-nav mx-lg-auto">
                 <li class="nav-item"><a class="nav-link{% if url_name == 'show_main' %} active{% endif %}" href="{% url 'show_main' %}"{% if url_name == 'show_main' %} aria-current="page"{% endif %}>Home</a></li>
                 {% if user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link{% if app == 'garden_planning' %} active{% endif %}" href="{% url 'garden_planning:index' %}"{% if app == 'garden_planning' %} aria-current="page"{% endif %}>Planning</a></li>
                     <li class="nav-item"><a class="nav-link{% if app == 'my_plants' %} active{% endif %}" href="{% url 'my_plants:list' %}"{% if app == 'my_plants' %} aria-current="page"{% endif %}>My Plants</a></li>
                     {% comment %}Module owners: add your module link here once its URL name exists, e.g. Garden Setup, Planning, My Plants, Plant Care, Journal.{% endcomment %}
                 {% endif %}
