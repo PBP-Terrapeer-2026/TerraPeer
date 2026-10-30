@@ -162,3 +162,33 @@ Garden Setup menyimpan metadata kota, koordinat, dan zona waktu untuk mendukung 
 ChatGPT digunakan sebagai alat bantu selama pengembangan, terutama untuk membahas pilihan implementasi Django, menyusun dan meninjau contoh kode, membantu penelusuran error, serta merancang skenario pengujian. Saran yang dihasilkan disesuaikan dengan struktur TerraPeer dan diperiksa melalui unit test serta pengujian manual di browser.
 
 Beberapa hasil bantuan AI juga direvisi, antara lain penyederhanaan struktur HTML, penghapusan teks antarmuka yang hanya menjelaskan status development, penyesuaian jenis ruang `Other`, dan pengujian tambahan untuk layanan geocoding. Bantuan AI memiliki keterbatasan karena tidak selalu mengetahui versi terbaru seluruh file maupun pekerjaan anggota tim; karena itu pemeriksaan kode aktual, validasi hasil, dan integrasi akhir tetap diperlukan.
+
+---
+
+# IMPLEMENTASI PLANT CARE (Nashri Khalid)
+
+Modul Plant Care dapat diakses di rute `/care/` (wajib login).
+
+Jalankan perintah pengujian modul ini dengan:
+```bash
+python manage.py test plant_care
+```
+
+## AI USAGE DISCLOSURE
+
+ChatGPT digunakan sebagai alat bantu selama pengembangan, terutama untuk membahas pilihan implementasi Django, menyusun dan meninjau contoh kode, membantu penelusuran error, serta merancang skenario pengujian. Saran yang dihasilkan disesuaikan dengan struktur TerraPeer dan diperiksa melalui unit test serta pengujian manual di browser.
+
+Beberapa hasil bantuan AI juga direvisi, antara lain penyederhanaan struktur HTML navbar, penghapusan teks antarmuka yang hanya menjelaskan status development, penyesuaian dependensi antarmodul, dan pengujian boundary untuk layanan ramalan cuaca. Bantuan AI memiliki keterbatasan karena tidak selalu mengetahui versi terbaru seluruh file maupun pekerjaan anggota tim; karena itu pemeriksaan kode aktual, validasi hasil, dan integrasi akhir tetap diperlukan.
+
+## Rincian Ketentuan & Implementasi
+
+| Ketentuan | Implementasi pada Modul Plant Care |
+| --- | --- |
+| **Models** | • `CareTask`: Menyimpan data tugas perawatan tanaman aktif (`Plant`), jenis aksi (`Water`, `Prune`, `Fertilize`, `Inspect`, `Harvest`), tenggat waktu (`due_date`), frekuensi pengulangan hari (`repeat_every`), status (`Pending`/`Completed`), dan waktu penyelesaian.<br>• `PlantCareSpace`: Menghubungkan entitas `Plant` (My Plants) ke `GrowingSpace` (Garden Setup) untuk memperoleh koordinat geografis dan zona waktu cuaca.<br>• `LegacyPlant`: Model kompatibilitas untuk mengamankan data riwayat tugas sebelumnya. |
+| **Views & CRUD** | • **Create:** `care:add` untuk membuat tugas perawatan baru pada tanaman aktif.<br>• **Read:** `care:page` untuk menampilkan kalender mingguan, daftar tugas, ringkasan, dan panel cuaca.<br>• **Update:** `care:edit` untuk mengubah detail tugas, `care:complete` untuk menandai tugas selesai (otomatis membuat pengingat berikutnya jika tugas berulang), serta `care:undo` untuk membatalkan status penyelesaian.<br>• **Delete:** `care:delete` dengan konfirmasi aman tanpa menghapus riwayat tugas yang sudah selesai. |
+| **Integrasi Open-Meteo API** | Mengintegrasikan *Open-Meteo Daily Forecast API* (`https://api.open-meteo.com/v1/forecast`) untuk menyajikan ramalan cuaca 4 hari (kondisi langit, estimasi suhu min/max, probabilitas hujan, dan curah hujan). Dilengkapi mekanisme timeout terproteksi `(3, 8)` detik, *caching* Django selama 15 menit untuk efisiensi kuota request, penanganan timezone lokal, serta mode demo cadangan. |
+| **Templates & UI Konsisten** | Menggunakan layout terpusat `base.html` dengan header navigasi standar (`partials/header.html`), pesan flash (`partials/messages.html`), dan template komponen modular di `templates/care/` (`page.html`, `task_list.html`, `task_detail.html`, `task_form.html`, `weather.html`, `calendar.html`). |
+| **Form & Validasi** | `CareTaskForm` dan `PlantCareSpaceForm` dengan validasi server ketat (validasi jenis aksi, interval pengulangan hari yang valid, tanggal tenggat, dan verifikasi ruang tanam milik pengguna yang bersangkutan). |
+| **AJAX / Asynchronous UX** | • Filter dinamis daftar tugas (*To do*, *Overdue*, *Done*, filter jenis aksi, dan pemilih tanggal kalender) diperbarui secara asinkronus tanpa memuat ulang seluruh halaman.<br>• Aksi *complete* dan *undo* memperbarui jumlah *pending task* dan indikator kalender secara instan.<br>• Panel cuaca dimuat secara *lazy loading* via asynchronous request agar pemuatan halaman awal tetap cepat. |
+| **Keamanan & Autentikasi** | • Seluruh endpoint dilindungi dekorator `@login_required` dan `@api_auth`.<br>• Seluruh *query* database difilter berdasar pemilik akun aktif (`plant__owner=request.user` atau `garden__owner=request.user`), memastikan pengguna tidak dapat melihat maupun memanipulasi tugas milik pengguna lain (menghasilkan status HTTP 404/403). |
+| **Pengujian (Testing)** | Memiliki 72 pengujian otomatis mencakup unit tests, *boundary tests* (penanganan timezone ekstrem, tanggal limit, kegagalan jaringan API), serta *integration tests* konsistensi antarmuka navigasi. |
