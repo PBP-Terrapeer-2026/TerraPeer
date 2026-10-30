@@ -141,18 +141,6 @@ body.care-page.tp-page {
     min-width: 0;
 }
 
-.care-page .tp-nav,
-.care-page .nav {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    background: var(--tp-surface);
-    border-radius: 50px;
-    padding: 15px 24px;
-    min-height: 74px;
-    border: 1px solid #b8cdbd;
-}
-
 .care-page .tp-icon-button,
 .care-page .iconbtn {
     height: 40px;
