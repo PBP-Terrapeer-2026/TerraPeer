@@ -203,10 +203,19 @@ def get_or_cache_plant(Pdata) : #param=dictionary
     watering = clean_perenual_text(Pdata.get("watering"), field_limit("watering"))
     description = clean_perenual_text(Pdata.get("description"))
     default_image = Pdata.get("default_image")
-    image_url = clean_perenual_text(
-        default_image.get("medium_url") if isinstance(default_image, dict) else "",
-        field_limit("image_url"),
-    )
+    image_url = ""
+    if isinstance(default_image, dict):
+        for image_key in ("medium_url", "regular_url", "original_url", "small_url"):
+            candidate_url = clean_perenual_text(default_image.get(image_key))
+            parsed_url = urlparse(candidate_url)
+            if (
+                candidate_url
+                and len(candidate_url) <= field_limit("image_url")
+                and parsed_url.scheme in {"http", "https"}
+                and parsed_url.netloc
+            ):
+                image_url = candidate_url
+                break
     raw_sunlight = Pdata.get("sunlight")
     if isinstance(raw_sunlight, str):
         raw_sunlight = [raw_sunlight]
@@ -227,7 +236,10 @@ def get_or_cache_plant(Pdata) : #param=dictionary
         updates["sunlight"] = sunlight
     if "description" in Pdata:
         updates["description"] = description
-    if isinstance(default_image, dict) and "medium_url" in default_image:
+    if isinstance(default_image, dict) and any(
+        image_key in default_image
+        for image_key in ("medium_url", "regular_url", "original_url", "small_url")
+    ):
         updates["image_url"] = image_url
     plant, created = Plant.objects.get_or_create(
         perenual_id=perenual_id,
