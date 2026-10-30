@@ -201,7 +201,7 @@ def garden_planning_page(request):
             pot = pot_form.save(commit=False)
             pot.owner = request.user
             pot.save()
-            messages.success(request, "Pot berhasil ditambahkan.")
+            messages.success(request, "Pot added successfully.")
             if plan:
                 return redirect("garden_planning:plan_summary", pk=plan.pk)
             return redirect(f"{reverse('garden_planning:index')}#pot-name-input")
@@ -289,7 +289,7 @@ def recommend_plants(request):
     try:
         profile = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({"error": "Body bukan JSON valid."}, status=400) #validasi json
+        return JsonResponse({"error": "The request body must be valid JSON."}, status=400)
 
 
     filters = build_perenual_filters(profile)
@@ -373,7 +373,7 @@ def pot_list_create(request):
         material = str(body.get("material", "")).strip()
         if not name or size < 1 or material not in POT_MATERIAL_CHOICES: raise ValueError
     except (json.JSONDecodeError, ValueError, TypeError):
-        return JsonResponse({"error": "Nama, ukuran pot, dan bahan pot yang valid wajib diisi."}, status=400)
+        return JsonResponse({"error": "Enter a pot name, a size greater than zero, and a valid material."}, status=400)
     pot = Pot.objects.create(owner=request.user, name=name, size_cm=size,
         material=material, drainage=bool(body.get("drainage", True)))
     return JsonResponse({"id": pot.pk, "name": pot.name, "size_cm": pot.size_cm,
@@ -404,7 +404,7 @@ def pot_detail(request, pk):
         if "drainage" in body: pot.drainage = bool(body["drainage"])
         if not pot.name or pot.size_cm < 1: raise ValueError
     except (json.JSONDecodeError, ValueError, TypeError):
-        return JsonResponse({"error": "Data pot tidak valid."}, status=400)
+        return JsonResponse({"error": "The pot data is invalid."}, status=400)
     pot.save()
     return JsonResponse({"ok": True})
 
@@ -417,7 +417,7 @@ def plant_create(request):
         name = str(body.get("name", "")).strip()
         if not name: raise ValueError
     except (json.JSONDecodeError, ValueError, TypeError):
-        return JsonResponse({"error": "Nama tanaman wajib diisi."}, status=400)
+        return JsonResponse({"error": "Plant name is required."}, status=400)
     plant = Plant.objects.create(name=name, benefit=str(body.get("benefit", "")).strip(),
         watering=str(body.get("watering", "")).strip(), sunlight=body.get("sunlight", []))
     return JsonResponse({"id": plant.pk, "name": plant.name, "benefit": plant.benefit}, status=201)
@@ -448,7 +448,7 @@ def plan_list_create(request):
     try:
         body = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({"error": "JSON tidak valid."}, status=400)
+        return JsonResponse({"error": "The request body must be valid JSON."}, status=400)
 
     plan = Plan.objects.create(
         owner               = request.user,
@@ -505,7 +505,7 @@ def plan_detail(request, pk):
         try:
             body = json.loads(request.body)
         except (json.JSONDecodeError, ValueError):
-            return JsonResponse({"error": "JSON tidak valid."}, status=400)
+            return JsonResponse({"error": "The request body must be valid JSON."}, status=400)
 
         plan.name                = body.get("name", plan.name)
         plan.location_name       = body.get("location_name", plan.location_name)
@@ -515,7 +515,7 @@ def plan_detail(request, pk):
         plan.is_draft            = body.get("is_draft", plan.is_draft)
         if "status" in body:
             if not isinstance(body["status"], str) or body["status"] not in dict(Plan.STATUS_CHOICES):
-                return JsonResponse({"error": "Status plan tidak valid."}, status=400)
+                return JsonResponse({"error": "The plan status is invalid."}, status=400)
             plan.status = body["status"]
         plan.save()
         return JsonResponse({"ok": True})
@@ -551,23 +551,23 @@ def planplant_list_create(request, plan_pk):
     try:
         body = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({"error": "JSON tidak valid."}, status=400)
+        return JsonResponse({"error": "The request body must be valid JSON."}, status=400)
 
     try:
         recommendation_latitude = float(body["recommendation_latitude"])
         recommendation_longitude = float(body["recommendation_longitude"])
     except (KeyError, TypeError, ValueError):
-        return JsonResponse({"error": "Lokasi rekomendasi wajib dipilih sebelum menambahkan tanaman."}, status=400)
+        return JsonResponse({"error": "Choose a recommendation location before adding a plant."}, status=400)
 
     if not math.isfinite(recommendation_latitude) or not math.isfinite(recommendation_longitude):
-        return JsonResponse({"error": "Koordinat lokasi rekomendasi tidak valid."}, status=400)
+        return JsonResponse({"error": "The recommendation coordinates are invalid."}, status=400)
     same_location = (
         math.isclose(recommendation_latitude, plan.latitude, abs_tol=LOCATION_MATCH_TOLERANCE)
         and math.isclose(recommendation_longitude, plan.longitude, abs_tol=LOCATION_MATCH_TOLERANCE)
     )
     if not same_location:
         return JsonResponse({
-            "error": f"Lokasi rekomendasi tidak sama dengan lokasi plan ({plan.location_name or 'lokasi plan'}). Tanaman tidak dapat ditambahkan."
+            "error": f"The recommendation location does not match this plan ({plan.location_name or 'plan location'}). The plant was not added."
         }, status=409)
 
     plant = get_object_or_404(Plant, pk=body.get("plant_id"))
@@ -575,7 +575,7 @@ def planplant_list_create(request, plan_pk):
     if body.get("pot_id"):
         pot = get_object_or_404(Pot, pk=body["pot_id"])
         if pot.owner_id not in (None, request.user.pk):
-            return JsonResponse({"error": "Pot tidak dapat digunakan."}, status=403)
+            return JsonResponse({"error": "This pot cannot be used."}, status=403)
 
     item = PlanPlant.objects.create(
         plan     = plan,
@@ -597,7 +597,7 @@ def planplant_detail(request, plan_pk, pk):
         try:
             body = json.loads(request.body)
         except (json.JSONDecodeError, ValueError):
-            return JsonResponse({"error": "JSON tidak valid."}, status=400)
+            return JsonResponse({"error": "The request body must be valid JSON."}, status=400)
 
         if "quantity" in body:
             item.quantity = body["quantity"]
@@ -606,7 +606,7 @@ def planplant_detail(request, plan_pk, pk):
         if "pot_id" in body:
             item.pot = get_object_or_404(Pot, pk=body["pot_id"]) if body["pot_id"] else None
             if item.pot and item.pot.owner_id not in (None, request.user.pk):
-                return JsonResponse({"error": "Pot tidak dapat digunakan."}, status=403)
+                return JsonResponse({"error": "This pot cannot be used."}, status=403)
         item.save()
         return JsonResponse({"ok": True})
 

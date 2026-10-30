@@ -1,26 +1,24 @@
-{% extends "base.html" %} {% load static %} {% block title %}Garden Planning-TerraPeer 
-{% endblock %} 
-{% block body_class %}bg-success-subtle text-success-emphasis{% endblock %}
-{% block extra_head %} 
-{% endblock %} 
+{% extends "base.html" %} {% load static %} {% block title %}Garden Planning · TerraPeer{% endblock %}
+{% block body_class %}bg-light text-success-emphasis{% endblock %}
+{% block extra_head %}<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>{% endblock %}
 {% block content%}
 
 <div class="container py-5">
   <div class="mb-4">
     <span class="badge rounded-pill text-bg-success mb-3"
-      >Rencanakan kebunmu</span
+      >Plan your garden</span
     >
-    <h1 class="display-5 fw-bold mb-2">🌿 Garden Planning</h1>
+    <h1 class="display-5 fw-bold mb-2">Garden Planning</h1>
     <p class="lead text-secondary mb-0">
-      Masukkan lokasi kamu untuk mendapatkan rekomendasi tanaman berdasarkan
-      cuaca setempat.
+      Enter a city to get plant recommendations based on local weather.
     </p>
   </div>
+  <div id="garden-feedback" class="alert d-none" role="status"></div>
 
   <div
     class="card shadow-sm border-0 rounded-4 p-4 p-lg-5 mb-4 text-success-emphasis"
   >
-    <h2 class="h4 mb-3">📍 Langkah 1 — Cari Cuaca Lokasi</h2>
+    <h2 class="h4 mb-3">Find local weather</h2>
     <form id="weather-search-form" class="d-flex flex-wrap align-items-end gap-3" _="on submit target.reset()">
       <div class="position-relative flex-grow-1">
         <input
@@ -28,7 +26,7 @@
           id="city-input"
           name="q"
           type="text"
-          placeholder="Nama kota (misal: Jakarta)"
+          placeholder="City name (e.g. Jakarta)"
           autocomplete="off"
           hx-get="{% url 'garden_planning:city_suggestions' %}"
           hx-trigger="input changed delay:300ms"
@@ -47,14 +45,15 @@
             id="search-spin"
             class="spinner-border spinner-border-sm text-success d-none"
           ></span>
-          Cari Cuaca
+          Search weather
         </button>
         <button
           id="refresh-button"
           class="btn btn-outline-success rounded-pill fw-bold px-4 py-2"
           type="button"
+          disabled
         >
-          Refresh
+          Refresh recommendations
         </button>
       </div>
       <div id="weather-summary" class="w-100 d-flex flex-wrap gap-2 mt-3 d-none"></div>
@@ -66,13 +65,12 @@
     id="rec-section"
     class="card shadow-sm border-0 rounded-4 p-4 p-lg-5 mb-4 text-success-emphasis d-none"
   >
-    <h2 id="rekomendasi-title" class="h4 mb-3">🌱 Langkah 2 — Rekomendasi Tanaman</h2>
+    <h2 id="rekomendasi-title" class="h4 mb-3">Plant recommendations</h2>
     <div id="rec-alert"></div>
 
     <p class="small text-secondary mb-3">
-      Filter yang dipakai:
-      <strong id="filter-watering">—</strong> watering ·
-      <strong id="filter-sunlight">—</strong> sunlight
+      Filters: watering <strong id="filter-watering">—</strong> · sunlight
+      <strong id="filter-sunlight">—</strong>
     </p>
 
     
@@ -80,8 +78,8 @@
       id="pot-rec"
       class="d-inline-flex align-items-center gap-3 bg-success-subtle border border-success-subtle rounded-3 p-3 fw-semibold text-success-emphasis mb-4"
     >
-      <span>🪴</span> 
       <div>
+        <strong class="d-block">Recommended pot</strong>
         <div id="pot-name">—</div>
         <div class="small fw-normal text-secondary" id="pot-detail">—</div>
       </div>
@@ -89,8 +87,7 @@
 
 
     <div id="rec-loading" class="d-none mb-3">
-      <span class="spinner-border spinner-border-sm text-success"></span> Memuat
-      rekomendasi…
+      <span class="spinner-border spinner-border-sm text-success"></span> Loading recommendations…
     </div>
     <div
       id="plant-grid"
@@ -102,9 +99,9 @@
     class="card shadow-sm border-0 rounded-4 p-4 p-lg-5 mb-4 text-success-emphasis"
   >
     <div class="d-flex align-items-center justify-content-between mb-4">
-      <h2 class="h4 mb-0">📋 Rencana Saya</h2>
+      <h2 class="h4 mb-0">My plans</h2>
       <button class="btn btn-outline-success btn-sm" onclick="showCreatePlan()">
-        + Rencana Baru
+        + New plan
       </button>
     </div>
 
@@ -117,91 +114,113 @@
           class="form-control"
           id="plan-name"
           type="text"
-          placeholder="Nama rencana"
+          placeholder="Plan name"
         />
         <input
           class="form-control"
           id="plan-loc"
           type="text"
-          placeholder="Nama lokasi (opsional)"
+          placeholder="Location name (optional)"
         />
         <div class="d-flex gap-2">
           <button class="btn btn-success btn-sm" onclick="createPlan()">
-            Simpan
+            Save
           </button>
           <button
             class="btn btn-outline-success btn-sm"
             onclick="hidePlanForm()"
           >
-            Batal
+            Cancel
           </button>
         </div>
       </div>
     </div>
 
-    <div class="border-top pt-4 mt-3">
-      <h3 class="h5 mb-3">🪴 Pot Saya</h3>
-      {% for message in messages %}
-        <div class="alert alert-success" role="status">{{ message }}</div>
-      {% endfor %}
-      <form method="post" action="{% url 'garden_planning:index' %}?plan_id={{ plan_id }}#pot-name-input" class="row g-2 align-items-end mb-3">
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="pot_create" />
-        <input type="hidden" name="plan_id" value="{{ plan_id }}" />
-        <div class="col-12 col-md-4">
-          <label class="form-label" for="{{ pot_form.name.id_for_label }}">{{ pot_form.name.label }}</label>
-          {{ pot_form.name }}
-          {% for error in pot_form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
-        </div>
-        <div class="col-12 col-md-3">
-          <label class="form-label" for="{{ pot_form.size_cm.id_for_label }}">{{ pot_form.size_cm.label }}</label>
-          {{ pot_form.size_cm }}
-          {% for error in pot_form.size_cm.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
-        </div>
-        <div class="col-12 col-md-3">
-          <label class="form-label" for="{{ pot_form.material.id_for_label }}">{{ pot_form.material.label }}</label>
-          {{ pot_form.material }}
-          {% for error in pot_form.material.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
-        </div>
-        <div class="col-12 col-md-2">
-          <button class="btn btn-success btn-sm w-100" type="submit">+ Tambah Pot</button>
-        </div>
-      </form>
-      <ul
-        id="pot-list"
-        class="list-unstyled d-flex flex-column gap-2"
-        hx-get="{% url 'garden_planning:pot_list_partial' %}"
-        hx-trigger="load, potsChanged from:body"
-        hx-swap="innerHTML"
-      ></ul>
-    </div>
-
     <ul id="plan-list" class="list-unstyled d-flex flex-column gap-2">
-      <li id="empty-plan" class="small text-secondary">Memuat rencana…</li>
+      <li id="empty-plan" class="small text-secondary">Loading plans…</li>
     </ul>
   </div>
 
-  <div id="edit-plan-modal" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-none align-items-center justify-content-center p-3 z-3" role="dialog" aria-modal="true" aria-labelledby="edit-plan-title">
-    <div class="modal-dialog modal-dialog-centered w-100">
+  <div class="card shadow-sm border-0 rounded-4 p-4 p-lg-5 mb-4 text-success-emphasis">
+    <h2 class="h4 mb-3">My pots</h2>
+    {% for message in messages %}
+      <div class="alert alert-success" role="status">{{ message }}</div>
+    {% endfor %}
+    <form method="post" action="{% url 'garden_planning:index' %}?plan_id={{ plan_id }}#pot-name-input" class="row g-2 align-items-end mb-3">
+      {% csrf_token %}
+      <input type="hidden" name="form_type" value="pot_create" />
+      <input type="hidden" name="plan_id" value="{{ plan_id }}" />
+      <div class="col-12 col-md-4">
+        <label class="form-label" for="{{ pot_form.name.id_for_label }}">Pot name</label>
+        {{ pot_form.name }}
+        {% for error in pot_form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label" for="{{ pot_form.size_cm.id_for_label }}">Size (cm)</label>
+        {{ pot_form.size_cm }}
+        {% for error in pot_form.size_cm.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label" for="{{ pot_form.material.id_for_label }}">Material</label>
+        {{ pot_form.material }}
+        {% for error in pot_form.material.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="col-12 col-md-2">
+        <button class="btn btn-success btn-sm w-100" type="submit">+ Add pot</button>
+      </div>
+    </form>
+    <ul
+      id="pot-list"
+      class="list-unstyled d-flex flex-column gap-2"
+      hx-get="{% url 'garden_planning:pot_list_partial' %}"
+      hx-trigger="load, potsChanged from:body"
+      hx-swap="innerHTML"
+    ></ul>
+  </div>
+
+  <div id="edit-plan-modal" class="modal fade" tabindex="-1" aria-labelledby="edit-plan-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content rounded-4 border-0 shadow">
         <div class="modal-header border-0">
-          <h2 id="edit-plan-title" class="modal-title h5 text-success-emphasis">Edit rencana</h2>
-          <button type="button" class="btn-close" aria-label="Tutup" onclick="closeEditPlan()"></button>
+          <h2 id="edit-plan-title" class="modal-title h5 text-success-emphasis">Edit plan</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body pt-0">
-          <label for="edit-plan-name" class="form-label">Nama rencana</label>
+          <label for="edit-plan-name" class="form-label">Plan name</label>
           <input id="edit-plan-name" class="form-control mb-3" type="text" />
-          <label for="edit-plan-status" class="form-label">Status rencana</label>
+          <label for="edit-plan-status" class="form-label">Plan status</label>
           <select id="edit-plan-status" class="form-select">
-            <option value="planning">Perencanaan</option>
-            <option value="ready">Siap Tanam</option>
-            <option value="planted">Sudah Ditanam</option>
+            <option value="planning">Planning</option>
+            <option value="ready">Ready to plant</option>
+            <option value="planted">Planted</option>
           </select>
         </div>
         <div class="modal-footer border-0 pt-0">
-          <button class="btn btn-outline-secondary rounded-pill" onclick="closeEditPlan()">Batal</button>
-          <button class="btn btn-success rounded-pill" onclick="savePlanEdit()">Simpan perubahan</button>
+          <button class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success rounded-pill" onclick="savePlanEdit()">Save changes</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="action-modal" class="modal fade" tabindex="-1" aria-labelledby="action-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow">
+        <form id="action-modal-form">
+          <div class="modal-header border-0">
+            <h2 id="action-modal-title" class="modal-title h5"></h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body pt-0">
+            <p id="action-modal-message" class="text-secondary"></p>
+            <div id="action-modal-fields" class="d-grid gap-3"></div>
+            <div id="action-modal-feedback" class="alert alert-danger d-none mt-3 mb-0" role="alert"></div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+            <button id="action-modal-submit" class="btn btn-success rounded-pill" type="submit">Continue</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

@@ -57,6 +57,6 @@ class PotForm(forms.ModelForm):
         raw_name = ACTIVE_HTML_CONTENT.sub("", self.cleaned_data["name"])
         name = strip_tags(raw_name).strip()
         if not name:
-            raise forms.ValidationError("Nama pot tidak boleh kosong.")
+            raise forms.ValidationError("Pot name cannot be empty.")
         return name
 
