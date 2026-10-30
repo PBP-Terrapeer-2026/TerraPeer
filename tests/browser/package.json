@@ -1,0 +1,10 @@
+{
+  "name": "terrapeer-browser-tests",
+  "private": true,
+  "scripts": {
+    "test": "python ../../manage.py test my_plants.browser_tests --noinput"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

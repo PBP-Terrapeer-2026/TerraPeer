@@ -18,7 +18,8 @@ class ProjectIntegrationTests(TestCase):
                 "next": "/plant-care/",
             },
         )
-        self.assertRedirects(response, reverse("show_main"))
+        # Login honours a safe local ?next= so the user lands back on Plant Care.
+        self.assertRedirects(response, "/plant-care/")
         page = self.client.get("/plant-care/")
         self.assertContains(page, "Your plants will appear here")
         self.assertContains(page, "css/style.css")
@@ -56,6 +57,8 @@ class ProjectIntegrationTests(TestCase):
         self.assertContains(page, "terrapeer/css/care-final.css")
         self.assertContains(page, "terrapeer/js/plant-care.js")
         home = self.client.get("/")
+        # Signed-in users are sent away from /login/, so check it signed out.
+        self.client.logout()
         login = self.client.get("/login/")
         for response in (home, login):
             self.assertNotContains(response, "terrapeer/css/care-final.css")

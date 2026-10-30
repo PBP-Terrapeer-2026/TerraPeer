@@ -16,6 +16,9 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
+PERENUAL_API_KEY=os.environ.get("PERENUAL_API_KEY")
+API_URL=os.environ.get("API_URL", "")
+DJANGO_SECRET_KEY=os.environ.get("DJANGO_SECRET_KEY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,11 +28,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-9afwg_o9lm4+627gm!$87+f=wo+bksg9x@kz0uw6%)+q3dqa=3"
+# Development falls back to an insecure key; production must set DJANGO_SECRET_KEY.
+SECRET_KEY = DJANGO_SECRET_KEY or "django-insecure-9afwg_o9lm4+627gm!$87+f=wo+bksg9x@kz0uw6%)+q3dqa=3"
 
 PRODUCTION = os.getenv("PRODUCTION", "False").lower() == "true"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not PRODUCTION
+
+if PRODUCTION and not DJANGO_SECRET_KEY:
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured("Set DJANGO_SECRET_KEY in the production environment.")
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -54,6 +62,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "main",
+    "my_plants",
+    "garden_planning",
+    "garden_setup",
     "care",
 ]
 
@@ -147,14 +158,22 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 WHITENOISE_USE_FINDERS = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = 'login'
+PERENUAL_API_KEY = os.getenv('PERENUAL_API_KEY', '')
+
+SESSION_COOKIE_AGE= 3600
+
+SESSION_SAVE_EVERY_REQUEST = True
+
 
 WEATHER_DEMO = os.getenv("WEATHER_DEMO", "0") == "1"
