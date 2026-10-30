@@ -5,7 +5,10 @@ from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.core.cache import cache
 import requests
-from .models import GardenSpace, Plant, CareTask
+from .models import CareTask, PlantCareSpace
+from my_plants.models import Plant
+from .integration import plant_today
+from .test_helpers import make_space, make_plant
 from .forms import CareTaskForm
 from .services import complete_task
 from .weather import forecast, ForecastUnavailable
@@ -20,12 +23,10 @@ class CareTests(TestCase):
         cls.other = get_user_model().objects.create_user(
             "other", password="test-only-password"
         )
-        cls.garden = GardenSpace.objects.create(
-            owner=cls.user, name="Balcony", latitude=-6.4, longitude=106.8
-        )
-        cls.plant = Plant.objects.create(garden=cls.garden, name="Mint", pot="B")
-        cls.second = Plant.objects.create(
-            garden=cls.garden, name="Tomato", pot="A", image="tomato"
+        cls.garden = make_space(cls.user)
+        cls.plant = make_plant(cls.user, cls.garden)
+        cls.second = make_plant(
+            cls.user, cls.garden, name="Tomato", species_name="Tomato"
         )
 
     def setUp(self):
@@ -34,7 +35,7 @@ class CareTests(TestCase):
             plant=self.plant,
             title="Water mint",
             action_type="Watering",
-            due_date=self.plant.today - timedelta(days=1),
+            due_date=plant_today(self.plant) - timedelta(days=1),
             repeat_every=3,
             instructions="Check first.",
         )
@@ -45,7 +46,7 @@ class CareTests(TestCase):
     def data(self, **overrides):
         data = {
             "action_type": "Watering",
-            "due_date": str(self.plant.today),
+            "due_date": str(plant_today(self.plant)),
             "repeat": "every",
             "interval": "3",
             "instructions": "Keep me",
@@ -55,6 +56,7 @@ class CareTests(TestCase):
 
     def test_plant_deletion_protects_task_history(self):
         from django.db.models.deletion import ProtectedError
+
         self.client.post(self.url("complete"))
         with self.assertRaises(ProtectedError):
             self.plant.delete()
@@ -160,7 +162,7 @@ class CareTests(TestCase):
         self.assertEqual(CareTask.objects.count(), 1)
 
     def test_inactive_no_next_and_no_add(self):
-        self.plant.status = "Finished"
+        self.plant.growth_stage = Plant.Stage.FINISHED
         self.plant.save()
         self.client.post(self.url("complete"))
         self.assertEqual(CareTask.objects.count(), 1)
@@ -198,13 +200,13 @@ class CareTests(TestCase):
             plant=self.plant,
             title="Upcoming",
             action_type="Inspection",
-            due_date=self.plant.today + timedelta(days=1),
+            due_date=plant_today(self.plant) + timedelta(days=1),
         )
         CareTask.objects.create(
             plant=self.second,
             title="Other plant task",
             action_type="Inspection",
-            due_date=self.plant.today,
+            due_date=plant_today(self.plant),
         )
         data = self.client.get(
             self.url("list", self.plant.pk), {"time": "upcoming", "status": "Pending"}
@@ -226,7 +228,7 @@ class CareTests(TestCase):
             plant=self.plant,
             title="Earlier task",
             action_type="Pruning",
-            due_date=self.plant.today - timedelta(days=3),
+            due_date=plant_today(self.plant) - timedelta(days=3),
         )
         data = self.client.get(self.url("list", self.plant.pk)).json()["html"]
         self.assertLess(data.index(earlier.title), data.index(self.task.title))
@@ -253,7 +255,7 @@ class CareTests(TestCase):
         self.assertEqual(list(response.context["tasks"]), [self.task])
         self.assertEqual(len(response.context["calendar"]), 7)
         response = self.client.get(
-            self.url("page", self.plant.pk), {"date": str(self.plant.today)}
+            self.url("page", self.plant.pk), {"date": str(plant_today(self.plant))}
         )
         self.assertEqual(list(response.context["tasks"]), [])
 
@@ -290,7 +292,7 @@ class CareTests(TestCase):
                 plant=self.plant,
                 title=f"Task {offset}",
                 action_type="Inspection",
-                due_date=self.plant.today + timedelta(days=offset),
+                due_date=plant_today(self.plant) + timedelta(days=offset),
             )
         request = RequestFactory().get("/")
         # Plant+garden already loaded: totals, grouped calendar, selected tasks = 3.
@@ -323,12 +325,10 @@ class CareTests(TestCase):
                 "My Plants",
                 "Plant Care",
                 "Journal",
-                "Explore",
             ],
         )
-        self.assertIsNone(items[1]["url"])
+        self.assertTrue(all(item["url"] for item in items))
         self.assertEqual([item["key"] for item in items if item["active"]], ["care"])
-
 
 
 @override_settings(WEATHER_DEMO=False)
@@ -343,7 +343,7 @@ class WeatherTests(TestCase):
     def sample(self):
         return {
             "daily": {
-                "time": [str(self.plant.today)],
+                "time": [str(plant_today(self.plant))],
                 "weather_code": [61],
                 "temperature_2m_min": [24],
                 "temperature_2m_max": [28],
@@ -352,7 +352,7 @@ class WeatherTests(TestCase):
             }
         }
 
-    @patch("care.weather.requests.get")
+    @patch("plant_care.weather.requests.get")
     def test_live_parser_cache_units(self, get):
         get.return_value = Mock(json=lambda: self.sample())
         data = forecast(self.garden)
@@ -363,7 +363,7 @@ class WeatherTests(TestCase):
         self.assertEqual(get.call_args.kwargs["params"]["timezone"], "Asia/Jakarta")
         self.assertEqual(get.call_args.kwargs["params"]["precipitation_unit"], "mm")
 
-    @patch("care.weather.requests.get", side_effect=requests.Timeout)
+    @patch("plant_care.weather.requests.get", side_effect=requests.Timeout)
     def test_network_error_and_tasks_still_available(self, get):
         self.assertEqual(
             self.client.get(self.url("weather", self.plant.pk)).status_code, 503
@@ -372,7 +372,7 @@ class WeatherTests(TestCase):
             self.client.get(self.url("list", self.plant.pk)).status_code, 200
         )
 
-    @patch("care.weather.requests.get")
+    @patch("plant_care.weather.requests.get")
     def test_missing_values_are_not_zero(self, get):
         sample = self.sample()
         sample["daily"]["precipitation_sum"] = [None]
@@ -380,11 +380,9 @@ class WeatherTests(TestCase):
         result = self.client.get(self.url("weather", self.plant.pk)).json()["html"]
         self.assertIn("— mm", result)
 
-    @patch("care.weather.requests.get")
+    @patch("plant_care.weather.requests.get")
     def test_no_coordinates_skips_network(self, get):
-        self.garden.latitude = None
-        self.garden.save()
-        self.assertEqual(forecast(self.garden)["state"], "no-location")
+        self.assertEqual(forecast(None)["state"], "no-location")
         get.assert_not_called()
 
 
@@ -465,7 +463,7 @@ class UndoTests(TestCase):
         self.assertEqual(self.task.status, "Completed")
 
     def test_undo_inactive_plant_keeps_pending_without_followup(self):
-        self.plant.status = "Finished"
+        self.plant.growth_stage = Plant.Stage.FINISHED
         self.plant.save()
         self.client.post(self.url("complete"))
         self.assertEqual(self.client.post(self.url("undo")).status_code, 200)

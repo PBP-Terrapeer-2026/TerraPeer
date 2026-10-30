@@ -914,3 +914,30 @@
         max-width: none;
     }
 }
+
+
+/* Post-merge care fixes: account, official space selection and mobile clearance. */
+.care-page .care-account { position: relative; flex-shrink: 0; }
+.care-page .care-account .avatar { border: 0; width: 44px; height: 44px; }
+.care-page .care-account .avatar::after { display: none; }
+.care-page .care-account .dropdown-menu { min-width: 180px; border-radius: 16px; }
+.care-page .care-mobile-links { display: none; }
+.care-page .care-space-form { padding: 16px 20px; }
+.care-page .care-space-form label { display: block; font-weight: 600; margin-bottom: 8px; }
+.care-page .care-space-controls { display: flex; gap: 8px; align-items: center; }
+.care-page .care-space-controls select { flex: 1; min-width: 0; width: 100%; }
+.care-page .care-space-form > a { display: inline-block; margin-top: 8px; font-size: 12px; text-decoration: underline; }
+.care-page .care-legacy-notice { padding: 12px 0; }
+.care-page .care-legacy-notice a { text-decoration: underline; }
+@media (max-width: 740px) {
+    .care-page.care-final { --care-tab-clearance: calc(112px + env(safe-area-inset-bottom, 0px)); }
+    /* Body clearance cannot be overridden by shared #main-content styles. */
+    body.care-page.care-final { padding-bottom: var(--care-tab-clearance); }
+    .care-page.care-final #main-content { padding-bottom: 24px; }
+    .care-page.care-final .mobile-bottom { min-height: 76px; }
+    .care-page.care-final .mobile-bottom a { min-width: 0; padding: 8px 12px; }
+    .care-page.care-final .care-mobile-links { display: flex; gap: 12px; overflow-x: auto; padding-top: 10px; }
+    .care-page.care-final .care-mobile-links a { white-space: nowrap; font-size: 12px; padding: 8px 0; }
+    .care-page.care-final .care-mobile-links [aria-current] { font-weight: 700; text-decoration: underline; }
+    .care-page.care-final [id] { scroll-margin-top: 150px; scroll-margin-bottom: var(--care-tab-clearance); }
+}

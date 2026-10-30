@@ -1,6 +1,5 @@
 from functools import wraps
 from datetime import date, timedelta
-from zoneinfo import ZoneInfo
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Case, When, Value, IntegerField, Count, Q
@@ -9,8 +8,9 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
-from .models import Plant, CareTask
-from .forms import CareTaskForm
+from .models import CareTask, PlantCareSpace, LegacyPlant
+from .integration import plants_for, plant_space, plant_today, plant_timezone
+from .forms import CareTaskForm, PlantCareSpaceForm, LegacyPlantLinkForm
 from .services import complete_task, undo_completion, UndoCompletionConflict
 from .weather import forecast, ForecastUnavailable
 
@@ -32,16 +32,14 @@ def api_auth(view):
 
 
 def owned_plant(request, pk):
-    return get_object_or_404(
-        Plant.objects.select_related("garden"), pk=pk, garden__owner=request.user
-    )
+    return get_object_or_404(plants_for(request.user), pk=pk)
 
 
 def owned_task(request, pk, lock=False):
-    query = CareTask.objects.select_related("plant__garden")
+    query = CareTask.objects.select_related("plant__care_location__growing_space")
     if lock:
-        query = query.select_for_update()
-    return get_object_or_404(query, pk=pk, plant__garden__owner=request.user)
+        query = query.select_for_update(of=("self",))
+    return get_object_or_404(query, pk=pk, plant__owner=request.user)
 
 
 def fragment(request, name, context, status=200):
@@ -53,7 +51,7 @@ def fragment(request, name, context, status=200):
 
 def list_context(request, plant):
     """Build one consistent snapshot for the initial page and AJAX refreshes."""
-    today = plant.today
+    today = plant_today(plant)
     time_filter = request.GET.get("time", "all")
     status_filter = request.GET.get("status", "all")
     action_filter = request.GET.get("action", "")
@@ -98,7 +96,7 @@ def list_context(request, plant):
         for i in range(7)
     ]
 
-    tasks = all_tasks.select_related("plant__garden")
+    tasks = all_tasks.select_related("plant__care_location__growing_space")
     if time_filter == "today":
         tasks = tasks.filter(due_date=today)
     elif time_filter == "upcoming":
@@ -142,8 +140,8 @@ def list_context(request, plant):
 @login_required(login_url="login")
 @require_GET
 def choose(request):
-    plants = Plant.objects.filter(garden__owner=request.user).select_related("garden")
-    first = plants.filter(status="Active").first() or plants.first()
+    plants = plants_for(request.user)
+    first = plants.active().first() or plants.first()
     if first:
         return redirect("care:page", pk=first.pk)
     return render(request, "care/no_plants.html")
@@ -154,8 +152,10 @@ def choose(request):
 def page(request, pk):
     plant = owned_plant(request, pk)
     context = list_context(request, plant)
-    context["plants"] = Plant.objects.filter(garden__owner=request.user).select_related(
-        "garden"
+    context["plants"] = plants_for(request.user)
+    context["space_form"] = PlantCareSpaceForm(
+        user=request.user,
+        instance=PlantCareSpace.objects.filter(plant=plant).first(),
     )
     context["title"] = "Plant Care · " + plant.name
     return render(request, "care/page.html", context)
@@ -187,7 +187,11 @@ def task_list(request, pk):
 def detail(request, pk):
     task = owned_task(request, pk)
     next_date = None
-    if task.repeat_every and task.plant.active and task.status == "Pending":
+    if (
+        task.repeat_every
+        and (task.plant.status == "active")
+        and task.status == "Pending"
+    ):
         try:
             next_date = task.due_date + timedelta(days=task.repeat_every)
         except OverflowError:
@@ -198,8 +202,9 @@ def detail(request, pk):
         {
             "task": task,
             "next_date": next_date,
+            "plant_timezone": str(plant_timezone(task.plant)),
             "completed_local": (
-                task.completed_at.astimezone(ZoneInfo(task.plant.garden.timezone_name))
+                task.completed_at.astimezone(plant_timezone(task.plant))
                 if task.completed_at
                 else None
             ),
@@ -220,7 +225,7 @@ def form_response(request, form, plant, task=None, code=200):
 @require_http_methods(["GET", "POST"])
 def add(request, pk):
     plant = owned_plant(request, pk)
-    if not plant.active:
+    if plant.status != "active":
         return JsonResponse(
             {"message": "New tasks require an active plant."}, status=409
         )
@@ -281,7 +286,7 @@ def complete(request, pk):
     message = "Task completed." if changed else "This task was already completed."
     if following:
         message += f" Next reminder: {following.due_date:%d %b %Y}."
-    elif changed and task.repeat_every and not task.plant.active:
+    elif changed and task.repeat_every and not (task.plant.status == "active"):
         message += " No next reminder: the plant is not active."
     return JsonResponse(
         {
@@ -343,18 +348,70 @@ def delete(request, pk):
 def weather_view(request, pk):
     plant = owned_plant(request, pk)
     try:
-        data = forecast(plant.garden)
+        garden = plant_space(plant)
+        data = forecast(garden)
         try:
             index = max(0, min(int(request.GET.get("day", "0")), len(data["days"]) - 1))
         except ValueError:
             index = 0
         data["selected"] = index
         data["day"] = data["days"][index] if data["days"] else None
-        return fragment(request, "weather", {"plant": plant, "forecast": data})
+        return fragment(
+            request, "weather", {"plant": plant, "garden": garden, "forecast": data}
+        )
     except ForecastUnavailable:
         return fragment(
             request,
             "weather",
-            {"plant": plant, "forecast": {"state": "error"}},
+            {
+                "plant": plant,
+                "garden": plant_space(plant),
+                "forecast": {"state": "error"},
+            },
             status=503,
         )
+
+
+@api_auth
+@require_POST
+def set_space(request, pk):
+    plant = owned_plant(request, pk)
+    instance = PlantCareSpace.objects.filter(plant=plant).first()
+    if instance is None:
+        instance = PlantCareSpace(plant=plant)
+    form = PlantCareSpaceForm(request.POST, user=request.user, instance=instance)
+    if not form.is_valid():
+        return JsonResponse(
+            {"message": "Choose one of your growing spaces.", "errors": form.errors},
+            status=422,
+        )
+    PlantCareSpace.objects.update_or_create(
+        plant=plant,
+        defaults={"growing_space": form.cleaned_data["growing_space"]},
+    )
+    return JsonResponse(
+        {"message": "Care location saved. Forecast and calendar updated."}
+    )
+
+
+@login_required(login_url="login")
+@require_http_methods(["GET", "POST"])
+@transaction.atomic
+def link_legacy(request):
+    """The owner maps old tasks explicitly; names and IDs are never guessed."""
+    form = LegacyPlantLinkForm(
+        request.POST if request.method == "POST" else None,
+        user=request.user,
+    )
+    if request.method == "POST" and form.is_valid():
+        old = get_object_or_404(
+            LegacyPlant.objects.select_for_update(),
+            pk=form.cleaned_data["legacy_plant"].pk,
+            garden__owner=request.user,
+        )
+        plant = form.cleaned_data["plant"]
+        CareTask.objects.filter(legacy_plant=old, plant__isnull=True).update(
+            plant=plant
+        )
+        return redirect("care:page", pk=plant.pk)
+    return render(request, "care/link_legacy.html", {"form": form})

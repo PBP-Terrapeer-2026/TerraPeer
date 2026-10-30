@@ -2,7 +2,7 @@
 <div class="dialog-head">
     <div>
         <h2 id="dialog-title">{% if task %}Edit care task{% else %}New care task{% endif %}</h2>
-        <p>{{ plant.name }} · {{ plant.pot }} · {{ plant.garden.name }}</p>
+        <p>{{ plant.name }} · {{ plant.species_name }}</p>
     </div>
     <button class="iconbtn" data-close aria-label="Close dialog">{% icon 'close' %}</button>
 </div>

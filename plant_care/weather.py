@@ -1,7 +1,7 @@
 """Open-Meteo daily forecast: timeout, cache, timezone, missing values."""
 
 from datetime import timedelta
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import requests
 from django.conf import settings
 from django.core.cache import cache
@@ -33,9 +33,12 @@ def condition(code):
 
 
 def forecast(garden):
-    if garden.latitude is None or garden.longitude is None:
+    if garden is None or garden.latitude is None or garden.longitude is None:
         return {"state": "no-location", "days": []}
-    today = timezone.localdate(timezone=ZoneInfo(garden.timezone_name))
+    try:
+        today = timezone.localdate(timezone=ZoneInfo(garden.timezone))
+    except (ZoneInfoNotFoundError, ValueError) as exc:
+        raise ForecastUnavailable("Growing space timezone is invalid") from exc
     if settings.WEATHER_DEMO:
         days = []
         for i, (code, lo, hi, rain, mm) in enumerate(
@@ -60,7 +63,7 @@ def forecast(garden):
                 )
             )
         return {"state": "ready", "days": days, "demo": True}
-    key = f"care-weather:{garden.latitude}:{garden.longitude}:{garden.timezone_name}:{today}"
+    key = f"care-weather:{garden.latitude}:{garden.longitude}:{garden.timezone}:{today}"
     cached = cache.get(key)
     if cached is not None:
         return cached
@@ -78,7 +81,7 @@ def forecast(garden):
                 "latitude": garden.latitude,
                 "longitude": garden.longitude,
                 "daily": ",".join(fields),
-                "timezone": garden.timezone_name,
+                "timezone": garden.timezone,
                 "forecast_days": 4,
                 "temperature_unit": "celsius",
                 "precipitation_unit": "mm",

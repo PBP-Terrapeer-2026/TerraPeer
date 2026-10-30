@@ -69,7 +69,7 @@
         </p>
         {% if has_tasks %}
             <button class="btn secondary" data-reset>Reset Filters</button>
-        {% elif plant.active %}
+        {% elif plant.status == 'active' %}
             <button class="btn secondary" data-open="{% url 'care:add' plant.pk %}">Add care task</button>
         {% endif %}
     </div>

@@ -10,10 +10,9 @@
             {% else %}
                 <span class="nav-unavailable"
                       aria-disabled="true"
-                      title="{{ item.label }} is not connected in this Plant Care preview">{{ item.label }}</span>
+                      title="{{ item.label }} is unavailable">{{ item.label }}</span>
             {% endif %}
         {% endfor %}
     </div>
-    <span class="avatar"
-          aria-label="Signed in as {{ request.user.username }}">{{ request.user.username|first|upper }}</span>
+    {% include "care/account.html" %}
 </nav>

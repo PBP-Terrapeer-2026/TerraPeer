@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     "my_plants",
     "garden_planning",
     "garden_setup",
-    "care",
+    "plant_care.apps.PlantCareConfig",
 ]
 
 MIDDLEWARE = [
@@ -91,7 +91,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "care.context_processors.care_navigation",
+                "plant_care.context_processors.care_navigation",
             ],
         },
     },

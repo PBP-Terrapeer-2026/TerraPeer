@@ -15,6 +15,12 @@
         <div class="schedule-grid">
             {% include "care/calendar.html" %}
             <aside class="weather-area">
+                <form id="space-form" class="care-space-form" method="post" action="{% url 'care:set-space' plant.pk %}">
+                    {% csrf_token %}
+                    <label for="{{ space_form.growing_space.id_for_label }}">{{ space_form.growing_space.label }}</label>
+                    <div class="care-space-controls">{{ space_form.growing_space }}<button class="btn secondary" type="submit">Save</button></div>
+                    <a href="{% url 'garden_setup:space_list' %}">Manage growing spaces</a>
+                </form>
                 <div id="weather-slot" aria-live="polite">
                     <section class="panel weather">
                         <h2>Weather forecast</h2>
@@ -55,7 +61,7 @@
                         <select id="plant-select">
                             {% for p in plants %}
                                 <option value="{% url 'care:page' p.pk %}"
-                                        {% if p.pk == plant.pk %}selected{% endif %}>{{ p.name }} · {{ p.garden.name }}</option>
+                                        {% if p.pk == plant.pk %}selected{% endif %}>{{ p.name }} · {{ p.species_name }}</option>
                             {% endfor %}
                         </select>
                     </label>
@@ -82,7 +88,7 @@
                     <button type="button" class="link" data-reset>Reset filters</button>
                 </form>
                 <div class="list-caption">
-                    <span>{{ plant.name }} · {{ plant.garden.name }}</span>
+                    <span>{{ plant.name }}</span>
                     <span id="pending-count">{{ pending_count }} pending</span>
                 </div>
                 <div id="task-list" aria-live="polite">{% include "care/task_list.html" %}</div>
@@ -100,7 +106,7 @@
             <a href="{% url 'care:choose' %}" aria-current="page">{% icon 'water' %}
                 <span>Care</span>
             </a>
-            <a href="#plant-select">{% icon 'sprout' %}
+            <a href="{% url 'my_plants:list' %}">{% icon 'sprout' %}
                 <span>Plants</span>
             </a>{% url 'garden_journal' as journal_url %}
             {% if journal_url %}
