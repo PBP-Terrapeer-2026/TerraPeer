@@ -1,0 +1,135 @@
+{% extends "my_plants/base.html" %}
+{% block title %}{{ plant.name }} · Growing recap · TerraPeer{% endblock %}
+{% block body_class %}plants-page recap-page{% endblock %}
+
+{% block plants_content %}
+    <a class="mp-back d-print-none" href="{{ plant.get_absolute_url }}"><svg class="mp-icon mp-icon-sm"><use href="#i-back"/></svg>Back to {{ plant.name }}</a>
+
+    <section class="mp-recap-hero mt-3" aria-labelledby="recap-title">
+        <div class="mp-recap-copy">
+            <p class="tp-eyebrow mp-recap-eyebrow"><svg class="mp-icon mp-icon-sm" aria-hidden="true"><use href="#i-sparkle"/></svg> {% if finished %}Growing recap{% else %}The story so far{% endif %}</p>
+            <h1 id="recap-title">{{ plant.name }}</h1>
+            <p class="mp-recap-species">{{ plant.species_name }}</p>
+            <p class="mp-recap-days"><span>{{ total_days }}</span> day{{ total_days|pluralize }} {% if finished %}from planting to finish{% else %}and counting{% endif %}</p>
+            <p class="mp-recap-dates">Planted {{ plant.planted_on|date:"j M Y" }}{% if finished_on %} · Finished {{ finished_on|date:"j M Y" }}{% endif %}</p>
+            <div class="d-flex flex-wrap gap-2 mt-4 d-print-none">
+                <button type="button" class="btn btn-light" data-print><svg class="mp-icon mp-icon-sm"><use href="#i-print"/></svg>Print or save as PDF</button>
+                {% if finished %}<a class="btn btn-outline-light" href="{% url 'my_plants:create' %}?species={{ plant.species_name|urlencode }}"><svg class="mp-icon mp-icon-sm"><use href="#i-sprout"/></svg>Grow it again</a>{% endif %}
+            </div>
+        </div>
+        <div class="mp-recap-cover mp-art-{{ plant.growth_stage }}">
+            {% if cover %}<img src="{{ cover.get_absolute_url }}" alt="Latest photo of {{ plant.name }}">{% else %}{% include "my_plants/_botanical.html" %}{% endif %}
+        </div>
+    </section>
+
+    {% if not finished %}
+        <div class="alert alert-info mt-4 d-print-none" role="status">This plant is still growing. The full recap is ready when you mark it <strong>Finished</strong> — each stage change adds a photo to this story.</div>
+    {% endif %}
+
+    <section class="row row-cols-2 row-cols-md-5 g-3 mt-2" aria-label="Highlights">
+        <div class="col"><div class="mp-recap-stat"><strong>{{ total_days }}</strong><span>Days grown</span></div></div>
+        <div class="col"><div class="mp-recap-stat"><strong>{{ stages_reached }}</strong><span>Stage{{ stages_reached|pluralize }} reached</span></div></div>
+        <div class="col"><div class="mp-recap-stat"><strong>{{ photos|length }}</strong><span>Photo{{ photos|length|pluralize }}</span></div></div>
+        <div class="col"><div class="mp-recap-stat"><strong>{{ check_in_total }}</strong><span>Check-in{{ check_in_total|pluralize }}</span></div></div>
+        <div class="col"><div class="mp-recap-stat"><strong>{% if healthy_pct is not None %}{{ healthy_pct }}%{% else %}—{% endif %}</strong><span>Healthy check-ins</span></div></div>
+    </section>
+
+    <section class="card mt-4" aria-labelledby="journey-title">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-3">
+                <h2 id="journey-title" class="h4 mb-0">The journey</h2>
+                {% if longest %}<p class="small text-muted mb-0">Longest stage: <strong>{{ longest.label }}</strong> · {{ longest.days }} day{{ longest.days|pluralize }}</p>{% endif %}
+            </div>
+            <div class="mp-journey" role="img" aria-label="{% for s in segments %}{{ s.label }} {{ s.days }} days{% if not forloop.last %}, {% endif %}{% endfor %}{% if finished %}, then finished{% endif %}">
+                {% for s in segments %}
+                    <div class="mp-journey-seg mp-seg-{{ s.stage }}" style="flex: {{ s.grow }} 1 0">
+                        <span class="mp-journey-label">{{ s.label }}</span>
+                        <span class="mp-journey-days">{{ s.days }}d</span>
+                    </div>
+                {% endfor %}
+                {% if finished %}<div class="mp-journey-end" title="Finished"><svg class="mp-icon mp-icon-sm"><use href="#i-check"/></svg></div>{% endif %}
+            </div>
+            <ol class="mp-milestones">
+                {% for chapter in chapters %}
+                    <li><span class="mp-dot mp-dot-{{ chapter.stage }}" aria-hidden="true"></span><strong>{{ chapter.label }}</strong><span>Day {{ chapter.day }} · {{ chapter.start|date:"j M Y" }}</span></li>
+                {% endfor %}
+            </ol>
+        </div>
+    </section>
+
+    {% if first_photo and last_photo %}
+    <section class="mt-4" aria-labelledby="ba-title">
+        <h2 id="ba-title" class="h4 mb-3">Then and now</h2>
+        <div class="row g-3 mp-ba-row">
+            <figure class="col-6 mb-0 mp-ba">
+                <img src="{{ first_photo.get_absolute_url }}" alt="{{ plant.name }} on day {{ first_photo.day_number }}" loading="lazy">
+                <figcaption><span class="badge mp-stage mp-stage-{{ first_photo.stage }}">{{ first_photo.get_stage_display }}</span> Day {{ first_photo.day_number }} · {{ first_photo.created_at|date:"j M Y" }}</figcaption>
+            </figure>
+            <figure class="col-6 mb-0 mp-ba">
+                <img src="{{ last_photo.get_absolute_url }}" alt="{{ plant.name }} on day {{ last_photo.day_number }}" loading="lazy">
+                <figcaption><span class="badge mp-stage mp-stage-{{ last_photo.stage }}">{{ last_photo.get_stage_display }}</span> Day {{ last_photo.day_number }} · {{ last_photo.created_at|date:"j M Y" }}</figcaption>
+            </figure>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="mt-5" aria-labelledby="chapters-title">
+        <h2 id="chapters-title" class="h4 mb-3">Stage by stage</h2>
+        <ol class="mp-chapters">
+            {% for chapter in chapters %}
+                <li class="mp-chapter">
+                    <div class="mp-chapter-head">
+                        <span class="mp-chapter-num" aria-hidden="true">{{ forloop.counter }}</span>
+                        <div>
+                            <h3 class="h5 mb-0">{{ chapter.label }}</h3>
+                            <p class="small text-muted mb-0">From day {{ chapter.day }} · {{ chapter.start|date:"j M Y" }} · {{ chapter.photos|length }} photo{{ chapter.photos|length|pluralize }}</p>
+                        </div>
+                    </div>
+                    {% if chapter.photos %}
+                        <ul class="mp-strip">
+                            {% for photo in chapter.photos %}
+                                <li>
+                                    <figure class="mb-0">
+                                        <img src="{{ photo.get_absolute_url }}" alt="{{ plant.name }}, {{ chapter.label|lower }}, day {{ photo.day_number }}{% if photo.caption %}: {{ photo.caption }}{% endif %}" width="{{ photo.width }}" height="{{ photo.height }}" loading="lazy" decoding="async">
+                                        <figcaption>
+                                            <span class="mp-strip-when"><strong>Day {{ photo.day_number }}</strong> · <time datetime="{{ photo.created_at|date:'c' }}">{{ photo.created_at|date:"j M Y" }}</time></span>
+                                            {% if photo.caption %}<span>{{ photo.caption }}</span>{% endif %}
+                                        </figcaption>
+                                    </figure>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="small text-muted mb-0 ms-5 ps-2">No photo at this stage.</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    </section>
+
+    {% if condition_rows %}
+    <section class="card mt-4" aria-labelledby="cond-title">
+        <div class="card-body">
+            <h2 id="cond-title" class="h4 mb-3">How it felt along the way</h2>
+            {% if healthy_pct is not None %}
+                <div class="progress mb-2" role="progressbar" aria-label="Healthy check-ins" aria-valuenow="{{ healthy_pct }}" aria-valuemin="0" aria-valuemax="100" style="height: 10px">
+                    <div class="progress-bar" style="width: {{ healthy_pct }}%; background: var(--tp-primary)"></div>
+                </div>
+                <p class="small text-muted">{{ healthy_pct }}% of {{ check_in_total }} check-in{{ check_in_total|pluralize }} said it was growing normally.</p>
+            {% endif %}
+            <div class="d-flex flex-wrap gap-2">
+                {% for row in condition_rows %}<span class="mp-cond{% if row.value != 'normal' %} is-warn{% endif %}">{{ row.label }} <strong>{{ row.count }}</strong></span>{% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if not photos %}
+        <div class="mp-empty mt-4">
+            <span class="mp-stat-icon mp-tone-green mx-auto"><svg class="mp-icon"><use href="#i-camera"/></svg></span>
+            <h2 class="h4 mt-3">No photos yet</h2>
+            <p class="text-muted">Photos added when you change stages, or from the photo diary, appear here as the plant's story.</p>
+            <a class="btn btn-primary d-print-none" href="{{ plant.get_absolute_url }}#photo-diary">Add a photo</a>
+        </div>
+    {% endif %}
+{% endblock %}

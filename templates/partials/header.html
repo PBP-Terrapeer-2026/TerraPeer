@@ -1,0 +1,48 @@
+{% with url_name=request.resolver_match.url_name app=request.resolver_match.app_name %}
+<header class="site-header">
+    <nav class="navbar navbar-expand-lg tp-nav" aria-label="Main navigation">
+        <a class="navbar-brand tp-brand" href="{% url 'show_main' %}" aria-label="TerraPeer home">
+            <svg viewBox="0 0 38 45" fill="none" aria-hidden="true">
+                <path d="M19 23V11M19 17C10 17 7 11 7 5c8 0 12 4 12 12ZM19 15c0-7 5-11 13-11 0 7-4 11-13 11Z" fill="#267353"/>
+                <path d="M10 25h18l-2 15H12l-2-15Z" fill="#C3654C"/>
+                <path d="M8 25h22" stroke="#C3654C" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <span>TerraPeer</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#tp-main-nav" aria-controls="tp-main-nav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="tp-main-nav">
+            <ul class="navbar-nav mx-lg-auto">
+                <li class="nav-item"><a class="nav-link{% if url_name == 'show_main' %} active{% endif %}" href="{% url 'show_main' %}"{% if url_name == 'show_main' %} aria-current="page"{% endif %}>Home</a></li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link{% if app == 'garden_planning' %} active{% endif %}" href="{% url 'garden_planning:index' %}"{% if app == 'garden_planning' %} aria-current="page"{% endif %}>Planning</a></li>
+                    <li class="nav-item"><a class="nav-link{% if app == 'my_plants' %} active{% endif %}" href="{% url 'my_plants:list' %}"{% if app == 'my_plants' %} aria-current="page"{% endif %}>My Plants</a></li>
+                    <li class="nav-item"><a class="nav-link{% if url_name|slice:':14' == 'garden_journal' %} active{% endif %}" href="{% url 'garden_journal' %}"{% if url_name|slice:':14' == 'garden_journal' %} aria-current="page"{% endif %}>Journal</a></li>
+                    {% comment %}Module owners: add your module link here once its URL name exists, e.g. Garden Setup, Planning, My Plants, Plant Care, Journal.{% endcomment %}
+                {% endif %}
+            </ul>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn tp-account dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="tp-avatar" aria-hidden="true">{{ user.username|slice:":1" }}</span>
+                            <span class="text-truncate" style="max-width: 140px">{{ user.username }}</span>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end p-2">
+                            {% if request.COOKIES.last_login %}<p class="dropdown-item-text small text-muted mb-1">Last login: {{ request.COOKIES.last_login }}</p>{% endif %}
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item rounded-3">Log out</button>
+                            </form>
+                        </div>
+                    </div>
+                {% else %}
+                    <a class="nav-link px-3 py-2 fw-semibold{% if url_name == 'login' %} active{% endif %}" href="{% url 'login' %}">Log in</a>
+                    <a class="btn btn-primary" href="{% url 'register' %}">Sign up free</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+</header>
+{% endwith %}

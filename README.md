@@ -63,3 +63,44 @@ Setiap data tanaman yang bersifat personal, seperti Growing Spaces, Garden Plans
    Plant Care membantu pengguna mengelola tugas perawatan untuk tanaman yang sudah aktif, seperti menyiram, memangkas, memeriksa kondisi daun, penyangga, nutrisi, dan kesiapan panen. Pengguna dapat membuat, melihat, mengubah, menyelesaikan, menghapus, serta memfilter tugas berdasarkan waktu atau tanaman tertentu. Modul ini juga menampilkan informasi cuaca sebagai konteks pendukung agar pengguna lebih mudah menentukan apa yang perlu diperiksa dan kapan melakukannya.
 5. Garden Journal - Adinda Pika Fauziah
    Garden Journal membantu pengguna mencatat perkembangan tanaman aktif, seperti pertumbuhan, pembungaan, panen, atau masalah yang terjadi. Catatan ditampilkan dalam bentuk timeline dan dapat dilengkapi tanggal, keterangan, jumlah panen, serta konteks cuaca pada waktu tertentu. Modul ini membantu pengguna melihat riwayat kebun dan mengevaluasi pengalaman sebelumnya untuk perencanaan berikutnya.
+
+# IMPLEMENTASI MY PLANTS (Muhammad Farel Ammar)
+
+Modul My Plants ada di `/my-plants/` (wajib login). Jalankan `python manage.py migrate` lalu `python manage.py test`.
+
+Untuk menjalankan pengujian browser, aktifkan virtualenv Python dan siapkan Node.js:
+
+```powershell
+npm --prefix tests/browser install
+npm --prefix tests/browser exec -- playwright install chromium
+npm --prefix tests/browser test
+```
+
+Pencarian spesies memerlukan `PERENUAL_API_KEY` pada environment lokal/PWS. Tanpa key, spesies masih bisa diisi manual.
+
+OpenAI Codex digunakan untuk membantu analisis, implementasi, dan pengujian. Perubahan diverifikasi menggunakan test Django serta pengujian browser.
+
+| Ketentuan | Implementasi |
+| --- | --- |
+| Models | `my_plants.Plant`, `my_plants.PlantCheckIn`, dan `my_plants.PlantPhoto` (buatan sendiri), `User` dari Django sebagai pemilik. `Plant` disediakan untuk dipakai Plant Care dan Journal lewat ForeignKey. |
+| Views + CRUD | Create, read (daftar + detail), update (edit + ubah tahap), delete (konfirmasi POST). Setiap operasi tulis bisa merespons HTML atau JSON (`Accept: application/json`); ada endpoint `api/` dan `api/<id>/`. |
+| Template | `base.html` + `partials/header.html`, `partials/footer.html`, `partials/messages.html`; template modul di `templates/my_plants/`. Bootstrap 5.3.8 disimpan lokal di `static/vendor/bootstrap/`. |
+| Form | `PlantForm`, `StageForm`, `PlantFilterForm`, `CheckInForm` dengan validasi server (tanggal tidak di masa depan, tahap valid, panjang catatan). |
+| AJAX | Filter/sort/pagination tanpa reload, ubah tahap, simpan/hapus check-in, hapus dari modal, dan pencarian spesies Perenual memakai `fetch()`. |
+| Filter autentikasi | Semua URL My Plants `login_required`; data selalu diambil lewat `Plant.objects.for_user(request.user)` sehingga ID milik akun lain menghasilkan 404. Navbar hanya menampilkan menu modul untuk pengguna yang login. |
+| Filter data database | Pencarian nama/spesies, tahap tumbuh, status Active/Finished, dan urutan (terbaru, terlama, nama, paling lama tumbuh). |
+| Foto & recap | Foto opsional saat menambah tanaman, foto **wajib** setiap ganti tahap, photo diary, dan halaman *growing recap* (durasi tiap tahap, foto per tahap, then-and-now) saat tanaman Finished. Foto disimpan di database (bukan folder media) agar aman di PWS. |
+
+Desain UI/UX baru tersedia di file Figma TerraPeer (frame "(TerraPeer — …)").
+
+---
+
+# CHANGELOG
+
+- 15 September, initial commit
+- 29 September, inisisasi tampilan awal web
+- 2 Oktober, Adding base template (header, footer, navbar) and show main page
+- 21 Oktober, Refactoring auth page and fix user login
+- 24 Oktober, Fixing cookie session timer
+- 26 Oktober, Bootstrap layout partials, auth redesign, and My Plants module (CRUD, AJAX, check-ins)
+- 26 Oktober, My Plants photo diary, required stage photos and growing recap

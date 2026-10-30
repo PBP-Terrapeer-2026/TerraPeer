@@ -1,0 +1,211 @@
+{% extends "base.html" %} {% load static %} {% block title %}Garden Planning-TerraPeer 
+{% endblock %} 
+{% block body_class %}bg-success-subtle text-success-emphasis{% endblock %}
+{% block extra_head %} 
+{% endblock %} 
+{% block content%}
+
+<div class="container py-5">
+  <div class="mb-4">
+    <span class="badge rounded-pill text-bg-success mb-3"
+      >Rencanakan kebunmu</span
+    >
+    <h1 class="display-5 fw-bold mb-2">🌿 Garden Planning</h1>
+    <p class="lead text-secondary mb-0">
+      Masukkan lokasi kamu untuk mendapatkan rekomendasi tanaman berdasarkan
+      cuaca setempat.
+    </p>
+  </div>
+
+  <div
+    class="card shadow-sm border-0 rounded-4 p-4 p-lg-5 mb-4 text-success-emphasis"
+  >
+    <h2 class="h4 mb-3">📍 Langkah 1 — Cari Cuaca Lokasi</h2>
+    <form id="weather-search-form" class="d-flex flex-wrap align-items-end gap-3" _="on submit target.reset()">
+      <div class="position-relative flex-grow-1">
+        <input
+          class="form-control"
+          id="city-input"
+          name="q"
+          type="text"
+          placeholder="Nama kota (misal: Jakarta)"
+          autocomplete="off"
+          hx-get="{% url 'garden_planning:city_suggestions' %}"
+          hx-trigger="input changed delay:300ms"
+          hx-sync="this:replace"
+          hx-target="#city-suggestions"
+          hx-swap="innerHTML"
+        />
+        <div id="city-suggestions" class="position-absolute top-100 start-0 w-100 shadow rounded-3 z-3"></div>
+      </div>
+      <div class="d-flex flex-column gap-2">
+        <button
+          class="btn btn-success rounded-pill fw-bold px-4 py-2"
+          type="submit"
+        >
+          <span
+            id="search-spin"
+            class="spinner-border spinner-border-sm text-success d-none"
+          ></span>
+          Cari Cuaca
+        </button>
+        <button
+          id="refresh-button"
+          class="btn btn-outline-success rounded-pill fw-bold px-4 py-2"
+          type="button"
+        >
+          Refresh
+        </button>
+      </div>
+      <div id="weather-summary" class="w-100 d-flex flex-wrap gap-2 mt-3 d-none"></div>
+    </form>
+
+
+  </div>
+  <div
+    id="rec-section"
+    class="card shadow-sm border-0 rounded-4 p-4 p-lg-5 mb-4 text-success-emphasis d-none"
+  >
+    <h2 id="rekomendasi-title" class="h4 mb-3">🌱 Langkah 2 — Rekomendasi Tanaman</h2>
+    <div id="rec-alert"></div>
+
+    <p class="small text-secondary mb-3">
+      Filter yang dipakai:
+      <strong id="filter-watering">—</strong> watering ·
+      <strong id="filter-sunlight">—</strong> sunlight
+    </p>
+
+    
+    <div
+      id="pot-rec"
+      class="d-inline-flex align-items-center gap-3 bg-success-subtle border border-success-subtle rounded-3 p-3 fw-semibold text-success-emphasis mb-4"
+    >
+      <span>🪴</span> 
+      <div>
+        <div id="pot-name">—</div>
+        <div class="small fw-normal text-secondary" id="pot-detail">—</div>
+      </div>
+    </div>
+
+
+    <div id="rec-loading" class="d-none mb-3">
+      <span class="spinner-border spinner-border-sm text-success"></span> Memuat
+      rekomendasi…
+    </div>
+    <div
+      id="plant-grid"
+      class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4"
+    ></div>
+  </div>
+
+  <div
+    class="card shadow-sm border-0 rounded-4 p-4 p-lg-5 mb-4 text-success-emphasis"
+  >
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <h2 class="h4 mb-0">📋 Rencana Saya</h2>
+      <button class="btn btn-outline-success btn-sm" onclick="showCreatePlan()">
+        + Rencana Baru
+      </button>
+    </div>
+
+    <div
+      id="create-plan-form"
+      class="d-none mb-4 p-3 border border-success-subtle rounded-3 bg-success-subtle"
+    >
+      <div class="d-flex flex-column gap-2">
+        <input
+          class="form-control"
+          id="plan-name"
+          type="text"
+          placeholder="Nama rencana"
+        />
+        <input
+          class="form-control"
+          id="plan-loc"
+          type="text"
+          placeholder="Nama lokasi (opsional)"
+        />
+        <div class="d-flex gap-2">
+          <button class="btn btn-success btn-sm" onclick="createPlan()">
+            Simpan
+          </button>
+          <button
+            class="btn btn-outline-success btn-sm"
+            onclick="hidePlanForm()"
+          >
+            Batal
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-top pt-4 mt-3">
+      <h3 class="h5 mb-3">🪴 Pot Saya</h3>
+      {% for message in messages %}
+        <div class="alert alert-success" role="status">{{ message }}</div>
+      {% endfor %}
+      <form method="post" action="{% url 'garden_planning:index' %}?plan_id={{ plan_id }}#pot-name-input" class="row g-2 align-items-end mb-3">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="pot_create" />
+        <input type="hidden" name="plan_id" value="{{ plan_id }}" />
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="{{ pot_form.name.id_for_label }}">{{ pot_form.name.label }}</label>
+          {{ pot_form.name }}
+          {% for error in pot_form.name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label" for="{{ pot_form.size_cm.id_for_label }}">{{ pot_form.size_cm.label }}</label>
+          {{ pot_form.size_cm }}
+          {% for error in pot_form.size_cm.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label" for="{{ pot_form.material.id_for_label }}">{{ pot_form.material.label }}</label>
+          {{ pot_form.material }}
+          {% for error in pot_form.material.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </div>
+        <div class="col-12 col-md-2">
+          <button class="btn btn-success btn-sm w-100" type="submit">+ Tambah Pot</button>
+        </div>
+      </form>
+      <ul
+        id="pot-list"
+        class="list-unstyled d-flex flex-column gap-2"
+        hx-get="{% url 'garden_planning:pot_list_partial' %}"
+        hx-trigger="load, potsChanged from:body"
+        hx-swap="innerHTML"
+      ></ul>
+    </div>
+
+    <ul id="plan-list" class="list-unstyled d-flex flex-column gap-2">
+      <li id="empty-plan" class="small text-secondary">Memuat rencana…</li>
+    </ul>
+  </div>
+
+  <div id="edit-plan-modal" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-none align-items-center justify-content-center p-3 z-3" role="dialog" aria-modal="true" aria-labelledby="edit-plan-title">
+    <div class="modal-dialog modal-dialog-centered w-100">
+      <div class="modal-content rounded-4 border-0 shadow">
+        <div class="modal-header border-0">
+          <h2 id="edit-plan-title" class="modal-title h5 text-success-emphasis">Edit rencana</h2>
+          <button type="button" class="btn-close" aria-label="Tutup" onclick="closeEditPlan()"></button>
+        </div>
+        <div class="modal-body pt-0">
+          <label for="edit-plan-name" class="form-label">Nama rencana</label>
+          <input id="edit-plan-name" class="form-control mb-3" type="text" />
+          <label for="edit-plan-status" class="form-label">Status rencana</label>
+          <select id="edit-plan-status" class="form-select">
+            <option value="planning">Perencanaan</option>
+            <option value="ready">Siap Tanam</option>
+            <option value="planted">Sudah Ditanam</option>
+          </select>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button class="btn btn-outline-secondary rounded-pill" onclick="closeEditPlan()">Batal</button>
+          <button class="btn btn-success rounded-pill" onclick="savePlanEdit()">Simpan perubahan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="{% static 'js/api.service.js' %}?v=3"></script>
+<script src="{% static 'js/garden_planning/index.js' %}?v=1"></script>
+{% endblock content %}
