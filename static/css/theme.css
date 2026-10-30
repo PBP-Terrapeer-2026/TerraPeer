@@ -104,6 +104,10 @@ textarea.form-control { min-height: 120px; }
 .tp-nav .navbar-toggler:focus { box-shadow: 0 0 0 .25rem var(--tp-moss-100); }
 .tp-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--tp-sun); color: var(--tp-ink); font-weight: 700; display: inline-flex; align-items: center; justify-content: center; text-transform: uppercase; }
 .tp-account { border: 1px solid #E3E7D3; background: var(--tp-surface); border-radius: 999px; padding: 4px 12px 4px 4px; gap: 8px; color: var(--tp-ink); font-weight: 600; font-size: .9rem; }
+/* Module stylesheets (e.g. Plant Care's .care-page .btn) must not restyle the shared navbar. */
+.site-header .tp-nav .btn.tp-account { display: inline-flex; align-items: center; min-height: 0; border: 1px solid #E3E7D3; background: var(--tp-surface); border-radius: 999px; padding: 4px 12px 4px 4px; gap: 8px; color: var(--tp-ink); font-weight: 600; font-size: .9rem; box-shadow: none; }
+.site-header .tp-nav .btn.tp-account:hover, .site-header .tp-nav .btn.tp-account:focus-visible { background: var(--tp-surface-2); color: var(--tp-ink); }
+.site-header .tp-nav .navbar-toggler { font-size: 1.25rem; line-height: 1; }
 @media (max-width: 991.98px) {
   .site-header { padding: 12px 12px 0; }
   .site-header .tp-nav { border-radius: 24px; padding: 8px 8px 8px 16px; }

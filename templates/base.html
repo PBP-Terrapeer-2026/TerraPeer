@@ -24,11 +24,11 @@
 </head>
 <body class="{% block body_class %}{% endblock %}">
     <a class="visually-hidden-focusable position-absolute top-0 start-0 m-2" href="#main-content">Skip to content</a>
+    {% include "partials/header.html" %}
     {% if care_layout %}
+        {# Plant Care adds its own module bar (mobile title and new-task button) under the shared header. #}
         {% include "care/topbar.html" %}
         {% if plant %}{% include "care/header.html" %}{% endif %}
-    {% else %}
-        {% include "partials/header.html" %}
     {% endif %}
     {% include "partials/messages.html" %}
 
@@ -36,11 +36,7 @@
         {% block content %}{% endblock %}
     </main>
 
-    {% if care_layout %}
-        {% include "terrapeer/footer.html" %}
-    {% else %}
-        {% include "partials/footer.html" %}
-    {% endif %}
+    {% include "partials/footer.html" %}
     <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}" defer></script>
     {% block extra_scripts %}{% endblock %}
 </body>
