@@ -105,6 +105,102 @@ class RecommendPlantsTests(TestCase):
         self.assertTrue(Plant.objects.filter(perenual_id=12345, name="Basil").exists())
         self.assertEqual(fetch_plants.call_count, 3)
 
+    @patch("garden_planning.views.fetch_plants_from_perenual")
+    def test_recommendation_cleans_premium_text_and_truncates_long_fields(self, fetch_plants):
+        Plant.objects.create(
+            perenual_id=23456,
+            name="Old cached name",
+            watering="Old value",
+        )
+        Plant.objects.create(
+            perenual_id=23457,
+            name="Cached premium plant",
+            watering="Upgrade Plans To Premium to see this data",
+        )
+        fetch_plants.side_effect = [[
+            {
+                "id": 23456,
+                "common_name": "Long name " * 25,
+                "scientific_name": [],
+                "watering": "frequent " * 10,
+                "sunlight": ["full sun"],
+                "description": "A plant description.",
+            },
+            {
+                "id": 23457,
+                "common_name": "Premium plant",
+                "scientific_name": [],
+                "watering": "Upgrade Plans To Premium to see this data",
+                "sunlight": ["part sun"],
+                "description": "Another plant description.",
+            },
+        ], [], []]
+
+        response = self.client.post(
+            self.url,
+            data=json.dumps({"avg_rain_mm": 2, "avg_radiation": 18}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        plants = response.json()["plants"]
+        plant = Plant.objects.get(perenual_id=23456)
+        premium_plant = Plant.objects.get(perenual_id=23457)
+        self.assertLessEqual(len(plant.name), Plant._meta.get_field("name").max_length)
+        self.assertLessEqual(len(plant.watering), Plant._meta.get_field("watering").max_length)
+        self.assertEqual(len(plant.watering), Plant._meta.get_field("watering").max_length)
+        self.assertEqual(premium_plant.watering, "")
+        self.assertIn(premium_plant.name, [item["name"] for item in plants])
+
+    @patch("garden_planning.views.fetch_plants_from_perenual")
+    def test_recommendation_uses_id_when_plant_has_no_names(self, fetch_plants):
+        fetch_plants.side_effect = [[{
+            "id": 34567,
+            "common_name": "",
+            "scientific_name": [],
+            "watering": "average",
+            "sunlight": ["part sun"],
+            "description": "A plant description.",
+        }], [], []]
+
+        response = self.client.post(
+            self.url,
+            data=json.dumps({"avg_rain_mm": 2, "avg_radiation": 18}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["plants"][0]["name"], "Plant #34567")
+        self.assertTrue(Plant.objects.filter(perenual_id=34567, name="Plant #34567").exists())
+
+    @patch("garden_planning.views.get_or_cache_plant")
+    @patch("garden_planning.views.fetch_plants_from_perenual")
+    def test_one_invalid_plant_does_not_fail_other_recommendations(self, fetch_plants, cache_plant):
+        valid_plant = Plant.objects.create(
+            perenual_id=45679,
+            name="Valid plant",
+            description="A plant description.",
+        )
+        fetch_plants.side_effect = [[
+            {"id": 45678, "common_name": "Invalid plant"},
+            {"id": 45679, "common_name": "Valid plant"},
+        ], [], []]
+
+        def cache_candidate(candidate):
+            if candidate["id"] == 45678:
+                raise ValueError("Invalid candidate data")
+            return valid_plant
+
+        cache_plant.side_effect = cache_candidate
+        response = self.client.post(
+            self.url,
+            data=json.dumps({"avg_rain_mm": 2, "avg_radiation": 18}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([item["name"] for item in response.json()["plants"]], ["Valid plant"])
+
 
 class GardenPlanningApiTests(TestCase):
     def setUp(self):
