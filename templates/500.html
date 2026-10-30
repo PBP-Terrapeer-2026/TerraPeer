@@ -1,0 +1,19 @@
+{% load static %}<!DOCTYPE html>
+{# Rendered without request context, so it must not depend on the user, messages or URL resolving. #}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Something went wrong · TerraPeer</title>
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+</head>
+<body>
+    <main class="container py-5 text-center" style="max-width: 640px">
+        <p class="tp-eyebrow mb-2">500</p>
+        <h1 class="mb-3">Something went wrong on our side</h1>
+        <p class="text-muted mb-4">Nothing you did caused this. Please try again in a moment.</p>
+        <a class="btn btn-primary" href="/">Back to home</a>
+    </main>
+</body>
+</html>
