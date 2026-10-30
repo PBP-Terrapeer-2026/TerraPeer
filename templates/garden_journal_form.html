@@ -53,22 +53,23 @@ Record a gardening milestone, progress notes, harvest details, and observed weat
                         <!-- Plant and date -->
                         <div class="row g-3 mb-4">
                             <div class="col-12 col-md-6">
-                                <label class="form-label"
-                                       for="{{ form.plant_name.id_for_label }}">
-                                    Plant <span class="text-danger">*</span>
-                                </label>
-                                {{ form.plant_name }}
+                            <label class="form-label"
+                                        for="{{ form.plant.id_for_label }}">
+                                Plant <span class="text-danger">*</span>
+                            </label>
 
-                                {% for error in form.plant_name.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {{ error }}
-                                    </div>
-                                {% endfor %}
+                            {{ form.plant }}
 
-                                <div class="form-text">
-                                    Enter the plant name for this journal entry.
+                            {% for error in form.plant.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
                                 </div>
+                            {% endfor %}
+
+                            <div class="form-text">
+                                Select a plant from your My Plants collection.
                             </div>
+                        </div>
 
                             <div class="col-12 col-md-6">
                                 <label class="form-label"

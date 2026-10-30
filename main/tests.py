@@ -8,6 +8,7 @@ from django.urls import reverse
 from .models import GardenJournalEntry
 from datetime import timedelta
 from django.utils import timezone
+from my_plants.models import Plant
 
 
 class GardenJournalTests(TestCase):
@@ -19,6 +20,12 @@ class GardenJournalTests(TestCase):
         self.other_user = User.objects.create_user(
             username="another_user",
             password="TestPassword123!",
+        )
+
+        self.plant = Plant.objects.create(
+            owner=self.user,
+            name="Basil",
+            species_name="Ocimum basilicum",
         )
 
         self.entry = GardenJournalEntry.objects.create(
@@ -74,7 +81,7 @@ class GardenJournalTests(TestCase):
         response = self.client.post(
             reverse("garden_journal_create"),
             {
-                "plant_name": "Mint",
+                "plant": self.plant.pk,
                 "entry_date": "2026-10-25",
                 "entry_type": "growth",
                 "title": "Mint is growing",
@@ -92,6 +99,9 @@ class GardenJournalTests(TestCase):
         )
 
         self.assertEqual(entry.user, self.user)
+        self.assertEqual(entry.plant, self.plant)
+        self.assertEqual(entry.plant_name, self.plant.name)
+
 
     def test_cannot_edit_another_users_entry(self):
         self.client.login(
@@ -135,7 +145,7 @@ class GardenJournalTests(TestCase):
                 args=[self.entry.pk],
             ),
             {
-                "plant_name": "Basil",
+                "plant": self.plant.pk,
                 "entry_date": "2026-10-25",
                 "entry_type": "growth",
                 "title": "Basil is thriving",
@@ -153,6 +163,8 @@ class GardenJournalTests(TestCase):
             self.entry.title,
             "Basil is thriving",
         )
+        self.assertEqual(self.entry.plant, self.plant)
+        self.assertEqual(self.entry.plant_name, self.plant.name)
 
     def test_delete_own_entry(self):
         self.client.login(
@@ -268,6 +280,39 @@ class GardenJournalTests(TestCase):
         self.assertIn(
             old_entry,
             response.context["entries"],
+        )
+
+    def test_cannot_create_entry_with_another_users_plant(self):
+        other_plant = Plant.objects.create(
+            owner=self.other_user,
+            name="Rose",
+            species_name="Rosa",
+        )
+
+        self.client.login(
+            username="journal_owner",
+            password="TestPassword123!",
+        )
+
+        response = self.client.post(
+            reverse("garden_journal_create"),
+            {
+                "plant": other_plant.pk,
+                "entry_date": "2026-10-25",
+                "entry_type": "growth",
+                "title": "Unauthorized plant entry",
+                "notes": "Trying to use another user's plant.",
+                "harvest_quantity": "",
+                "harvest_unit": "",
+                "weather_summary": "Sunny",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            GardenJournalEntry.objects.filter(
+                title="Unauthorized plant entry"
+            ).exists()
         )
 
     #testing garden evaluation
