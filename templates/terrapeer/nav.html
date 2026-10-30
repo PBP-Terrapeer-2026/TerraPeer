@@ -1,0 +1,19 @@
+{% load static %}
+<nav class="nav tp-nav" aria-label="Main navigation">
+    <a class="brand" href="{% url 'show_main' %}">
+    <img src="{% static 'terrapeer/img/logo.png' %}" alt="">TerraPeer</a>
+    <div class="navlinks">
+        {% for item in care_nav_items %}
+            {% if item.url %}
+                <a href="{{ item.url }}"
+                   {% if item.active %}class="selected" aria-current="page"{% endif %}>{{ item.label }}</a>
+            {% else %}
+                <span class="nav-unavailable"
+                      aria-disabled="true"
+                      title="{{ item.label }} is not connected in this Plant Care preview">{{ item.label }}</span>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <span class="avatar"
+          aria-label="Signed in as {{ request.user.username }}">{{ request.user.username|first|upper }}</span>
+</nav>

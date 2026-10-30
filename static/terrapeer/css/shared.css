@@ -1,0 +1,212 @@
+/* 1. Foundations: one source of truth for all TerraPeer pages. */
+.care-page {
+    --tp-green: #2f6b4f;
+    --tp-green-dark: #285b43;
+    --tp-ink: #18382a;
+    --tp-muted: #58705f;
+    --tp-border: #709582;
+    --tp-cream: #efedcf;
+    --tp-surface: #eef7f1;
+    --tp-white: #fffef8;
+    --tp-mint: #d9ebdd;
+    --tp-danger: #963d30;
+    --tp-radius-section: 50px;
+    --tp-radius-control: 16px;
+    --tp-gap: 24px;
+    --tp-content-width: 1280px;
+    --tp-font-body: "Plus Jakarta Sans", Arial, sans-serif;
+    --tp-font-heading: "Lora", Georgia, serif;
+    /* Aliases retained so the earlier prototype remains compatible. */
+    --green: var(--tp-green);
+    --ink: var(--tp-ink);
+    --muted: var(--tp-muted);
+    --border: var(--tp-border);
+}
+
+.care-page,
+.care-page * {
+    box-sizing: border-box;
+}
+
+body.care-page.tp-page {
+    margin: 0;
+    background: var(--tp-cream);
+    color: var(--tp-ink);
+    font: 14px/1.5 var(--tp-font-body);
+}
+
+.care-page button,
+.care-page input,
+.care-page select,
+.care-page textarea {
+    font: inherit;
+    color: inherit;
+}
+
+.care-page button,
+.care-page a {
+    cursor: pointer;
+}
+
+.care-page button:disabled {
+    cursor: default;
+    opacity: .6;
+}
+
+.care-page a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.care-page h1,
+.care-page h2,
+.care-page h3,
+.care-page p {
+    margin: 0;
+}
+
+.care-page h1,
+.care-page h2 {
+    font-family: var(--tp-font-heading);
+    font-weight: 600;
+    letter-spacing: -.6px;
+}
+
+.care-page button:focus-visible,
+.care-page a:focus-visible,
+.care-page input:focus-visible,
+.care-page select:focus-visible,
+.care-page textarea:focus-visible {
+    outline: 3px solid #c65c46;
+    outline-offset: 3px;
+}
+
+.care-page [hidden] {
+    display: none !important;
+}
+
+/* 2. Shared layout and controls; use these classes in other modules too. */
+.care-page .tp-container {
+    width: calc(100% - 112px);
+    max-width: var(--tp-content-width);
+    margin-inline: auto;
+}
+
+.care-page .tp-stack {
+    display: grid;
+    gap: var(--tp-gap);
+}
+
+.care-page .tp-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.care-page .tp-button,
+.care-page .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 44px;
+    padding: 11px 20px;
+    border-radius: 50px;
+    border: 1px solid var(--tp-green);
+    background: var(--tp-green);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.care-page .tp-button--secondary,
+.care-page .btn.secondary,
+.care-page .btn.light {
+    background: var(--tp-surface);
+    color: var(--tp-green-dark);
+}
+
+.care-page .tp-button--danger,
+.care-page .btn.danger {
+    background: var(--tp-danger);
+    border-color: var(--tp-danger);
+}
+
+.care-page .tp-panel,
+.care-page .panel {
+    border: 1px solid var(--tp-border);
+    border-radius: var(--tp-radius-section);
+    background: var(--tp-surface);
+    padding: 28px;
+    min-width: 0;
+}
+
+.care-page .tp-nav,
+.care-page .nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    background: var(--tp-surface);
+    border-radius: 50px;
+    padding: 15px 24px;
+    min-height: 74px;
+    border: 1px solid #b8cdbd;
+}
+
+.care-page .tp-icon-button,
+.care-page .iconbtn {
+    height: 40px;
+    width: 40px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid #94b09c;
+    background: var(--tp-surface);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.care-page .icon {
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.care-page .icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.care-page .tp-skip {
+    position: absolute;
+    left: 16px;
+    top: -80px;
+    z-index: 50;
+    background: var(--tp-surface);
+    border: 1px solid var(--tp-border);
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.care-page .tp-skip:focus {
+    top: 16px;
+}
+
+.care-page .errorlist {
+    margin: 4px 0;
+    padding-left: 16px;
+    color: var(--tp-danger);
+    font-size: 12px;
+}
+
+@media (max-width: 740px) {
+    .care-page .tp-container {
+        width: calc(100% - 28px);
+    }
+
+    .care-page .tp-panel {
+        border-radius: 32px;
+        padding: 22px;
+    }
+}

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load static care_icons %}
+{% block title %}{{ title|default:"Plant Care · TerraPeer" }}{% endblock %}
+{% block body_class %}tp-page care-page care-final{% endblock %}
+{% block extra_head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'terrapeer/vendor/bootstrap/bootstrap-grid.min.css' %}">
+    <link rel="stylesheet" href="{% static 'terrapeer/css/shared.css' %}">
+    <link rel="stylesheet" href="{% static 'terrapeer/css/plant-care.css' %}">
+    <link rel="stylesheet" href="{% static 'terrapeer/css/care-final.css' %}">
+{% endblock %}
+{% block content %}
+        <div hidden>{% csrf_token %}</div>
+        <div id="feedback" class="feedback" role="status" hidden></div>
+        <div class="schedule-grid">
+            {% include "care/calendar.html" %}
+            <aside class="weather-area">
+                <div id="weather-slot" aria-live="polite">
+                    <section class="panel weather">
+                        <h2>Weather forecast</h2>
+                        <p>Loading your forecast…</p>
+                    </section>
+                </div>
+                <aside class="summary-area">
+                    {% include "care/summary.html" %}
+                    <section class="finished-note">
+                        <h3>Finished plants</h3>
+                        <p>Recurring tasks stop when a plant is no longer active. Past tasks stay in history.</p>
+                    </section>
+                </aside>
+            </aside>
+            <section class="schedule-tasks" aria-label="Care tasks">
+                <form class="filters" id="filters">
+                    <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+                    <div class="status-tabs" aria-label="Task status">
+                        <button type="button"
+                                data-status="Pending"
+                                aria-pressed="{% if status_filter == 'Pending' and not overdue_filter %}true{% else %}false{% endif %}">To do</button>
+                        <button type="button"
+                                data-overdue
+                                aria-pressed="{% if overdue_filter %}true{% else %}false{% endif %}">Overdue</button>
+                        <button type="button"
+                                data-status="Completed"
+                                aria-pressed="{% if status_filter == 'Completed' and not overdue_filter %}true{% else %}false{% endif %}">Done</button>
+                        <button type="button"
+                                data-status="all"
+                                aria-pressed="{% if status_filter == 'all' and not overdue_filter %}true{% else %}false{% endif %}">All</button>
+                    </div>
+                    <input type="hidden" name="status" value="{{ status_filter }}">
+                    <input type="hidden"
+                           name="overdue"
+                           value="{% if overdue_filter %}1{% endif %}">
+                    <label>
+                        <span class="field-label">Plant</span>
+                        <select id="plant-select">
+                            {% for p in plants %}
+                                <option value="{% url 'care:page' p.pk %}"
+                                        {% if p.pk == plant.pk %}selected{% endif %}>{{ p.name }} · {{ p.garden.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>
+                        <span class="field-label">When</span>
+                        <select name="time">
+                            <option value="all">All dates</option>
+                            <option value="today"
+                                    {% if time_filter == 'today' %}selected{% endif %}>Today</option>
+                            <option value="upcoming"
+                                    {% if time_filter == 'upcoming' %}selected{% endif %}>Upcoming</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span class="field-label">Task type</span>
+                        <select name="action">
+                            <option value="">All types</option>
+                            {% for value, label in actions %}
+                                <option value="{{ value }}"
+                                        {% if action_filter == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <button type="button" class="link" data-reset>Reset filters</button>
+                </form>
+                <div class="list-caption">
+                    <span>{{ plant.name }} · {{ plant.garden.name }}</span>
+                    <span id="pending-count">{{ pending_count }} pending</span>
+                </div>
+                <div id="task-list" aria-live="polite">{% include "care/task_list.html" %}</div>
+                <section class="mobile-tip">
+                    <h3>Tip</h3>
+                    <p>Tap the circle to complete a task. Use the menu to view, edit, or delete it.</p>
+                </section>
+            </section>
+        </div>
+        <noscript>Enable JavaScript to manage tasks and load the weather forecast.</noscript>
+        <nav class="mobile-bottom" aria-label="Mobile navigation">
+            <a href="{% url 'show_main' %}">{% icon 'leaf' %}
+                <span>Home</span>
+            </a>
+            <a href="{% url 'care:choose' %}" aria-current="page">{% icon 'water' %}
+                <span>Care</span>
+            </a>
+            <a href="#plant-select">{% icon 'sprout' %}
+                <span>Plants</span>
+            </a>{% url 'garden_journal' as journal_url %}
+            {% if journal_url %}
+                <a href="{{ journal_url }}">{% icon 'calendar' %}
+                    <span>Journal</span>
+                </a>
+            {% endif %}
+        </nav>
+{% endblock %}
+{% block extra_scripts %}
+    {{ block.super }}
+    <div id="modal-root"></div>
+    <script src="{% static 'terrapeer/js/plant-care.js' %}" defer></script>
+{% endblock %}

@@ -1,0 +1,871 @@
+/* Plant Care layout only. Load shared.css first. */
+.care-page {
+    --green: var(--tp-green);
+    --ink: var(--tp-ink);
+    --muted: var(--tp-muted);
+    --border: var(--tp-border)
+}
+
+.care-page h1 {
+    font-size: 44px;
+    line-height: 1.2
+}
+
+.care-page h2 {
+    font-size: 25px
+}
+
+.care-page h3 {
+    font-size: 16px
+}
+
+.care-page .shell {
+    width: calc(100% - 112px);
+    max-width: 1280px;
+    margin: auto
+}
+
+.care-page .hero {
+    position: relative;
+    padding: 28px 0 44px;
+    isolation: isolate;
+    background: #2f4e36
+}
+
+.care-page .hero-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2
+}
+
+.care-page .hero-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(17, 42, 33, .84), rgba(17, 42, 33, .35));
+    z-index: -1
+}
+
+.care-page .brand {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 700;
+    font-size: 21px;
+    color: var(--tp-green);
+    margin-right: auto
+}
+
+.care-page .brand img {
+    width: 25px;
+    height: 30px;
+    object-fit: contain
+}
+
+.care-page .navlinks {
+    display: flex;
+    gap: 7px;
+    align-items: center
+}
+
+.care-page .navlinks a,
+.care-page .navlinks span {
+    padding: 10px 13px;
+    font-size: 12px;
+    border-radius: 30px
+}
+
+.care-page .navlinks .selected {
+    background: #d5e7df;
+    font-weight: 700
+}
+
+.care-page .avatar {
+    background: #f4d577;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    margin-left: auto;
+    font-weight: 600
+}
+
+.care-page .crumb {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    color: #ecf3e5;
+    font-size: 12px;
+    margin: 24px 0 14px
+}
+
+.care-page .hero-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    color: #fffce7
+}
+
+.care-page .hero-title p {
+    margin-top: 8px;
+    color: #e0eadc
+}
+
+.care-page .care-inline-row {
+    display: flex;
+    align-items: center;
+    gap: 12px
+}
+
+.care-page .link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 0;
+    background: none;
+    padding: 7px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tp-green)
+}
+
+.care-page .link.danger {
+    color: var(--tp-danger)
+}
+
+.care-page .main {
+    padding: 26px 0 32px
+}
+
+.care-page .plant-context {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 24px;
+    border: 1px solid #91ad98;
+    border-radius: 32px;
+    background: var(--tp-surface);
+    margin-bottom: 24px
+}
+
+.care-page .plant-photo {
+    width: 58px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 24px
+}
+
+.care-page .eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase
+}
+
+.care-page .muted {
+    color: var(--tp-muted);
+    font-size: 12px
+}
+
+.care-page .plant-title {
+    font-family: Lora, Georgia, serif;
+    font-size: 22px;
+    font-weight: 600
+}
+
+.care-page .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 20px;
+    background: var(--tp-mint);
+    color: var(--tp-green-dark);
+    padding: 4px 10px;
+    white-space: nowrap
+}
+
+.care-page .pill.pending {
+    background: #f7edc4;
+    color: #695a2c
+}
+
+.care-page .pill.overdue {
+    background: #f4ded5;
+    color: var(--tp-danger)
+}
+
+.care-page .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(340px, 1fr);
+    gap: 24px;
+    align-items: start
+}
+
+.care-page .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 22px
+}
+
+.care-page .filters {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    padding-bottom: 21px;
+    border-bottom: 1px solid #c9dccd;
+    flex-wrap: wrap
+}
+
+.care-page .filters label {
+    flex: 1;
+    min-width: 130px
+}
+
+.care-page .field-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--tp-green);
+    margin-bottom: 6px
+}
+
+.care-page input,
+.care-page select,
+.care-page textarea {
+    width: 100%;
+    border: 1px solid #9db6a3;
+    background: var(--tp-white);
+    border-radius: 16px;
+    padding: 11px 13px;
+    color: var(--tp-ink);
+    min-height: 44px
+}
+
+.care-page textarea {
+    resize: vertical;
+    min-height: 100px
+}
+
+.care-page select {
+    padding-right: 28px
+}
+
+.care-page input[aria-invalid=true],
+.care-page select[aria-invalid=true] {
+    border: 1.5px solid var(--tp-danger);
+    background: #fff6f0
+}
+
+.care-page .filter-note {
+    font-size: 11px;
+    color: var(--tp-muted);
+    margin: 16px 0 4px
+}
+
+.care-page .task {
+    padding: 20px 0;
+    border-bottom: 1px solid #c9dccd;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start
+}
+
+.care-page .task:last-child {
+    border-bottom: 0;
+    padding-bottom: 4px
+}
+
+.care-page .check {
+    border: 3px solid var(--tp-green);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    background: var(--tp-surface);
+    flex-shrink: 0;
+    margin-top: 6px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: var(--tp-surface)
+}
+
+.care-page .check.completed {
+    background: var(--tp-green)
+}
+
+.care-page .task-body {
+    flex: 1;
+    min-width: 0
+}
+
+.care-page .task-title {
+    font-size: 15px;
+    font-weight: 700;
+    background: none;
+    border: 0;
+    padding: 0;
+    text-align: left;
+    line-height: 1.5
+}
+
+.care-page .task-title:hover {
+    text-decoration: underline
+}
+
+.care-page .task-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    color: var(--tp-muted);
+    font-size: 11px;
+    margin-top: 5px
+}
+
+.care-page .task-meta .icon {
+    width: 15px;
+    height: 15px
+}
+
+.care-page .task-tags {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-top: 10px
+}
+
+.care-page .task-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 2px
+}
+
+.care-page .task-actions .iconbtn {
+    width: 34px;
+    height: 34px
+}
+
+.care-page .task-actions .icon {
+    width: 17px;
+    height: 17px
+}
+
+.care-page .repeat {
+    font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--tp-muted)
+}
+
+.care-page .repeat .icon {
+    width: 14px;
+    height: 14px
+}
+
+.care-page .weather {
+    background: linear-gradient(135deg, #c4dfee, #e3ebd5 60%, #f9edbc);
+    overflow: hidden
+}
+
+.care-page .weather-head {
+    font-size: 11px;
+    letter-spacing: 1.4px;
+    font-weight: 600;
+    text-transform: uppercase
+}
+
+.care-page .weather-place {
+    font-size: 21px;
+    font-family: Lora, Georgia, serif;
+    margin-top: 9px;
+    font-weight: 600
+}
+
+.care-page .weather-date {
+    font-size: 12px;
+    color: #466450;
+    margin-top: 5px
+}
+
+.care-page .weather-sky {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 23px 0 16px
+}
+
+.care-page .temperature {
+    font-family: Lora, Georgia, serif;
+    font-size: 55px;
+    line-height: 1.15;
+    color: var(--tp-green)
+}
+
+.care-page .temperature span {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    margin-left: 5px
+}
+
+.care-page .sky-art {
+    width: 106px;
+    height: 106px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffec9e, rgba(255, 236, 158, 0));
+    display: grid;
+    place-items: center
+}
+
+.care-page .sky-art .icon {
+    width: 68px;
+    height: 68px;
+    color: var(--tp-green)
+}
+
+.care-page .weather.rainy {
+    background: linear-gradient(135deg, #b6cfde, #e0e9e9)
+}
+
+.care-page .weather.cloudy {
+    background: linear-gradient(135deg, #cfdee9, #e4e9da)
+}
+
+.care-page .weather.sunny {
+    background: linear-gradient(135deg, #fff0b1, #d6e9df)
+}
+
+.care-page .weather-facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    border-top: 1px solid #aac4b6;
+    border-bottom: 1px solid #aac4b6;
+    padding: 20px 0;
+    margin: 16px 0
+}
+
+.care-page .weather-facts strong {
+    display: block;
+    font-size: 23px;
+    font-weight: 600;
+    margin: 7px 0 2px
+}
+
+.care-page .weather-facts .muted {
+    font-size: 11px
+}
+
+.care-page .weather-days {
+    display: flex;
+    gap: 7px;
+    margin-top: 22px
+}
+
+.care-page .weather-days button {
+    border: 1px solid #98b5a2;
+    background: #ffffff55;
+    border-radius: 18px;
+    flex: 1;
+    min-height: 53px;
+    font-size: 11px;
+    padding: 8px
+}
+
+.care-page .weather-days button[aria-pressed=true] {
+    background: var(--tp-green);
+    color: #fff;
+    border-color: var(--tp-green)
+}
+
+.care-page .weather-note {
+    font-size: 12px;
+    margin-top: 19px;
+    line-height: 1.7
+}
+
+.care-page .weather-credit {
+    font-size: 10px;
+    margin-top: 15px;
+    color: #466450
+}
+
+.care-page .small-panel {
+    margin-top: 20px;
+    padding: 24px 28px;
+    background: var(--tp-mint);
+    border: 1px solid var(--tp-border);
+    border-radius: 32px
+}
+
+.care-page .small-panel h3 {
+    font-family: Lora, Georgia, serif;
+    font-size: 19px;
+    margin-bottom: 9px
+}
+
+.care-page .empty {
+    text-align: center;
+    padding: 42px 16px
+}
+
+.care-page .empty-symbol {
+    display: grid;
+    place-items: center;
+    width: 74px;
+    height: 74px;
+    margin: 0 auto 18px;
+    background: var(--tp-mint);
+    border-radius: 50%
+}
+
+.care-page .empty-symbol .icon {
+    width: 38px;
+    height: 38px
+}
+
+.care-page .empty h3 {
+    font-family: Lora, Georgia, serif;
+    font-size: 23px;
+    margin-bottom: 9px
+}
+
+.care-page .empty p {
+    font-size: 13px;
+    color: var(--tp-muted);
+    max-width: 330px;
+    margin: 0 auto 20px
+}
+
+.care-page .feedback {
+    background: var(--tp-mint);
+    border: 1px solid var(--tp-border);
+    border-radius: 20px;
+    padding: 14px 20px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px
+}
+
+.care-page .feedback span {
+    flex: 1
+}
+
+.care-page .footer {
+    font-size: 11px;
+    color: var(--tp-muted);
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    gap: 20px
+}
+
+.care-page .backdrop {
+    position: fixed;
+    inset: 0;
+    background: #102a2170;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+    z-index: 10
+}
+
+.care-page .dialog {
+    width: 660px;
+    max-width: 100%;
+    max-height: calc(100vh - 56px);
+    overflow: auto;
+    background: var(--tp-surface);
+    border: 1px solid var(--tp-border);
+    border-radius: 40px;
+    padding: 30px;
+    box-shadow: 0 24px 70px #102a2130
+}
+
+.care-page .dialog.small {
+    width: 540px
+}
+
+.care-page .dialog h2 {
+    font-size: 29px
+}
+
+.care-page .dialog-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 23px
+}
+
+.care-page .dialog-head p {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--tp-muted)
+}
+
+.care-page .formgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 19px
+}
+
+.care-page .wide {
+    grid-column: 1/-1
+}
+
+.care-page .error-text {
+    font-size: 11px;
+    color: var(--tp-danger);
+    margin-top: 6px
+}
+
+.care-page .help {
+    font-size: 11px;
+    color: var(--tp-muted);
+    margin-top: 7px
+}
+
+.care-page .hint {
+    padding: 14px 17px;
+    border-radius: 18px;
+    background: #f7edc4;
+    font-size: 12px;
+    color: #61572f;
+    margin-top: 18px
+}
+
+.care-page .dialog-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #c9dccd;
+    padding-top: 20px;
+    margin-top: 24px
+}
+
+.care-page .dialog-footer .danger-link {
+    margin-right: auto
+}
+
+.care-page .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 23px 0
+}
+
+.care-page .detail-grid dt {
+    font-size: 11px;
+    color: var(--tp-muted);
+    margin-bottom: 5px
+}
+
+.care-page .detail-grid dd {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0
+}
+
+.care-page .instructions {
+    padding: 18px;
+    background: var(--tp-white);
+    border: 1px solid #cadbc9;
+    border-radius: 22px;
+    white-space: pre-wrap;
+    font-size: 14px;
+    margin-top: 9px
+}
+
+.care-page .warn-icon {
+    background: #f4ded5;
+    color: var(--tp-danger);
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 16px
+}
+
+.care-page .loading-line {
+    height: 12px;
+    background: #c8dbd4;
+    border-radius: 10px;
+    margin: 16px 0
+}
+
+.care-page .loading-line.big {
+    height: 60px;
+    width: 55%;
+    margin: 34px 0
+}
+
+@media (max-width:1000px) {
+    .care-page .shell {
+        width: calc(100% - 48px)
+    }
+
+    .care-page .navlinks a,
+    .care-page .navlinks span {
+        padding: 8px;
+        font-size: 10px
+    }
+
+    .care-page .grid {
+        grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr)
+    }
+
+    .care-page .panel {
+        padding: 24px
+    }
+
+    .care-page .task-actions {
+        flex-direction: column
+    }
+}
+
+@media (max-width:740px) {
+    .care-page .shell {
+        width: calc(100% - 28px)
+    }
+
+    .care-page .nav {
+        flex-wrap: wrap;
+        padding: 14px 18px;
+        border-radius: 32px
+    }
+
+    .care-page .navlinks {
+        order: 3;
+        width: 100%;
+        overflow: auto;
+        gap: 4px
+    }
+
+    .care-page .navlinks a,
+    .care-page .navlinks span {
+        white-space: nowrap;
+        font-size: 11px
+    }
+
+    .care-page .grid {
+        grid-template-columns: 1fr
+    }
+
+    .care-page .hero {
+        padding-top: 14px
+    }
+
+    .care-page .hero-title {
+        align-items: flex-start
+    }
+
+    .care-page h1 {
+        font-size: 35px
+    }
+
+    .care-page .hero-title .btn {
+        padding: 10px 13px
+    }
+
+    .care-page .plant-context {
+        align-items: flex-start;
+        flex-wrap: wrap
+    }
+
+    .care-page .plant-context>.care-inline-row:last-child {
+        width: 100%
+    }
+
+    .care-page .plant-context select {
+        flex: 1
+    }
+
+    .care-page .panel {
+        border-radius: 32px;
+        padding: 22px
+    }
+
+    .care-page .task {
+        gap: 10px
+    }
+
+    .care-page .dialog {
+        padding: 23px;
+        border-radius: 28px
+    }
+
+    .care-page .backdrop {
+        padding: 14px
+    }
+
+    .care-page .formgrid {
+        grid-template-columns: 1fr
+    }
+
+    .care-page .wide {
+        grid-column: auto
+    }
+
+    .care-page .footer {
+        flex-wrap: wrap
+    }
+
+    .care-page .task-actions {
+        flex-direction: column
+    }
+
+    .care-page .weather-sky {
+        justify-content: flex-start;
+        gap: 40px
+    }
+
+    .care-page .hero-title p {
+        max-width: 240px
+    }
+
+    .care-page .filters .link {
+        min-height: 40px
+    }
+
+    .care-page .dialog-footer {
+        flex-wrap: wrap
+    }
+}
+
+.care-page .feedback.error {
+    background: #f4ded5;
+    border-color: #b77864
+}
+
+.care-page .error-text .errorlist {
+    padding: 0;
+    list-style: none
+}
+
+.care-page .dialog:focus {
+    outline: none
+}
+
+.care-page #task-list[aria-busy=true],
+.care-page #weather-slot[aria-busy=true] {
+    opacity: .65
+}
+
+.care-page .sky-art {
+    flex-shrink: 0
+}

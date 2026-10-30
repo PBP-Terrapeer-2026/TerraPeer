@@ -1,0 +1,12 @@
+<section class="summary-card">
+    <h2>This week</h2>
+    <div class="summary-line">
+        <span>Completed · {{ plant.name }}</span>
+        <strong>{{ week_done }} of {{ week_total }}</strong>
+    </div>
+    <progress value="{{ week_done }}"
+              max="{% if week_total %}{{ week_total }}{% else %}1{% endif %}"
+              aria-label="Tasks completed this week">
+    </progress>
+    <p class="muted">Scheduled {{ week_start|date:'j M' }} – {{ week_end|date:'j M' }}</p>
+</section>

@@ -19,6 +19,7 @@
                     <li class="nav-item"><a class="nav-link{% if app == 'garden_setup' %} active{% endif %}" href="{% url 'garden_setup:space_list' %}"{% if app == 'garden_setup' %} aria-current="page"{% endif %}>Garden Setup</a></li>
                     <li class="nav-item"><a class="nav-link{% if app == 'garden_planning' %} active{% endif %}" href="{% url 'garden_planning:index' %}"{% if app == 'garden_planning' %} aria-current="page"{% endif %}>Planning</a></li>
                     <li class="nav-item"><a class="nav-link{% if app == 'my_plants' %} active{% endif %}" href="{% url 'my_plants:list' %}"{% if app == 'my_plants' %} aria-current="page"{% endif %}>My Plants</a></li>
+                    <li class="nav-item"><a class="nav-link{% if app == 'care' %} active{% endif %}" href="{% url 'care:choose' %}"{% if app == 'care' %} aria-current="page"{% endif %}>Plant Care</a></li>
                     <li class="nav-item"><a class="nav-link{% if url_name|slice:':14' == 'garden_journal' %} active{% endif %}" href="{% url 'garden_journal' %}"{% if url_name|slice:':14' == 'garden_journal' %} aria-current="page"{% endif %}>Journal</a></li>
                     {% comment %}Module owners: add your module link here once its URL name exists, e.g. Garden Setup, Planning, My Plants, Plant Care, Journal.{% endcomment %}
                 {% endif %}

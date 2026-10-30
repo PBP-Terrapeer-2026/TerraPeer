@@ -1,0 +1,17 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{{ title|default:"TerraPeer" }}</title>
+        {% block framework_styles %}{% endblock %}
+        <link rel="stylesheet" href="{% static 'terrapeer/css/shared.css' %}">
+        {% block styles %}{% endblock %}
+    </head>
+    <body class="tp-page {% block body_class %}{% endblock %}">
+        <a class="tp-skip" href="#main-content">Skip to content</a>
+        {% block content %}{% endblock %}
+        {% block scripts %}{% endblock %}
+    </body>
+</html>

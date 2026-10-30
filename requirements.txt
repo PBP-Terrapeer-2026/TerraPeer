@@ -6,3 +6,5 @@ whitenoise
 PyJWT
 Pillow>=11,<13
 requests>=2.32,<3
+# Plant Care forecast and IANA timezone support
+tzdata

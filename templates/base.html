@@ -21,14 +21,23 @@
 </head>
 <body class="{% block body_class %}{% endblock %}">
     <a class="visually-hidden-focusable position-absolute top-0 start-0 m-2" href="#main-content">Skip to content</a>
-    {% include "partials/header.html" %}
+    {% if care_layout %}
+        {% include "care/topbar.html" %}
+        {% if plant %}{% include "care/header.html" %}{% endif %}
+    {% else %}
+        {% include "partials/header.html" %}
+    {% endif %}
     {% include "partials/messages.html" %}
 
-    <main id="main-content">
+    <main id="main-content"{% if care_layout %} class="shell main"{% if plant %} data-list-url="{% url 'care:list' plant.pk %}" data-weather-url="{% url 'care:weather' plant.pk %}"{% endif %}{% endif %}>
         {% block content %}{% endblock %}
     </main>
 
-    {% include "partials/footer.html" %}
+    {% if care_layout %}
+        {% include "terrapeer/footer.html" %}
+    {% else %}
+        {% include "partials/footer.html" %}
+    {% endif %}
     <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}" defer></script>
     {% block extra_scripts %}{% endblock %}
 </body>
