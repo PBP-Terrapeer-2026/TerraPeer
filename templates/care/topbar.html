@@ -1,10 +1,8 @@
 {% load care_icons %}
 <div class="care-topbar shell">
-    {% include "partials/header.html" %}
+    {# The shared navbar (partials/header.html) is rendered by base.html; this bar only adds Plant Care actions on small screens. #}
     <div class="mobile-top">
-        <a class="iconbtn" href="{% url 'show_main' %}" aria-label="Back home">←</a>
         <strong>Plant Care</strong>
-        {% include "care/account.html" %}
         {% if plant %}
             <button class="btn"
                     data-open="{% url 'care:add' plant.pk %}"
@@ -12,11 +10,6 @@
                     {% if plant.status != 'active' %}disabled{% endif %}>{% icon 'plus' %}</button>
         {% endif %}
     </div>
-    <nav class="care-mobile-links" aria-label="More modules">
-        {% for item in care_nav_items %}
-            {% if item.url %}<a href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>{{ item.label }}</a>{% endif %}
-        {% endfor %}
-    </nav>
 </div>
 {% if has_legacy_tasks %}
     <p class="shell care-legacy-notice">Your previous care tasks are safe. <a href="{% url 'care:link-legacy' %}">Connect them to My Plants</a>.</p>
