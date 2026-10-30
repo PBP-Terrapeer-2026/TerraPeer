@@ -8,6 +8,6 @@
         </div>
         <button class="btn new-task"
                 data-open="{% url 'care:add' plant.pk %}"
-                {% if not plant.active %}disabled{% endif %}>{% icon 'plus' %} New task</button>
+                {% if plant.status != 'active' %}disabled{% endif %}>{% icon 'plus' %} New task</button>
     </div>
 </header>

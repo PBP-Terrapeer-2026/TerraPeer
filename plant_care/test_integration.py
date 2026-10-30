@@ -43,10 +43,9 @@ class ProjectIntegrationTests(TestCase):
         )
 
     def test_care_uses_common_base_without_duplicate_main_or_navigation(self):
-        from care.models import GardenSpace, Plant
+        from .test_helpers import make_plant
 
-        garden = GardenSpace.objects.create(owner=self.user, name="Test balcony")
-        plant = Plant.objects.create(garden=garden, name="Mint", pot="A")
+        plant = make_plant(self.user)
         self.client.force_login(self.user)
         page = self.client.get(reverse("care:page", args=[plant.pk]))
         self.assertTemplateUsed(page, "base.html")

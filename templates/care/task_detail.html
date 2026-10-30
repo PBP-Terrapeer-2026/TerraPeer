@@ -34,17 +34,17 @@
     <div>
         <dt>Plant</dt>
         <dd>
-            {{ task.plant.name }} · {{ task.plant.pot }}
+            {{ task.plant.name }} · {{ task.plant.species_name }}
         </dd>
     </div>
 </dl>
 <span class="field-label">Instructions</span>
 <div class="instructions">{{ task.instructions|default:'No instructions added.' }}</div>
 {% if task.status == "Completed" %}
-    <div class="hint">Completed {% localtime off %}{{ completed_local|date:'j M Y · H:i' }}{% endlocaltime %} · {{ task.plant.garden.timezone_name }}</div>
+    <div class="hint">Completed {% localtime off %}{{ completed_local|date:'j M Y · H:i' }}{% endlocaltime %} · {{ plant_timezone }}</div>
 {% elif next_date %}
     <div class="hint">Completing this task creates one new reminder for {{ next_date|date:'j M Y' }}.</div>
-{% elif not task.plant.active and task.repeat_every %}
+{% elif task.plant.status != 'active' and task.repeat_every %}
     <div class="hint">This plant is not active. No new reminder will be created.</div>
 {% endif %}
 <div id="modal-error" class="error-text" role="alert"></div>

@@ -1,0 +1,12 @@
+<div class="dropdown care-account">
+    <button class="avatar dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account menu for {{ user.username }}">
+        {{ user.username|first|upper }}
+    </button>
+    <div class="dropdown-menu dropdown-menu-end">
+        <span class="dropdown-item-text">{{ user.username }}</span>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="dropdown-item" type="submit">Log out</button>
+        </form>
+    </div>
+</div>

@@ -10,6 +10,8 @@ urlpatterns = [
         name="landing",
     ),
     path("", views.choose, name="choose"),
+    path("link-previous-tasks/", views.link_legacy, name="link-legacy"),
+    path("plants/<int:pk>/space/", views.set_space, name="set-space"),
     path("plants/<int:pk>/", views.page, name="page"),
     path("plants/<int:pk>/tasks/", views.task_list, name="list"),
     path("plants/<int:pk>/tasks/add/", views.add, name="add"),

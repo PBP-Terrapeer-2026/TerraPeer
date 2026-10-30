@@ -1,0 +1,14 @@
+{% extends "care/no_plants.html" %}
+{% block content %}
+<section class="panel care-link-legacy">
+    <h1>Connect previous tasks</h1>
+    <p>Select the matching plant yourself. Task dates, completion history and repeating reminders will be kept.</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn" type="submit">Connect tasks</button>
+        <a class="btn secondary" href="{% url 'care:choose' %}">Back to Plant Care</a>
+    </form>
+    <p>Plant missing? <a href="{% url 'my_plants:create' %}">Add it in My Plants first</a>.</p>
+</section>
+{% endblock %}

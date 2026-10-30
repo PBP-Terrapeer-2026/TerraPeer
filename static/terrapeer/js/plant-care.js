@@ -297,6 +297,24 @@
             refreshList();
         } else if (button.hasAttribute('data-weather')) refreshWeather(button.dataset.weather);
     });
+    document.getElementById('space-form')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const button = form.querySelector('button[type="submit"]');
+        if (button.disabled) return;
+        button.disabled = true;
+        try {
+            const { response, data } = await request(form.action, { method: 'POST', body: new FormData(form) });
+            if (!response.ok) throw new Error(responseError(response, data));
+            message(data.message);
+            await Promise.all([refreshWeather(), refreshList()]);
+        } catch (error) {
+            if (!(error instanceof SessionExpiredError)) message(error.message || 'Could not save location.', true);
+        } finally {
+            button.disabled = false;
+        }
+    });
+
     document.addEventListener('submit', event => {
         if (['care-form', 'delete-form'].includes(event.target.id)) {
             event.preventDefault();

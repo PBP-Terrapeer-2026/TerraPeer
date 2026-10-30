@@ -12,7 +12,7 @@
 {% block content %}
         <section class="panel empty">
             <h1>Your plants will appear here</h1>
-            <p>Once your plants are connected, you can plan and track their care here.</p>
-            <a class="btn" href="{% url 'show_main' %}">Back to home</a>
+            <p>Add a plant in My Plants, then plan and track its care here.</p>
+            <a class="btn" href="{% url 'my_plants:create' %}">Add a plant</a>
         </section>
 {% endblock %}

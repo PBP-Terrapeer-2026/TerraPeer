@@ -1,13 +1,13 @@
 from datetime import timedelta
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth import get_user_model
-from care.models import GardenSpace, Plant, CareTask
+from django.utils import timezone
+from my_plants.models import Plant
+from plant_care.models import CareTask
 
 
 class Command(BaseCommand):
-    help = (
-        "Create a small sample garden for an EXISTING user; does not reset their data."
-    )
+    help = "Add optional sample plants/tasks for an existing user; never create fake weather locations."
 
     def add_arguments(self, parser):
         parser.add_argument("--username", required=True)
@@ -18,20 +18,19 @@ class Command(BaseCommand):
             raise CommandError(
                 "Create this user first: python manage.py createsuperuser"
             )
-        garden, _ = GardenSpace.objects.get_or_create(
-            owner=user,
-            name="My Balcony",
-            defaults={"location": "Depok", "latitude": -6.4025, "longitude": 106.7942},
-        )
-        mint, _ = Plant.objects.get_or_create(
-            garden=garden, name="Peppermint", defaults={"pot": "Pot B", "image": "mint"}
-        )
-        Plant.objects.get_or_create(
-            garden=garden, name="Tomato", defaults={"pot": "Pot A", "image": "tomato"}
-        )
-        Plant.objects.get_or_create(
-            garden=garden, name="Basil", defaults={"pot": "Pot C", "image": "mint"}
-        )
+        for name in ["Peppermint", "Tomato", "Basil"]:
+            plant = Plant.objects.filter(
+                owner=user, name=name, notes="Optional Plant Care sample"
+            ).first()
+            if plant is None:
+                plant = Plant.objects.create(
+                    owner=user,
+                    name=name,
+                    species_name=name,
+                    notes="Optional Plant Care sample",
+                )
+            if name == "Peppermint":
+                mint = plant
         if not mint.care_tasks.exists():
             for action, title, offset, interval in [
                 ("Watering", "Check soil moisture", -1, 3),
@@ -42,12 +41,12 @@ class Command(BaseCommand):
                     plant=mint,
                     action_type=action,
                     title=title,
-                    due_date=mint.today + timedelta(days=offset),
+                    due_date=timezone.localdate() + timedelta(days=offset),
                     repeat_every=interval,
                     instructions="Observe the plant before deciding what care it needs.",
                 )
         self.stdout.write(
             self.style.SUCCESS(
-                "Sample garden ready. Sign in at /login/, then open /plant-care/."
+                "Sample tasks ready at /plant-care/. Choose a real Garden Setup space for weather."
             )
         )

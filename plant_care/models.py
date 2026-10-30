@@ -1,7 +1,4 @@
-"""Legacy standalone adapters, pending published My Plants migrations.
-Target contract: CareTask -> my_plants.Plant with PROTECT.
-Do not add a second official Plant or guess the Garden Setup relationship.
-"""
+"""Official plants for new tasks; archived adapters preserve pre-integration data."""
 
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from django.conf import settings
@@ -11,7 +8,11 @@ from django.db import models
 from django.utils import timezone
 
 
-class GardenSpace(models.Model):
+class LegacyGardenSpace(models.Model):
+    class Meta:
+        db_table = "care_gardenspace"
+        verbose_name = "Archived care space"
+
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=150, default="Depok")
@@ -39,9 +40,13 @@ class GardenSpace(models.Model):
         return self.name
 
 
-class Plant(models.Model):
+class LegacyPlant(models.Model):
+    class Meta:
+        db_table = "care_plant"
+        verbose_name = "Archived care plant"
+
     garden = models.ForeignKey(
-        GardenSpace, on_delete=models.CASCADE, related_name="plants"
+        LegacyGardenSpace, on_delete=models.CASCADE, related_name="plants"
     )
     name = models.CharField(max_length=100)
     pot = models.CharField(max_length=50)
@@ -76,7 +81,7 @@ class Plant(models.Model):
 
 
 class CareTask(models.Model):
-    
+
     ACTIONS = [
         ("Watering", "Watering"),
         ("Fertilizing", "Fertilizing"),
@@ -85,7 +90,20 @@ class CareTask(models.Model):
         ("Repotting", "Repotting"),
     ]
     plant = models.ForeignKey(
-        Plant, on_delete=models.PROTECT, related_name="care_tasks"
+        "my_plants.Plant",
+        on_delete=models.PROTECT,
+        related_name="care_tasks",
+        null=True,
+        blank=True,
+    )
+    # Only populated for tasks created before the My Plants integration.
+    legacy_plant = models.ForeignKey(
+        LegacyPlant,
+        on_delete=models.PROTECT,
+        related_name="care_tasks",
+        null=True,
+        blank=True,
+        editable=False,
     )
     title = models.CharField(max_length=160)
     action_type = models.CharField(max_length=20, choices=ACTIONS)
@@ -113,6 +131,11 @@ class CareTask(models.Model):
         ordering = ["due_date", "pk"]
         constraints = [
             models.CheckConstraint(
+                condition=models.Q(plant__isnull=False)
+                | models.Q(legacy_plant__isnull=False),
+                name="care_task_has_plant",
+            ),
+            models.CheckConstraint(
                 condition=models.Q(repeat_every__isnull=True)
                 | models.Q(repeat_every__gte=1),
                 name="care_repeat_positive",
@@ -128,7 +151,10 @@ class CareTask(models.Model):
 
     @property
     def overdue(self):
-        return self.status == "Pending" and self.due_date < self.plant.today
+        from .integration import plant_today
+
+        today = plant_today(self.plant) if self.plant_id else self.legacy_plant.today
+        return self.status == "Pending" and self.due_date < today
 
     @property
     def repeat_label(self):
@@ -142,3 +168,31 @@ class CareTask(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class PlantCareSpace(models.Model):
+    """Care's weather location; references official records without copying them."""
+
+    plant = models.OneToOneField(
+        "my_plants.Plant",
+        on_delete=models.CASCADE,
+        related_name="care_location",
+    )
+    growing_space = models.ForeignKey(
+        "garden_setup.GrowingSpace",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="care_locations",
+    )
+
+    def clean(self):
+        super().clean()
+        if self.plant_id and self.growing_space_id:
+            if self.plant.owner_id != self.growing_space.user_id:
+                raise ValidationError(
+                    {"growing_space": "Choose a space owned by the plant owner."}
+                )
+
+    def __str__(self):
+        return f"Care location · {self.plant}"

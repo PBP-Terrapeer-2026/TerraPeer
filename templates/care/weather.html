@@ -1,12 +1,12 @@
 {% load care_icons %}
 <section class="panel weather {{ forecast.day.style|default:'cloudy' }}">
     <div class="weather-head">Weather Forecast</div>
-    <div class="weather-place">{{ plant.garden.name }} · {{ plant.garden.location }}</div>
+    <div class="weather-place">{% if garden %}{{ garden.name }} · {{ garden.city }}{% endif %}</div>
     {% if forecast.state == "ready" %}
         <p class="weather-brief">{% icon 'rain' %} {{ forecast.day.rain|default_if_none:'—' }}% maximum rain chance · {{ forecast.day.label }}. Check soil before watering.</p>
         <details class="weather-expand" open>
             <summary>Forecast details</summary>
-            <div class="weather-date">{{ forecast.day.date|date:'j M Y' }} · {{ plant.garden.timezone_name }}</div>
+            <div class="weather-date">{{ forecast.day.date|date:'j M Y' }} · {{ garden.timezone }}</div>
             <div class="weather-sky">
                 <div>
                     <div class="temperature">
@@ -43,7 +43,7 @@
         <div class="empty">
             {% icon 'location' %}
             <h3>Garden location needed</h3>
-            <p>This plant is not linked to a growing space yet. Its location must be connected before weather is available.</p>
+            <p>This plant is not linked to a growing space yet. Select its weather location above, then save. You can add spaces in Garden Setup.</p>
         </div>
     {% else %}
         <div class="empty">

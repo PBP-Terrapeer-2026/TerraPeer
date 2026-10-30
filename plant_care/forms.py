@@ -1,6 +1,8 @@
 from datetime import timedelta
 from django import forms
-from .models import CareTask
+from .models import CareTask, PlantCareSpace, LegacyPlant
+from my_plants.models import Plant
+from garden_setup.models import GrowingSpace
 
 TITLES = {
     "Watering": "Check soil moisture",
@@ -78,3 +80,33 @@ class CareTaskForm(forms.ModelForm):
         if commit:
             task.save()
         return task
+
+
+class PlantCareSpaceForm(forms.ModelForm):
+    class Meta:
+        model = PlantCareSpace
+        fields = ["growing_space"]
+        labels = {"growing_space": "Weather location"}
+
+    def __init__(self, *args, user, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["growing_space"].queryset = GrowingSpace.objects.filter(user=user)
+        self.fields["growing_space"].empty_label = "Select a growing space"
+
+
+class LegacyPlantLinkForm(forms.Form):
+    legacy_plant = forms.ModelChoiceField(
+        queryset=LegacyPlant.objects.none(), label="Previous care plant"
+    )
+    plant = forms.ModelChoiceField(
+        queryset=Plant.objects.none(), label="Plant in My Plants"
+    )
+
+    def __init__(self, *args, user, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["legacy_plant"].queryset = LegacyPlant.objects.filter(
+            garden__owner=user,
+            care_tasks__plant__isnull=True,
+            care_tasks__isnull=False,
+        ).distinct()
+        self.fields["plant"].queryset = Plant.objects.for_user(user)
