@@ -11,6 +11,8 @@ import requests
 import json
 import random
 import math
+import re
+from django.db import transaction
 from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
 
 from .models import Plant, Pot, Plan, PlanPlant
@@ -164,26 +166,81 @@ def first_description_sentence(description):
     return f"{first_sentence}." if first_sentence else ""
 
 
+def clean_perenual_text(value, max_length=None):
+    if not isinstance(value, str):
+        return ""
+    value = value.strip()
+    if re.search(r"upgrade\s+plans|upgrade\s+to\s+premium|premium\s+plan", value, re.IGNORECASE):
+        return ""
+    return value[:max_length] if max_length else value
+
+
 def get_or_cache_plant(Pdata) : #param=dictionary
     """
     Simpan atau ambil tanaman dari DB lokal (cache) berdasarkan perenual_id.
     """
     perenual_id = Pdata.get("id")
-    plant, _ = Plant.objects.get_or_create(
-        perenual_id=perenual_id,
-        defaults={
-            "name":      Pdata.get("common_name") or Pdata.get("scientific_name", [""])[0],
-            "watering":  Pdata.get("watering", ""),
-            "sunlight":  Pdata.get("sunlight", []),
-            "description": Pdata.get("description", ""),
-            "image_url": (Pdata.get("default_image") or {}).get("medium_url", ""),
-        },
+    try:
+        perenual_id = int(perenual_id)
+    except (TypeError, ValueError):
+        raise ValueError("Perenual plant has no valid ID.")
+    if perenual_id < 1:
+        raise ValueError("Perenual plant has no valid ID.")
+
+    field_limit = lambda field: Plant._meta.get_field(field).max_length
+    common_name = clean_perenual_text(Pdata.get("common_name"), field_limit("name"))
+    scientific_names = Pdata.get("scientific_name")
+    if isinstance(scientific_names, str):
+        scientific_names = [scientific_names]
+    elif not isinstance(scientific_names, (list, tuple)):
+        scientific_names = []
+    scientific_name = next(
+        (clean_perenual_text(name, field_limit("name")) for name in scientific_names if clean_perenual_text(name)),
+        "",
     )
-    # Isi juga cache lama yang dibuat sebelum deskripsi Perenual disimpan.
-    description = Pdata.get("description", "")
-    if description and plant.description != description:
-        plant.description = description
-        plant.save(update_fields=["description"])
+    name = common_name or scientific_name or f"Plant #{perenual_id}"
+    name = clean_perenual_text(name, field_limit("name")) or f"Plant #{perenual_id}"
+    watering = clean_perenual_text(Pdata.get("watering"), field_limit("watering"))
+    description = clean_perenual_text(Pdata.get("description"))
+    default_image = Pdata.get("default_image")
+    image_url = clean_perenual_text(
+        default_image.get("medium_url") if isinstance(default_image, dict) else "",
+        field_limit("image_url"),
+    )
+    raw_sunlight = Pdata.get("sunlight")
+    if isinstance(raw_sunlight, str):
+        raw_sunlight = [raw_sunlight]
+    if not isinstance(raw_sunlight, (list, tuple)):
+        raw_sunlight = []
+    sunlight = [cleaned for item in raw_sunlight if (cleaned := clean_perenual_text(item))]
+    defaults = {
+        "name": name,
+        "watering": watering,
+        "sunlight": sunlight,
+        "description": description,
+        "image_url": image_url,
+    }
+    updates = {"name": name}
+    if "watering" in Pdata:
+        updates["watering"] = watering
+    if "sunlight" in Pdata:
+        updates["sunlight"] = sunlight
+    if "description" in Pdata:
+        updates["description"] = description
+    if isinstance(default_image, dict) and "medium_url" in default_image:
+        updates["image_url"] = image_url
+    plant, created = Plant.objects.get_or_create(
+        perenual_id=perenual_id,
+        defaults=defaults,
+    )
+    if not created:
+        changed_fields = []
+        for field, value in updates.items():
+            if getattr(plant, field) != value:
+                setattr(plant, field, value)
+                changed_fields.append(field)
+        if changed_fields:
+            plant.save(update_fields=changed_fields)
     return plant
 
 
@@ -307,7 +364,14 @@ def recommend_plants(request):
             page=page,
         ) or []
         for candidate in page_plants:
-            candidate_id = candidate.get("id")
+            if not isinstance(candidate, dict):
+                continue
+            try:
+                candidate_id = int(candidate.get("id"))
+            except (TypeError, ValueError):
+                continue
+            if candidate_id < 1:
+                continue
             if candidate_id not in seen_ids:
                 seen_ids.add(candidate_id)
                 raw_plants.append(candidate)
@@ -316,23 +380,28 @@ def recommend_plants(request):
     # 4. Cache ke DB & bentuk response
     result_plants = []
     for p in raw_plants[:10]:   # pilih maksimal 10 kandidat secara acak
-        plant = get_or_cache_plant(p)
-        description = first_description_sentence(p.get("description") or plant.description)
-        if not description and plant.perenual_id:
-            details = fetch_plant_details_from_perenual(plant.perenual_id)
-            full_description = details.get("description", "")
-            description = first_description_sentence(full_description)
-            if full_description:
-                plant.description = full_description
-                plant.save(update_fields=["description"])
-        result_plants.append({
-            "id":        plant.pk,
-            "name":      plant.name,
-            "watering":  plant.watering,
-            "sunlight":  plant.sunlight,
-            "description": description or "Deskripsi tanaman belum tersedia.",
-            "image_url": plant.image_url,
-        })
+        try:
+            with transaction.atomic():
+                plant = get_or_cache_plant(p)
+                description = first_description_sentence(plant.description)
+                if not description and plant.perenual_id:
+                    details = fetch_plant_details_from_perenual(plant.perenual_id)
+                    full_description = clean_perenual_text(details.get("description"))
+                    description = first_description_sentence(full_description)
+                    if full_description and plant.description != full_description:
+                        plant.description = full_description
+                        plant.save(update_fields=["description"])
+                response_plant = {
+                    "id": plant.pk,
+                    "name": plant.name,
+                    "watering": plant.watering,
+                    "sunlight": plant.sunlight,
+                    "description": description or "Plant description is not available.",
+                    "image_url": plant.image_url,
+                }
+            result_plants.append(response_plant)
+        except Exception as exc:
+            print(f"[Perenual] Plant skipped: {type(exc).__name__}")
 
     if not result_plants:
         cached = list(Plant.objects.filter(perenual_id__isnull=True).order_by("name")[:10])
