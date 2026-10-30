@@ -75,3 +75,15 @@ class AuthFlowTests(TestCase):
         response = self.client.get(reverse('show_main'))
         self.assertContains(response, 'Log out')
         self.assertNotContains(response, 'Sign up free')
+
+
+class LandingPageTests(TestCase):
+    def test_cta_sends_guests_to_register(self):
+        response = self.client.get(reverse("show_main"))
+        self.assertContains(response, f'class="cta-button" href="{reverse("register")}"')
+
+    def test_cta_sends_signed_in_users_to_planning(self):
+        user = get_user_model().objects.create_user("cta-user", password="testing-only-9384")
+        self.client.force_login(user)
+        response = self.client.get(reverse("show_main"))
+        self.assertContains(response, f'class="cta-button" href="{reverse("garden_planning:index")}"')
