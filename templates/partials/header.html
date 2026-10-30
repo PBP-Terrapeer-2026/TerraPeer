@@ -14,7 +14,6 @@
         </button>
         <div class="collapse navbar-collapse" id="tp-main-nav">
             <ul class="navbar-nav mx-lg-auto">
-                <li class="nav-item"><a class="nav-link{% if url_name == 'show_main' %} active{% endif %}" href="{% url 'show_main' %}"{% if url_name == 'show_main' %} aria-current="page"{% endif %}>Home</a></li>
                 {% if user.is_authenticated %}
                     <li class="nav-item"><a class="nav-link{% if app == 'garden_setup' %} active{% endif %}" href="{% url 'garden_setup:space_list' %}"{% if app == 'garden_setup' %} aria-current="page"{% endif %}>Garden Setup</a></li>
                     <li class="nav-item"><a class="nav-link{% if app == 'garden_planning' %} active{% endif %}" href="{% url 'garden_planning:index' %}"{% if app == 'garden_planning' %} aria-current="page"{% endif %}>Planning</a></li>
