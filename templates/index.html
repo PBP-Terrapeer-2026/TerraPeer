@@ -1,20 +1,129 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}TerraPeer — Your Digital Garden Peer{% endblock %}
 {% block body_class %}landing-page{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/landing.css' %}">{% endblock %}
 
 {% block content %}
-    <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-content">
-            <h1 id="hero-title">Your Digital<br>Garden Peer</h1>
-            <p>Know your garden. Choose the perfect plant.<br class="desktop-break"> Nurture it daily with clear steps on TerraPeer.</p>
-            <a class="cta-button" href="{% if user.is_authenticated %}{% url 'garden_planning:index' %}{% else %}{% url 'register' %}{% endif %}">
-                <svg viewBox="0 0 42 48" fill="none" aria-hidden="true">
-                    <path d="M21 24V12M21 17C13 17 10 12 10 6c7 0 11 4 11 11Zm0-2c0-7 4-11 11-11 0 7-4 11-11 11Z" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M9 27h24l-3 16H12L9 27ZM7 27h28" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span>Plan your plants</span>
-            </a>
+<div class="tp-landing">
+    <section class="lp-hero" aria-labelledby="hero-title">
+        <svg class="lp-hero-leaves" viewBox="0 0 720 640" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
+            <path d="M520 640C470 470 500 300 640 160c60 140 40 330-120 480Z" fill="#24543F"/>
+            <path d="M600 640c-20-170 40-310 160-380 20 150-30 290-160 380Z" fill="#2E6B4C"/>
+            <path d="M420 640c-90-110-120-260-60-400 110 90 140 250 60 400Z" fill="#2A5E45"/>
+            <path d="M700 420c-120-20-200-110-210-230 120 0 200 90 210 230Z" fill="#3E7655"/>
+            <path d="M330 640c-40-80-30-170 30-240 50 80 40 170-30 240Z" fill="#477E53"/>
+            <path d="M560 120c-60-40-80-100-60-150 60 30 80 90 60 150Z" fill="#6D9765"/>
+            <path d="M700 640V200" stroke="#3E7655" stroke-width="6"/>
+        </svg>
+        <div class="container position-relative">
+            <div class="row g-5 align-items-center">
+                <div class="col-12 col-lg-7">
+                    <p class="lp-eyebrow lp-eyebrow-light">Personal gardening assistant</p>
+                    <h1 id="hero-title" class="lp-display">Your Digital<br>Garden Peer</h1>
+                    <p class="lp-lead lp-hero-lead">Tell us about your balcony, terrace or windowsill. TerraPeer recommends plants that actually fit, plans your pots, and walks you through daily care.</p>
+                    <div class="d-flex flex-wrap align-items-center gap-3 mt-4">
+                        {% if user.is_authenticated %}
+                            <a class="btn btn-lg lp-btn-cream cta-button" href="{% url 'garden_planning:index' %}">{% include "partials/_landing_icon.html" with i="pot" %}Plan your plants</a>
+                        {% else %}
+                            <a class="btn btn-lg lp-btn-cream cta-button" href="{% url 'register' %}">{% include "partials/_landing_icon.html" with i="pot" %}Start with your space</a>
+                            <a class="lp-hero-link" href="{% url 'login' %}">Already have an account? Log in</a>
+                        {% endif %}
+                    </div>
+                    <p class="small lp-hero-note">Free for registered users · Weather by Open-Meteo · Species data by Perenual</p>
+                </div>
+                <div class="col-12 col-lg-5">
+                    <div class="lp-hero-cards" role="group" aria-label="Example of what TerraPeer shows">
+                        <article class="lp-card lp-float">
+                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                <span class="lp-eyebrow">Matched for My Balcony</span>
+                                <span class="lp-badge lp-badge-great">Great fit</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-3 mt-3">
+                                <div class="lp-art lp-art-sm">{% include "partials/_landing_plant.html" with kind="basil" %}</div>
+                                <div><p class="lp-h3 mb-1">Sweet Basil</p><p class="small text-muted mb-0">Culinary herb · Pot 3–5 L</p></div>
+                            </div>
+                            <ul class="lp-facts">
+                                <li><span class="lp-ico-ink">{% include "partials/_landing_icon.html" with i="sun" size=18 %}</span>Needs 4–6 h sun — your balcony gets 4–6 h</li>
+                                <li><span class="lp-ico-ink">{% include "partials/_landing_icon.html" with i="drop" size=18 %}</span>Water daily — you check in every day</li>
+                            </ul>
+                        </article>
+                        <article class="lp-card lp-float lp-offset">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="lp-eyebrow">Today</span><span class="small text-muted">2 tasks</span>
+                            </div>
+                            <ul class="lp-tasks">
+                                <li><span class="lp-task-ico lp-ti-water">{% include "partials/_landing_icon.html" with i="drop" %}</span><div class="flex-grow-1"><p class="lp-task">Water Sweet Basil</p><p class="lp-task-meta">08:00 · No rain expected</p></div><span class="lp-check" aria-hidden="true"></span></li>
+                                <li><span class="lp-task-ico lp-ti-support">{% include "partials/_landing_icon.html" with i="support" %}</span><div class="flex-grow-1"><p class="lp-task">Tie tomato to stake</p><p class="lp-task-meta">16:00</p></div><span class="lp-check" aria-hidden="true"></span></li>
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
+
+    <section class="lp-section lp-peek" aria-labelledby="peek-title">
+        <div class="container">
+            <div class="lp-intro">
+                <p class="lp-eyebrow">A peek into your everyday</p>
+                <h2 id="peek-title" class="lp-h1"><em>Your garden, in one place.</em></h2>
+                <p class="lp-lead text-muted mb-0">After you sign in, TerraPeer shows what needs you today, how each plant is doing and what the weather means for your pots.</p>
+            </div>
+            <div class="row g-4 mt-1">
+                <div class="col-12 col-lg-5">
+                    <article class="lp-card h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h3 class="lp-h3 mb-0">A little care today</h3><span class="lp-badge lp-badge-good">3 to do</span>
+                        </div>
+                        <ul class="lp-tasks">
+                            <li><span class="lp-check is-done" aria-hidden="true">{% include "partials/_landing_icon.html" with i="check" size=16 %}</span><div class="flex-grow-1"><p class="lp-task is-done">Check soil moisture</p><p class="lp-task-meta">Peppermint · 07:00</p></div></li>
+                            <li><span class="lp-check" aria-hidden="true"></span><div class="flex-grow-1"><p class="lp-task">Water Sweet Basil</p><p class="lp-task-meta">My Balcony · 08:00</p></div><span class="lp-badge lp-badge-flowering">Today</span></li>
+                            <li><span class="lp-check" aria-hidden="true"></span><div class="flex-grow-1"><p class="lp-task">Inspect leaves for pests</p><p class="lp-task-meta">Tomato 1 · 16:00</p></div></li>
+                        </ul>
+                    </article>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                    <article class="lp-card lp-card-flush h-100">
+                        <div class="lp-art lp-art-wide">{% include "partials/_landing_plant.html" with kind="tomato" %}</div>
+                        <div class="lp-card-body">
+                            <div class="d-flex justify-content-between align-items-center"><h3 class="lp-h3 mb-0">Tomato 1</h3><span class="lp-badge lp-badge-fruiting">Fruiting</span></div>
+                            <p class="lp-task-meta mt-2 mb-0">Planted 20 Sep · 36 days growing</p>
+                        </div>
+                    </article>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                    <article class="lp-weather h-100">
+                        <p class="lp-eyebrow lp-eyebrow-sky">Depok weather</p>
+                        <div class="d-flex align-items-center gap-3"><span class="lp-sun">{% include "partials/_landing_icon.html" with i="sun" size=40 %}</span><span class="lp-temp">32°</span></div>
+                        <p class="small mb-3">Partly cloudy · 60% rain later</p>
+                        <p class="lp-weather-tip">{% include "partials/_landing_icon.html" with i="rain" size=18 %}<span>Rain at 15:00 — skip watering outdoor pots.</span></p>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="lp-cta-wrap" aria-labelledby="cta-title">
+        <div class="container">
+            <div class="lp-cta">
+                <div class="lp-cta-copy">
+                    <p class="lp-eyebrow lp-eyebrow-light">One space is enough to start</p>
+                    <h2 id="cta-title" class="lp-h1">Make room for something growing.</h2>
+                    {% if user.is_authenticated %}
+                        <p class="mb-0">Describe a growing space and TerraPeer will match plants to it, plan your pots and keep track of daily care.</p>
+                    {% else %}
+                        <p class="mb-0">Create a free account, describe one growing space, and get your first recommendations in about two minutes.</p>
+                    {% endif %}
+                </div>
+                {% if user.is_authenticated %}
+                    <a class="btn btn-lg lp-btn-cream" href="{% url 'garden_setup:space_list' %}">Set up a growing space{% include "partials/_landing_icon.html" with i="arrow" size=18 %}</a>
+                {% else %}
+                    <a class="btn btn-lg lp-btn-cream" href="{% url 'register' %}">Create your account{% include "partials/_landing_icon.html" with i="arrow" size=18 %}</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
 {% endblock %}

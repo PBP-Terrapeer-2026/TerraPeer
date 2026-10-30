@@ -78,12 +78,24 @@ class AuthFlowTests(TestCase):
 
 
 class LandingPageTests(TestCase):
-    def test_cta_sends_guests_to_register(self):
+    def test_guest_landing_links_to_register_and_login(self):
         response = self.client.get(reverse("show_main"))
-        self.assertContains(response, f'class="cta-button" href="{reverse("register")}"')
+        self.assertTemplateUsed(response, "index.html")
+        self.assertContains(response, f'cta-button" href="{reverse("register")}"')
+        self.assertContains(response, f'href="{reverse("login")}">Already have an account? Log in')
+        self.assertContains(response, "Create your account")
+        self.assertNotContains(response, 'href="#"')
 
-    def test_cta_sends_signed_in_users_to_planning(self):
+    def test_landing_has_no_explore_or_how_it_works_sections(self):
+        response = self.client.get(reverse("show_main"))
+        self.assertNotContains(response, "Explore plants")
+        self.assertNotContains(response, "How it works")
+        self.assertNotContains(response, "Browse plants before you sign up")
+
+    def test_signed_in_landing_points_to_planning_and_setup(self):
         user = get_user_model().objects.create_user("cta-user", password="testing-only-9384")
         self.client.force_login(user)
         response = self.client.get(reverse("show_main"))
-        self.assertContains(response, f'class="cta-button" href="{reverse("garden_planning:index")}"')
+        self.assertContains(response, f'cta-button" href="{reverse("garden_planning:index")}"')
+        self.assertContains(response, f'href="{reverse("garden_setup:space_list")}"')
+        self.assertNotContains(response, "Already have an account? Log in")

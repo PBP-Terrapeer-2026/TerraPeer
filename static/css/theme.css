@@ -47,8 +47,6 @@
 
 body:not(.landing-page) { background: var(--tp-paper); color: var(--tp-ink); }
 h1, h2, h3, h4, .tp-serif { font-family: Lora, Georgia, serif; font-weight: 600; color: var(--tp-ink); }
-/* Headings on dark surfaces (landing hero) keep the light text colour of their section. */
-.hero h1, .hero h2, .hero p { color: inherit; }
 .text-muted, .text-body-secondary { color: var(--tp-muted) !important; }
 .tp-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--tp-primary); margin-bottom: .75rem; }
 .tp-lead { font-size: 1.0625rem; line-height: 1.7; color: var(--tp-muted); max-width: 40rem; }
