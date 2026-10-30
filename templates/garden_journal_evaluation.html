@@ -1,0 +1,221 @@
+
+{% extends "base.html" %}
+
+{% block title %}Garden Evaluation — TerraPeer{% endblock %}
+
+{% block meta_description %}
+Review your monthly gardening journal activity and harvest records.
+{% endblock %}
+
+{% block body_class %}journal-evaluation-body{% endblock %}
+
+{% block content %}
+<div class="container-xxl py-5 journal-evaluation-page">
+    <header class="journal-evaluation-page__header mb-4">
+        <p class="text-uppercase small fw-bold">
+            Garden Evaluation
+        </p>
+
+        <h1>{{ selected_month_label }}, in review</h1>
+
+        <p>
+            Review the journal activity recorded during your selected month.
+        </p>
+
+        <form method="get" class="d-flex gap-2 flex-wrap">
+            <label for="evaluation-month" class="visually-hidden">
+                Select evaluation month
+            </label>
+
+            <select
+                id="evaluation-month"
+                name="month"
+                class="form-select"
+                style="max-width: 240px;"
+            >
+                {% for option in month_options %}
+                    <option
+                        value="{{ option.value }}"
+                        {% if selected_month == option.value %}selected{% endif %}
+                    >
+                        {{ option.label }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="btn btn-success">
+                View evaluation
+            </button>
+        </form>
+    </header>
+
+    <section class="row g-3 mb-4 journal-evaluation-page__stats">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="card h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Journal entries</p>
+                    <h2>{{ total_entries }}</h2>
+                </div>
+            </article>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="card h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Harvest entries</p>
+                    <h2>{{ harvest_count }}</h2>
+                </div>
+            </article>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="card h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Plant names recorded</p>
+                    <h2>{{ plant_count }}</h2>
+                </div>
+            </article>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <article class="card h-100">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Problem entries</p>
+                    <h2>{{ problem_count }}</h2>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <div class="row g-4 journal-evaluation-page__analysis">
+        <section class="col-12 col-lg-7">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h4">Journal activity by week</h2>
+
+                    {% if total_entries %}
+                        {% for week in weekly_activity %}
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>{{ week.label }}</span>
+                                    <span>{{ week.count }} entries</span>
+                                </div>
+
+                                <div
+                                    class="progress"
+                                    role="progressbar"
+                                    aria-label="{{ week.label }} journal activity"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100"
+                                    aria-valuenow="{{ week.bar_height }}"
+                                >
+                                    <div
+                                        class="progress-bar bg-success"
+                                        style="width: {{ week.bar_height }}%;"
+                                    ></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No journal entries were recorded this month.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="col-12 col-lg-5">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h4">Weather this month</h2>
+
+                    {% if weather_notes %}
+                        {% for weather in weather_notes %}
+                            <p class="mb-2">
+                                <strong>{{ weather.weather_summary }}</strong>
+                                <span class="text-muted">
+                                    · {{ weather.entry_count }} entries
+                                </span>
+                            </p>
+                        {% endfor %}
+                    {% else %}
+                        <p>
+                            No weather observations have been recorded
+                            for this month.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <section class="card mt-4">
+        <div class="card-body">
+            <h2 class="h4">Plant by plant</h2>
+
+            {% if plant_summary %}
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Plant</th>
+                                <th>Journal entries</th>
+                                <th>Harvest entries</th>
+                                <th>Problem entries</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for plant in plant_summary %}
+                                <tr>
+                                    <td>{{ plant.plant_name }}</td>
+                                    <td>{{ plant.entry_count }}</td>
+                                    <td>{{ plant.harvest_count }}</td>
+                                    <td>{{ plant.issue_count }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>
+                    No plant activity has been recorded for this month.
+                </p>
+            {% endif %}
+        </div>
+    </section>
+
+    <div class="row g-4 mt-1">
+        <section class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h4">What went well</h2>
+                    <ul>
+                        {% for item in what_went_well %}
+                            <li class="mb-2">{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h4">Try next month</h2>
+                    <ul>
+                        {% for item in next_month_suggestions %}
+                            <li class="mb-2">{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'garden_journal' %}"
+           class="btn btn-outline-success">
+            Back to Garden Journal
+        </a>
+    </div>
+</div>
+{% endblock %}

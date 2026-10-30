@@ -1,0 +1,12 @@
+<li class="list-group-item d-flex align-items-start gap-3 px-0" data-check-in>
+    <span class="mp-dot {% if check_in.needs_attention %}mp-dot-warn{% endif %}" aria-hidden="true"></span>
+    <div class="flex-grow-1">
+        <p class="mb-0 fw-semibold small">{{ check_in.get_condition_display }}</p>
+        {% if check_in.note %}<p class="mb-0 small text-muted">{{ check_in.note }}</p>{% endif %}
+        <p class="mb-0 small text-muted"><time datetime="{{ check_in.created_at|date:'c' }}">{{ check_in.created_at|date:"j M Y, H:i" }}</time></p>
+    </div>
+    <form method="post" action="{% url 'my_plants:check_in_delete' plant.pk check_in.pk %}" data-check-in-delete>
+        {% csrf_token %}
+        <button type="submit" class="btn btn-link btn-sm text-muted px-2" aria-label="Remove check-in from {{ check_in.created_at|date:'j M H:i' }}"><svg class="mp-icon mp-icon-sm"><use href="#i-trash"/></svg></button>
+    </form>
+</li>

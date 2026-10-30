@@ -9,6 +9,12 @@ db.sqlite3
 staticfiles/
 __pycache__/
 *.pyc
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+node_modules/
+test-results/
 
 # OS & IDE Files
 .DS_Store

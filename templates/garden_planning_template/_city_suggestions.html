@@ -1,0 +1,18 @@
+{% for city in cities %}
+  <button
+    type="button"
+    class="list-group-item list-group-item-action bg-white"
+    data-input="{{ city.name }}{% if city.admin1 %}, {{ city.admin1 }}{% endif %}{% if city.country %}, {{ city.country }}{% endif %}"
+    data-name="{{ city.name }}"
+    data-country="{{ city.country|default:'' }}"
+    data-latitude="{{ city.latitude }}"
+    data-longitude="{{ city.longitude }}"
+    onclick="selectCitySuggestion(this)"
+  >
+    <span class="fw-semibold">{{ city.name }}</span>
+    <span class="small text-body-secondary">
+      {% if city.admin1 %} · {{ city.admin1 }}{% endif %}
+      {% if city.country %} · {{ city.country }}{% endif %}
+    </span>
+  </button>
+{% endfor %}
