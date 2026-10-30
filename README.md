@@ -104,3 +104,146 @@ Desain UI/UX baru tersedia di file Figma TerraPeer (frame "(TerraPeer — …)")
 - 24 Oktober, Fixing cookie session timer
 - 26 Oktober, Bootstrap layout partials, auth redesign, and My Plants module (CRUD, AJAX, check-ins)
 - 26 Oktober, My Plants photo diary, required stage photos and growing recap
+
+
+# IMPLEMENTASI MODUL GARDEN JOURNAL (Adinda Pika)
+
+Garden Journal merupakan modul pada TerraPeer yang memungkinkan pengguna mencatat, mengelola, dan memantau perkembangan tanaman yang dimiliki. Modul ini berfungsi sebagai jurnal digital untuk mendokumentasikan berbagai aktivitas berkebun, mulai dari pertumbuhan tanaman, pembungaan, panen, hingga permasalahan yang ditemukan selama proses perawatan.
+
+Setiap entri jurnal terhubung dengan tanaman milik pengguna melalui modul My Plants dan menyimpan informasi berupa tanggal pencatatan, jenis milestone, judul, catatan perkembangan, detail panen, serta kondisi cuaca yang diamati. Modul ini juga menyediakan fitur pencarian, filter, timeline, dan evaluasi bulanan untuk membantu pengguna melihat perkembangan aktivitas berkebun dari waktu ke waktu.
+
+## Fitur yang Dikembangkan
+
+- Create Journal Entry: membuat catatan jurnal baru dengan memilih tanaman dari koleksi My Plants, menentukan tanggal, jenis milestone, judul, dan progress notes.
+
+- Read Journal Entries: menampilkan catatan jurnal dalam bentuk timeline yang responsif, dengan informasi tanaman, tanggal, jenis aktivitas, serta detail catatan.
+
+- Update Journal Entry: memperbarui informasi jurnal yang sudah dibuat oleh pengguna.
+
+- Delete Journal Entry: menghapus catatan jurnal yang sudah tidak diperlukan.
+
+- My Plants Integration: menghubungkan Garden Journal dengan model `Plant` dari modul My Plants melalui ForeignKey. Pengguna hanya dapat memilih tanaman yang dimiliki melalui queryset yang dibatasi berdasarkan pengguna yang sedang login. Nama tanaman juga disimpan dalam `plant_name` sebagai snapshot untuk mempertahankan informasi historis jurnal.
+
+- Milestone Categories: menyediakan lima jenis pencatatan aktivitas berkebun:
+  - Growth
+  - Flowering
+  - Harvest
+  - Pest or Disease
+  - Other
+
+- Conditional Harvest Details: menampilkan bagian Harvest Details ketika pengguna memilih milestone `Harvest`. Bagian ini mencatat jumlah hasil panen dan satuannya. Validasi memastikan jumlah panen diisi dan tidak bernilai negatif.
+
+- Search & Filter: memungkinkan pengguna mencari jurnal berdasarkan nama tanaman, judul, catatan perkembangan, dan catatan cuaca. Pengguna juga dapat memfilter entri berdasarkan tanaman, jenis milestone, dan periode waktu (30 hari, 3 bulan, 6 bulan, atau seluruh waktu).
+
+- HTMX Filtering: menerapkan HTMX untuk memperbarui hasil pencarian dan filter pada bagian timeline tanpa harus memuat ulang seluruh halaman. URL juga diperbarui menggunakan `hx-push-url`.
+
+- Responsive Timeline Interface: menyediakan tampilan timeline dan form yang responsif menggunakan Bootstrap 5.3.8, dengan komponen visual khusus untuk Garden Journal.
+
+- Monthly Garden Evaluation: menyediakan halaman evaluasi bulanan yang merangkum aktivitas berkebun berdasarkan bulan dan tahun yang dipilih. Evaluasi mencakup jumlah entri jurnal, aktivitas panen, permasalahan tanaman, perkembangan, pembungaan, ringkasan aktivitas mingguan, dan ringkasan berdasarkan tanaman.
+
+- Weather Condition Selection: memungkinkan pengguna mencatat kondisi cuaca secara manual melalui pilihan kategori yang disertai ikon:
+  - Sunny
+  - Partly Cloudy
+  - Cloudy
+  - Light Rain
+  - Heavy Rain
+  - Stormy
+  - Foggy
+  - Windy
+  - Hot
+  - Other
+
+- Additional Weather Notes: menyediakan kolom catatan cuaca tambahan secara opsional untuk menyimpan informasi seperti kondisi lingkungan atau pengamatan cuaca lainnya.
+
+- Weather Context: menampilkan kondisi cuaca terbaru yang tercatat pada halaman utama Garden Journal, termasuk kategori kondisi cuaca, catatan tambahan jika tersedia, dan tanggal pencatatan.
+
+- Access Control: membatasi akses dan pengelolaan entri jurnal berdasarkan pengguna yang sedang login. Pengguna tidak dapat mengelola entri milik pengguna lain.
+
+## Model dan Struktur Data
+
+Garden Journal menggunakan model `GardenJournalEntry` pada `main/models.py`.
+
+Model ini menyimpan beberapa informasi utama:
+
+| Field | Keterangan |
+|---|---|
+| `user` | Pengguna pemilik catatan jurnal |
+| `plant` | Relasi ForeignKey ke model `Plant` pada modul My Plants |
+| `plant_name` | Snapshot nama tanaman untuk mempertahankan riwayat jurnal |
+| `entry_date` | Tanggal pencatatan jurnal |
+| `entry_type` | Jenis milestone atau aktivitas berkebun |
+| `title` | Judul catatan jurnal |
+| `notes` | Catatan perkembangan atau pengamatan tanaman |
+| `harvest_quantity` | Jumlah hasil panen, jika jenis entri adalah Harvest |
+| `harvest_unit` | Satuan jumlah hasil panen |
+| `weather_condition` | Kategori kondisi cuaca yang diamati |
+| `weather_summary` | Catatan tambahan mengenai kondisi cuaca |
+| `created_at` | Waktu pembuatan entri |
+| `updated_at` | Waktu pembaruan terakhir |
+
+Relasi `plant` menggunakan `on_delete=models.PROTECT` agar tanaman tidak dapat dihapus ketika masih direferensikan oleh entri jurnal. Sementara itu, `plant_name` menyimpan snapshot nama tanaman sehingga informasi nama historis tetap tersedia.
+
+## Rute Garden Journal
+
+| Rute / URL Name | Fungsi |
+|---|---|
+| `/garden-journal/` | Halaman utama Garden Journal, menampilkan timeline, pencarian, filter, dan Weather Context |
+| `garden_journal_create` | Membuka form untuk membuat entri jurnal |
+| `garden_journal_evaluation` | Menampilkan evaluasi aktivitas berkebun bulanan |
+| `garden_journal` | Route halaman utama yang digunakan untuk navigasi kembali ke Garden Journal |
+
+Selain halaman utama, modul juga menyediakan endpoint untuk operasi pembuatan, pengubahan, dan penghapusan entri jurnal.
+
+## Pengujian Garden Journal
+
+Pengujian dilakukan menggunakan Django testing framework untuk memastikan fungsionalitas dan integrasi modul berjalan sesuai kebutuhan.
+
+Perintah untuk menjalankan pemeriksaan dan pengujian:
+
+```bash
+python manage.py check
+python manage.py test main
+python manage.py makemigrations --check
+```
+
+Pengujian terakhir pada branch `feat/garden-journal` menghasilkan:
+
+- **27 tests**
+- **27 tests passed**
+- **0 test failures**
+- Django system check: no issues identified.
+
+Pengujian juga dilakukan secara manual pada browser untuk memeriksa pembuatan dan pengelolaan entri jurnal, pemilihan tanaman dari My Plants, filtering timeline, tampilan evaluasi bulanan, serta penyimpanan dan penampilan kondisi cuaca.
+
+Hasil pengujian merupakan kondisi pada branch saat pengembangan dilakukan. Seluruh pengujian tetap perlu dijalankan kembali setelah integrasi dengan branch utama karena perubahan dari modul lain dapat memengaruhi hasil integrasi.
+
+## Changelog Pengembangan
+
+Berikut rangkuman perubahan berdasarkan riwayat commit pada branch `feat/garden-journal`:
+
+| Commit | Perubahan |
+|---|---|
+| `94199de` | Implementasi awal fitur pembuatan entri Garden Journal dan styling |
+| `2ccf0d1` | Penambahan pengujian akses jurnal dan operasi CRUD |
+| `f4afb99` | Penyesuaian bahasa pesan keberhasilan |
+| `bb53b86` | Integrasi Bootstrap 5.3.8 |
+| `2f3a578` | Penambahan fitur filtering entri jurnal |
+| `3d9b740` | Implementasi responsive timeline layout |
+| `32a05a9` | Penyempurnaan styling form entri jurnal |
+| `77cea2e` | Perbaikan tampilan ikon milestone |
+| `03484ed` | Implementasi evaluasi bulanan Garden Journal |
+| `3449e8e` | Penambahan pengujian Garden Evaluation |
+| `1c80c5a` | Implementasi filtering menggunakan HTMX |
+| `3527d32` | Integrasi entri jurnal dengan modul My Plants |
+| `798dc37` | Implementasi pemilihan kondisi cuaca pada Garden Journal |
+
+## Catatan Integrasi dan Pengembangan
+
+Garden Journal terintegrasi dengan modul My Plants untuk memastikan setiap catatan jurnal berkaitan dengan tanaman yang dimiliki pengguna.
+
+
+## AI USAGE DISCLOSURE
+
+ChatGPT digunakan sebagai alat bantu selama proses pengembangan Garden Journal, terutama untuk membantu peninjauan kode serta menelusuri kesalahan pada kode
+
+Saran yang dihasilkan AI disesuaikan dengan struktur proyek TerraPeer serta saya pilih pilih lagi masukannya. Implementasi dan hasil akhirnya tetap memerlukan verifikasi saya terhadap kode asli dan hasil integrasi dengan pekerjaan anggota tim lainnya.
