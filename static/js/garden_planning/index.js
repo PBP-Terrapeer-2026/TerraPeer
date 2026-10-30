@@ -206,8 +206,8 @@ async function fetchRecommendations() {
       <div class="col">
         <article class="card h-100 bg-light border-0 shadow-sm rounded-4 overflow-hidden">
           <div class="ratio ratio-4x3 bg-success-subtle">
-            <img class="card-img-top object-fit-cover" src="${escapeHtml(p.image_url || "https://placehold.co/600x450/eaf6ef/1b4032?text=Tanaman")}"
-                 alt="${escapeHtml(p.name)}" loading="lazy" />
+            <img class="card-img-top object-fit-cover" src="${escapeHtml(p.image_url || "https://placehold.co/600x450/eaf6ef/1b4032?text=Tanaman")}" 
+                 alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.onerror=null;this.src='https://placehold.co/600x450/eaf6ef/1b4032?text=Tanaman'" />
           </div>
           <div class="card-body d-flex flex-column p-3 p-lg-4">
             <h3 class="h6 fw-bold text-success-emphasis mb-2">${escapeHtml(p.name)}</h3>

@@ -106,6 +106,29 @@ class RecommendPlantsTests(TestCase):
         self.assertEqual(fetch_plants.call_count, 3)
 
     @patch("garden_planning.views.fetch_plants_from_perenual")
+    def test_recommendation_preserves_long_image_url(self, fetch_plants):
+        image_url = "https://images.example.com/" + ("plant-image/" * 25) + "basil.jpg"
+        fetch_plants.side_effect = [[{
+            "id": 12346,
+            "common_name": "Basil",
+            "watering": "average",
+            "sunlight": ["full sun"],
+            "description": "A culinary herb.",
+            "default_image": {"medium_url": image_url},
+        }], [], []]
+
+        response = self.client.post(
+            self.url,
+            data=json.dumps({"avg_rain_mm": 2, "avg_radiation": 18}),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertGreater(len(image_url), 200)
+        self.assertEqual(response.json()["plants"][0]["image_url"], image_url)
+        self.assertEqual(Plant.objects.get(perenual_id=12346).image_url, image_url)
+
+    @patch("garden_planning.views.fetch_plants_from_perenual")
     def test_recommendation_cleans_premium_text_and_truncates_long_fields(self, fetch_plants):
         Plant.objects.create(
             perenual_id=23456,

@@ -10,7 +10,7 @@ class Plant(models.Model):
     sunlight = models.JSONField(default=list, blank=True)
     benefit = models.CharField(max_length=200, blank=True)  # hias, konsumsi, obat
     description = models.TextField(blank=True)
-    image_url = models.URLField(blank=True)
+    image_url = models.URLField(blank=True, max_length=1000)
 
     def __str__(self):
         return self.name
