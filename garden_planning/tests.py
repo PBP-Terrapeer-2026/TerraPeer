@@ -115,7 +115,7 @@ class RecommendPlantsTests(TestCase):
         Plant.objects.create(
             perenual_id=23457,
             name="Cached premium plant",
-            watering="Upgrade Plans To Premium to see this data",
+            watering="Upgrade Plans To Premium",
         )
         fetch_plants.side_effect = [[
             {
@@ -200,6 +200,51 @@ class RecommendPlantsTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual([item["name"] for item in response.json()["plants"]], ["Valid plant"])
+
+
+class RecommendPlantsTimeBudgetTests(TestCase):
+    """PWS stops a request after 30 s; slow Perenual calls must not reach that."""
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username="budget", password="test-password")
+        self.client.force_login(self.user)
+        self.url = reverse("garden_planning:recommend_plants")
+        self.body = json.dumps({"avg_rain_mm": 5.9, "avg_temp_c": 27.6, "avg_radiation": 21.9, "avg_humidity": 82})
+
+    @patch("garden_planning.views.PERENUAL_TIME_BUDGET", 1)
+    @patch("garden_planning.views.fetch_plant_details_from_perenual")
+    @patch("garden_planning.views.fetch_plants_from_perenual")
+    def test_slow_perenual_still_answers_within_budget(self, fetch_plants, fetch_details):
+        import time
+
+        def slow_page(**kwargs):
+            time.sleep(3)
+            return [{"id": 900 + kwargs["page"], "common_name": "Slow plant"}]
+
+        fetch_plants.side_effect = slow_page
+        started = time.monotonic()
+        response = self.client.post(self.url, data=self.body, content_type="application/json")
+        elapsed = time.monotonic() - started
+
+        self.assertEqual(response.status_code, 200)
+        self.assertLess(elapsed, 2.5)
+        # Nothing arrived in time, so the built-in suggestions are shown instead.
+        self.assertTrue(response.json()["plants"])
+        fetch_details.assert_not_called()
+
+    @patch("garden_planning.views.fetch_plant_details_from_perenual", return_value={"description": "Grows fast. Likes sun."})
+    @patch("garden_planning.views.fetch_plants_from_perenual")
+    def test_description_lookups_are_capped(self, fetch_plants, fetch_details):
+        from garden_planning.views import MAX_DETAIL_LOOKUPS
+
+        fetch_plants.side_effect = [[{"id": n, "common_name": f"Plant {n}"} for n in range(1, 9)], [], []]
+        response = self.client.post(self.url, data=self.body, content_type="application/json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["plants"]), 8)
+        self.assertEqual(fetch_details.call_count, MAX_DETAIL_LOOKUPS)
+        described = [p for p in response.json()["plants"] if p["description"] == "Grows fast."]
+        self.assertEqual(len(described), MAX_DETAIL_LOOKUPS)
 
 
 class GardenPlanningApiTests(TestCase):

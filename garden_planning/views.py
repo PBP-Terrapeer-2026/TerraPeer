@@ -12,6 +12,8 @@ import json
 import random
 import math
 import re
+import time
+from concurrent.futures import ThreadPoolExecutor, wait
 from django.db import transaction
 from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
 
@@ -21,6 +23,11 @@ from .forms import PotForm
 
 
 PERENUAL_BASE = "https://perenual.com/api/v2/species-list"
+# Gunicorn on PWS stops a request after 30 s, and Perenual's free plan is slow.
+# All Perenual calls in one request share this budget and run in parallel.
+PERENUAL_TIME_BUDGET = 12          # seconds for every Perenual call in one request
+PERENUAL_TIMEOUT = (3.05, 6)       # (connect, read) seconds per call
+MAX_DETAIL_LOOKUPS = 4             # description lookups per request; the rest fill in over time
 
 
 POTS = [
@@ -116,7 +123,7 @@ def fetch_plants_from_perenual(watering, sunlight, page = 1) : #watering str sun
   query.update({"watering": watering, "sunlight": sunlight, "page": page})
   target = urlunparse(parsed._replace(query=urlencode(query)))
   try:
-      resp = requests.get(target, timeout=10)
+      resp = requests.get(target, timeout=PERENUAL_TIMEOUT)
       resp.raise_for_status()
       data = resp.json()
       if isinstance(data, dict):
@@ -146,7 +153,7 @@ def fetch_plant_details_from_perenual(perenual_id):
     try:
         response = requests.get(
             urlunparse(parsed._replace(path=path, query=urlencode({"key": key}))),
-            timeout=10,
+            timeout=PERENUAL_TIMEOUT,
         )
         response.raise_for_status()
         data = response.json()
@@ -322,6 +329,31 @@ def city_suggestions(request):
     return render(request, "garden_planning_template/_city_suggestions.html", {"cities": cities[:3]})
 
 
+def _run_within_budget(calls, deadline):
+    """Run Perenual calls in parallel and return their results in order.
+    A call that has not finished by the deadline counts as empty, so the
+    request always answers before gunicorn's timeout."""
+    if not calls:
+        return []
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        return [None] * len(calls)
+    pool = ThreadPoolExecutor(max_workers=len(calls))
+    try:
+        futures = [pool.submit(call) for call in calls]
+        wait(futures, timeout=remaining)
+        results = []
+        for future in futures:
+            if future.done() and not future.cancelled() and future.exception() is None:
+                results.append(future.result())
+            else:
+                results.append(None)
+        return results
+    finally:
+        # Do not wait for slow calls; their own timeout ends them in the background.
+        pool.shutdown(wait=False, cancel_futures=True)
+
+
 @login_required
 @require_POST
 def recommend_plants(request):
@@ -355,15 +387,17 @@ def recommend_plants(request):
     pot = recommend_pot(profile)
 
    #disini akan dirandom untuk rekomendasi tanaman agar lebih bervariasi 
+    deadline = time.monotonic() + PERENUAL_TIME_BUDGET
     raw_plants = []
     seen_ids = set()
-    for page in range(1, 4):
-        page_plants = fetch_plants_from_perenual(
-            watering=filters["watering"],
-            sunlight=filters["sunlight"],
-            page=page,
-        ) or []
-        for candidate in page_plants:
+    pages = _run_within_budget(
+        [lambda page=page: fetch_plants_from_perenual(
+            watering=filters["watering"], sunlight=filters["sunlight"], page=page)
+         for page in range(1, 4)],
+        deadline,
+    )
+    for page_plants in pages:
+        for candidate in page_plants or []:
             if not isinstance(candidate, dict):
                 continue
             try:
@@ -377,31 +411,39 @@ def recommend_plants(request):
                 raw_plants.append(candidate)
     random.shuffle(raw_plants)
 
-    # 4. Cache ke DB & bentuk response
-    result_plants = []
+    # 4. Cache ke DB (cepat, tanpa panggilan API)
+    cached_plants = []
     for p in raw_plants[:10]:   # pilih maksimal 10 kandidat secara acak
         try:
             with transaction.atomic():
-                plant = get_or_cache_plant(p)
-                description = first_description_sentence(plant.description)
-                if not description and plant.perenual_id:
-                    details = fetch_plant_details_from_perenual(plant.perenual_id)
-                    full_description = clean_perenual_text(details.get("description"))
-                    description = first_description_sentence(full_description)
-                    if full_description and plant.description != full_description:
-                        plant.description = full_description
-                        plant.save(update_fields=["description"])
-                response_plant = {
-                    "id": plant.pk,
-                    "name": plant.name,
-                    "watering": plant.watering,
-                    "sunlight": plant.sunlight,
-                    "description": description or "Plant description is not available.",
-                    "image_url": plant.image_url,
-                }
-            result_plants.append(response_plant)
+                cached_plants.append(get_or_cache_plant(p))
         except Exception as exc:
             print(f"[Perenual] Plant skipped: {type(exc).__name__}")
+
+    # 5. Lengkapi deskripsi yang belum ada secara paralel, dalam sisa waktu.
+    missing = [plant for plant in cached_plants
+               if plant.perenual_id and not first_description_sentence(plant.description)][:MAX_DETAIL_LOOKUPS]
+    details = _run_within_budget(
+        [lambda pid=plant.perenual_id: fetch_plant_details_from_perenual(pid) for plant in missing],
+        deadline,
+    )
+    for plant, detail in zip(missing, details):
+        full_description = clean_perenual_text((detail or {}).get("description"))
+        if full_description and plant.description != full_description:
+            plant.description = full_description
+            try:
+                plant.save(update_fields=["description"])
+            except Exception as exc:
+                print(f"[Perenual] Description not saved: {type(exc).__name__}")
+
+    result_plants = [{
+        "id": plant.pk,
+        "name": plant.name,
+        "watering": plant.watering,
+        "sunlight": plant.sunlight,
+        "description": first_description_sentence(plant.description) or "Plant description is not available.",
+        "image_url": plant.image_url,
+    } for plant in cached_plants]
 
     if not result_plants:
         cached = list(Plant.objects.filter(perenual_id__isnull=True).order_by("name")[:10])
