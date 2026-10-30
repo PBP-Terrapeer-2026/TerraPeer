@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}plants-page{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/my-plants.css' %}">{% endblock %}
+
+{% block content %}
+    <svg class="d-none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+        <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+        <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+        <symbol id="i-sprout" viewBox="0 0 24 24"><path d="M12 21v-9M12 12c-4 0-7-2.5-7-7 4 0 7 2.5 7 7ZM12 14c0-4 2.5-7 7-7 0 4-2.5 7-7 7Z"/></symbol>
+        <symbol id="i-flower" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z"/></symbol>
+        <symbol id="i-harvest" viewBox="0 0 24 24"><path d="M4 10h16l-2 10H6L4 10ZM8 10l4-6 4 6"/></symbol>
+        <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7"/></symbol>
+        <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4ZM13.5 6.5l4 4"/></symbol>
+        <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></symbol>
+        <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
+        <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4V8Z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+        <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3ZM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"/></symbol>
+        <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></symbol>
+        <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    </svg>
+    <div class="container plants-shell">
+        {% block plants_content %}{% endblock %}
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}<script type="module" src="{% static 'js/my-plants.js' %}"></script>{% endblock %}

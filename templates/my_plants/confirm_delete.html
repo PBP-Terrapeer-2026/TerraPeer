@@ -1,0 +1,20 @@
+{% extends "my_plants/base.html" %}
+{% block title %}Delete {{ plant.name }} · TerraPeer{% endblock %}
+
+{% block plants_content %}
+    <a class="mp-back" href="{{ plant.get_absolute_url }}"><svg class="mp-icon mp-icon-sm"><use href="#i-back"/></svg>Back to {{ plant.name }}</a>
+    <section class="card mx-auto my-5" style="max-width: 620px" aria-labelledby="delete-title">
+        <div class="card-body p-4 p-md-5">
+            <span class="mp-stat-icon mp-tone-danger mb-3"><svg class="mp-icon"><use href="#i-trash"/></svg></span>
+            <h1 id="delete-title" class="h2">Delete {{ plant.name }}?</h1>
+            <p class="text-muted">This permanently removes the plant. You can mark it Finished instead to keep it in your garden's history.</p>
+            {% if error %}<div class="alert alert-warning" role="alert">{{ error }}</div>{% endif %}
+            <form method="post" class="d-flex flex-wrap gap-2 mt-4" data-delete-form data-list-url="{% url 'my_plants:list' %}">
+                {% csrf_token %}
+                <p class="alert alert-danger d-none w-100" role="alert" data-delete-error></p>
+                <button class="btn btn-danger" type="submit">Delete plant</button>
+                <a class="btn btn-outline-primary" href="{{ plant.get_absolute_url }}">Keep this plant</a>
+            </form>
+        </div>
+    </section>
+{% endblock %}
