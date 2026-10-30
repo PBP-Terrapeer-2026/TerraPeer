@@ -162,10 +162,13 @@ def garden_journal(request):
         entry_type="issue"
     ).count()
 
-    #ambil catatan cuaca terbaru yang benar-benar tersimpan
+    # Ambil entri terbaru yang memiliki kategori cuaca
+    # atau catatan cuaca tambahan.
     latest_weather_entry = (
-        all_entries.exclude(weather_summary="")
-        .first()
+        all_entries.filter(
+            Q(weather_condition__gt="")
+            | Q(weather_summary__gt="")
+        ).first()
     )
 
     context = {

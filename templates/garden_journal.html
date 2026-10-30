@@ -191,24 +191,55 @@ Record your plants' growth, harvests, and gardening milestones with TerraPeer Ga
                 <section class="journal-v2__weather">
                     <p class="journal-v2__eyebrow">WEATHER CONTEXT</p>
                     <h2>Garden conditions</h2>
-
                     {% if latest_weather_entry %}
+                    {% if latest_weather_entry.weather_condition %}
                         <p class="journal-v2__weather-value">
-                            {{ latest_weather_entry.weather_summary }}
-                        </p>
-                        <p class="journal-v2__weather-note">
-                            From your journal entry on
-                            {{ latest_weather_entry.entry_date|date:"d M Y" }}.
-                        </p>
-                    {% else %}
-                        <p class="journal-v2__weather-value">
-                            No weather notes yet
-                        </p>
-                        <p class="journal-v2__weather-note">
-                            Add weather conditions to a journal entry
-                            to keep track of your garden's environment.
+                            {% if latest_weather_entry.weather_condition == "sunny" %}
+                                ☀️
+                            {% elif latest_weather_entry.weather_condition == "partly_cloudy" %}
+                                🌤️
+                            {% elif latest_weather_entry.weather_condition == "cloudy" %}
+                                ☁️
+                            {% elif latest_weather_entry.weather_condition == "light_rain" %}
+                                🌦️
+                            {% elif latest_weather_entry.weather_condition == "heavy_rain" %}
+                                🌧️
+                            {% elif latest_weather_entry.weather_condition == "stormy" %}
+                                ⛈️
+                            {% elif latest_weather_entry.weather_condition == "foggy" %}
+                                🌫️
+                            {% elif latest_weather_entry.weather_condition == "windy" %}
+                                💨
+                            {% elif latest_weather_entry.weather_condition == "hot" %}
+                                🌡️
+                            {% else %}
+                                🌈
+                            {% endif %}
+                            {{ latest_weather_entry.get_weather_condition_display }}
                         </p>
                     {% endif %}
+
+                    {% if latest_weather_entry.weather_summary %}
+                        <p class="journal-v2__weather-note">
+                            {{ latest_weather_entry.weather_summary }}
+                        </p>
+                    {% endif %}
+
+                    <p class="journal-v2__weather-note">
+                        From your journal entry on
+                        {{ latest_weather_entry.entry_date|date:"d M Y" }}.
+                    </p>
+
+                {% else %}
+                    <p class="journal-v2__weather-value">
+                        No weather notes yet
+                    </p>
+
+                    <p class="journal-v2__weather-note">
+                        Add weather conditions to a journal entry
+                        to keep track of your garden's environment.
+                    </p>
+                {% endif %}
                 </section>
 
                 <section class="journal-v2__plant-panel">

@@ -13,6 +13,19 @@ class GardenJournalEntry(models.Model):
         ("general", "Other"),
     ]
 
+    WEATHER_CONDITION_CHOICES = [
+        ("sunny", "Sunny"),
+        ("partly_cloudy", "Partly Cloudy"),
+        ("cloudy", "Cloudy"),
+        ("light_rain", "Light Rain"),
+        ("heavy_rain", "Heavy Rain"),
+        ("stormy", "Stormy"),
+        ("foggy", "Foggy"),
+        ("windy", "Windy"),
+        ("hot", "Hot"),
+        ("other", "Other"),
+    ]
+
     # Pemilik catatan jurnal
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -53,6 +66,20 @@ class GardenJournalEntry(models.Model):
 
     harvest_unit = models.CharField(
         max_length=30,
+        blank=True,
+    )
+
+    # Kategori kondisi cuaca yang dipilih pengguna
+    weather_condition = models.CharField(
+        max_length=20,
+        choices=WEATHER_CONDITION_CHOICES,
+        blank=True,
+        default="",
+    )
+
+    # Catatan tambahan cuaca (opsional)
+    weather_summary = models.CharField(
+        max_length=200,
         blank=True,
     )
 

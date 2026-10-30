@@ -210,11 +210,75 @@ Record a gardening milestone, progress notes, harvest details, and observed weat
                         </div>
 
                         <!-- Weather conditions -->
+                        <fieldset class="journal-form-v2__fieldset mb-4">
+                            <legend class="form-label">
+                                Weather condition
+                            </legend>
+
+                            <div class="journal-form-v2__weather-grid">
+                                {% for radio in form.weather_condition %}
+                                    {% if radio.data.value %}
+                                        <label
+                                            class="journal-form-v2__weather-option"
+                                            for="{{ radio.id_for_label }}"
+                                        >
+                                        {{ radio.tag }}
+
+                                        <span
+                                            class="journal-form-v2__weather-icon"
+                                            aria-hidden="true"
+                                        >
+                                            {% if radio.data.value == "sunny" %}
+                                                ☀️
+                                            {% elif radio.data.value == "partly_cloudy" %}
+                                                🌤️
+                                            {% elif radio.data.value == "cloudy" %}
+                                                ☁️
+                                            {% elif radio.data.value == "light_rain" %}
+                                                🌦️
+                                            {% elif radio.data.value == "heavy_rain" %}
+                                                🌧️
+                                            {% elif radio.data.value == "stormy" %}
+                                                ⛈️
+                                            {% elif radio.data.value == "foggy" %}
+                                                🌫️
+                                            {% elif radio.data.value == "windy" %}
+                                                💨
+                                            {% elif radio.data.value == "hot" %}
+                                                🌡️
+                                            {% else %}
+                                                🌈
+                                            {% endif %}
+                                        </span>
+
+                                        <span class="journal-form-v2__weather-label">
+                                            {{ radio.choice_label }}
+                                        </span>
+                                    </label>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+
+                            {% for error in form.weather_condition.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                            <div class="form-text">
+                                Select the weather condition you observed.
+                            </div>
+                        </fieldset>
+
+                        <!-- Additional weather notes -->
                         <div class="mb-4">
-                            <label class="form-label"
-                                   for="{{ form.weather_summary.id_for_label }}">
-                                Weather conditions
+                            <label
+                                class="form-label"
+                                for="{{ form.weather_summary.id_for_label }}"
+                            >
+                                Additional weather notes
                             </label>
+
                             {{ form.weather_summary }}
 
                             {% for error in form.weather_summary.errors %}
@@ -224,11 +288,9 @@ Record a gardening milestone, progress notes, harvest details, and observed weat
                             {% endfor %}
 
                             <div class="form-text">
-                                Optional. Enter weather conditions you observed.
-                                Automatic weather lookup is not connected here yet.
+                                Optional. Add details about the weather, if needed.
                             </div>
                         </div>
-
                         <!-- Actions -->
                         <div class="journal-form-v2__actions">
                             <a href="{% url 'garden_journal' %}"
@@ -253,9 +315,9 @@ Record a gardening milestone, progress notes, harvest details, and observed weat
                     </p>
                     <h2>Garden conditions</h2>
                     <p>
-                        Weather notes are optional. Record what you observe
-                        in the weather field so the information stays with
-                        this journal entry.
+                        Select the weather condition you observed and add
+                        optional notes to preserve the environmental context
+                        of your gardening activities.
                     </p>
                     <span class="journal-form-v2__info-tag">
                         Manual entry

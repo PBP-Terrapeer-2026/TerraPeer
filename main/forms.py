@@ -29,6 +29,7 @@ class GardenJournalEntryForm(forms.ModelForm):
             "notes",
             "harvest_quantity",
             "harvest_unit",
+            "weather_condition",
             "weather_summary",
         ]
 
@@ -74,6 +75,11 @@ class GardenJournalEntryForm(forms.ModelForm):
                     "placeholder": "e.g. grams, pieces, bunches",
                 }
             ),
+            "weather_condition": forms.RadioSelect(
+                attrs={
+                    "class": "journal-form-v2__weather-input",
+                }
+            ),
             "weather_summary": forms.TextInput(
                 attrs={
                     "class": "form-control",
@@ -91,14 +97,16 @@ class GardenJournalEntryForm(forms.ModelForm):
             "notes": "Progress notes",
             "harvest_quantity": "Harvest quantity",
             "harvest_unit": "Harvest unit",
-            "weather_summary": "Weather conditions",
+            "weather_condition": "Weather condition",
+            "weather_summary": "Additional weather notes",
         }
 
         help_texts = {
             "plant": "Select a plant from your My Plants collection.",
             "notes": "Describe the changes, progress, or problems you noticed.",
             "harvest_unit": "For example: grams, kilograms, pieces, or bunches.",
-            "weather_summary": "Optional. Record the weather you observed.",
+            "weather_condition": "Select the weather condition you observed.",
+            "weather_summary": "Optional. Add details about the weather, if needed.",
         }
 
     def save(self, commit=True):
