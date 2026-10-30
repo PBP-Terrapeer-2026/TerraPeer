@@ -1,59 +1,64 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Masuk - TerraPeer{% endblock %}
-{% block meta_description %}Masuk ke akun TerraPeer dan lanjutkan mengelola kebun digitalmu.{% endblock %}
+{% block title %}Log in · TerraPeer{% endblock %}
+{% block meta_description %}Log in to TerraPeer and pick up today's care tasks.{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/auth.css' %}">{% endblock %}
 
 {% block content %}
-<section class="auth-section">
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <svg class="auth-logo" viewBox="0 0 38 45" fill="none" aria-hidden="true">
-                    <path d="M19 23V11M19 17C10 17 7 11 7 5c8 0 12 4 12 12ZM19 15c0-7 5-11 13-11 0 7-4 11-13 11Z" fill="#267353"/>
-                    <path d="M10 25h18l-2 15H12l-2-15Z" fill="#C3654C"/>
-                    <path d="M8 25h22M19 28v8" stroke="#C3654C" stroke-width="3" stroke-linecap="round"/>
-                </svg>
-                <h1 class="auth-title">Selamat Datang</h1>
-                <p class="auth-subtitle">Masuk untuk melanjutkan ke TerraPeer.</p>
-            </div>
-
-            {% if messages %}
-                <div class="auth-messages">
-                    {% for message in messages %}
-                        <p class="auth-message auth-message--{{ message.tags }}">{{ message }}</p>
-                    {% endfor %}
+<section class="tp-auth container" aria-labelledby="login-title">
+    <div class="card tp-auth-card overflow-hidden">
+        <div class="row g-0">
+            <aside class="col-lg-5 tp-auth-aside d-flex flex-column justify-content-between">
+                <p class="tp-eyebrow text-reset opacity-75 mb-0">Welcome back</p>
+                {% include "partials/_auth_art.html" %}
+                <div>
+                    <p class="h2 tp-auth-aside-title">Your plants missed you.</p>
+                    <p class="mb-0">Pick up today's care tasks and see how your garden is growing.</p>
                 </div>
-            {% endif %}
+            </aside>
+            <div class="col-lg-7 tp-auth-main">
+                <form method="post" action="{% url 'login' %}" class="tp-auth-form" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                    <h1 id="login-title" class="tp-auth-title">Log in</h1>
+                    <p class="text-muted mb-4">Welcome back to your garden.</p>
 
-            <form method="post" action="{% url 'login' %}" class="auth-form" novalidate>
-                {% csrf_token %}
+                    {% if next %}
+                        <div class="alert alert-info small" role="status">Log in to continue. We'll take you back to the page you opened.</div>
+                    {% endif %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger small" role="alert">
+                            {% for error in form.non_field_errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+                        </div>
+                    {% endif %}
 
-                {% if form.non_field_errors %}
-                    <div class="auth-alert" role="alert">
-                        {% for error in form.non_field_errors %}
-                            <p class="auth-alert__text">{{ error }}</p>
-                        {% endfor %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
+                        {{ form.username }}
+                        {% for error in form.username.errors %}<div class="invalid-feedback d-block" id="username-error">{{ error }}</div>{% endfor %}
                     </div>
-                {% endif %}
-
-                {% for field in form %}
-                    <div class="auth-field{% if field.errors %} auth-field--error{% endif %}">
-                        <label class="auth-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {{ field }}
-                        {% for error in field.errors %}
-                            <p class="auth-error">{{ error }}</p>
-                        {% endfor %}
+                    <div class="mb-2">
+                        <label class="form-label" for="{{ form.password.id_for_label }}">Password</label>
+                        <div class="tp-pw-wrap">
+                            {{ form.password }}
+                            <button class="btn btn-link btn-sm tp-pw-toggle" type="button" data-toggle-password="{{ form.password.id_for_label }}" aria-pressed="false" aria-label="Show password">Show</button>
+                        </div>
+                        {% for error in form.password.errors %}<div class="invalid-feedback d-block" id="password-error">{{ error }}</div>{% endfor %}
                     </div>
-                {% endfor %}
+                    <p class="form-text mb-4">For your security you're signed out after 1 hour without activity.</p>
 
-                <button type="submit" class="auth-submit">Masuk</button>
-            </form>
-
-            <p class="auth-footer-text">
-                Belum punya akun?
-                <a href="{% url 'register' %}" class="auth-link">Daftar di sini</a>
-            </p>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Log in</button>
+                    <p class="text-center text-muted small mt-4 mb-0">
+                        New to TerraPeer?
+                        <a class="fw-semibold" href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Create an account</a>
+                    </p>
+                </form>
+            </div>
         </div>
     </div>
 </section>
 {% endblock content %}
+
+{% block extra_scripts %}<script src="{% static 'js/auth.js' %}" defer></script>{% endblock %}
