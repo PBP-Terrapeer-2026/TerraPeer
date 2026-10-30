@@ -138,7 +138,7 @@ class RecommendPlantsTests(TestCase):
         Plant.objects.create(
             perenual_id=23457,
             name="Cached premium plant",
-            watering="Upgrade Plans To Premium to see this data",
+            watering="Upgrade Plans To Premium",
         )
         fetch_plants.side_effect = [[
             {
