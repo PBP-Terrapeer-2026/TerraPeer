@@ -1,12 +1,17 @@
 let currentProfile = null;
 let currentLocation = {};
 let editingPlanId = null;
-let availablePots = [];
 let targetPlanId = null;
 let selectedCitySuggestion = null;
 
 document.getElementById("city-input").addEventListener("input", () => {
   selectedCitySuggestion = null;
+});
+
+document.getElementById("plant-grid").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-add-plant]");
+  if (!button) return;
+  addToPlan(Number(button.dataset.plantId), button.dataset.plantName);
 });
 
 function selectCitySuggestion(button) {
@@ -130,7 +135,7 @@ async function fetchRecommendations() {
       <div class="col">
         <article class="card h-100 bg-light border-0 shadow-sm rounded-4 overflow-hidden">
           <div class="ratio ratio-4x3 bg-success-subtle">
-            <img class="card-img-top object-fit-cover" src="${p.image_url || "https://placehold.co/600x450/eaf6ef/1b4032?text=Tanaman"}"
+            <img class="card-img-top object-fit-cover" src="${escapeHtml(p.image_url || "https://placehold.co/600x450/eaf6ef/1b4032?text=Tanaman")}"
                  alt="${escapeHtml(p.name)}" loading="lazy" />
           </div>
           <div class="card-body d-flex flex-column p-3 p-lg-4">
@@ -140,7 +145,8 @@ async function fetchRecommendations() {
               Array.isArray(p.sunlight) ? p.sunlight.join(", ") : p.sunlight,
             )}</p>
             <button class="btn btn-success rounded-pill fw-semibold w-100 mt-auto"
-                    onclick="addToPlan(${Number(p.id)}, '${escapeHtml(p.name).replace(/'/g, "\\'")}')">
+                    type="button" data-add-plant data-plant-id="${Number(p.id)}"
+                    data-plant-name="${escapeHtml(p.name)}">
               + Tambah ke Rencana
             </button>
           </div>
@@ -206,31 +212,6 @@ async function savePlanEdit() {
   }
 }
 
-async function loadPots() {
-  const list = document.getElementById("pot-list");
-  try {
-    const res = await fetch("/garden_planning/api/pots/", {
-      credentials: "same-origin",
-      headers: { Accept: "application/json" },
-    });
-    const data = await readApiResponse(res);
-    availablePots = data.pots;
-    list.innerHTML =
-      data.pots
-        .map(
-          (
-            p,
-          ) => `<li class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 rounded-3 border bg-light plan-item" data-id="${p.id}">
-      <div><div class="fw-bold text-success-emphasis plan-item-name">${p.name}</div><div class="small text-body-secondary mt-1 plan-item-loc">${p.size_cm} cm · ${p.material || "material tidak disebutkan"}</div></div>
-      <div class="d-flex flex-wrap gap-2"><button class="btn btn-outline-success btn-sm" onclick="editPot(${p.id}, this)">Edit</button>
-      <button class="btn btn-danger btn-sm" onclick="deletePot(${p.id}, this)">Hapus</button></div></li>`,
-        )
-        .join("") || '<li class="small text-secondary">Belum ada pot.</li>';
-  } catch (err) {
-    list.innerHTML = `<li class="text-danger small">${escapeHtml(err.message)}</li>`;
-  }
-}
-
 async function readApiResponse(res) {
   const contentType = res.headers.get("content-type") || "";
   if (!contentType.includes("application/json")) {
@@ -254,17 +235,12 @@ async function readApiResponse(res) {
 }
 
 function escapeHtml(value) {
-  return String(value).replace(
-    /[&<>"']/g,
-    (char) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[char],
-  );
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function planStatusInfo(status) {
@@ -346,7 +322,7 @@ async function editPot(id, button) {
     body: JSON.stringify({ name: name.trim(), size_cm }),
   });
   if (!res.ok) return alert("Gagal mengubah pot.");
-  loadPots();
+  htmx.trigger(document.body, "potsChanged");
 }
 
 async function deletePot(id, button) {
@@ -356,7 +332,7 @@ async function deletePot(id, button) {
     headers: { "X-CSRFToken": CSRF },
   });
   if (!res.ok) return alert("Gagal menghapus pot.");
-  button.closest(".plan-item").remove();
+  htmx.trigger(document.body, "potsChanged");
 }
 
 async function createPlan() {
@@ -393,7 +369,7 @@ async function createPlan() {
   li.innerHTML = `
     <div>
       <div class="d-flex align-items-center gap-2 flex-wrap"><div class="fw-bold text-success-emphasis plan-item-name">${escapeHtml(data.name)}</div>${planStatusBadge(data.status)}</div>
-      <div class="small text-body-secondary mt-1 plan-item-loc">${body.location_name || "—"}</div>
+      <div class="small text-body-secondary mt-1 plan-item-loc">${escapeHtml(body.location_name || "—")}</div>
     </div>
     <div class="d-flex flex-wrap gap-2">
       <button class="btn btn-outline-success btn-sm" onclick="editPlan(${data.id}, this)">Edit</button>
@@ -519,7 +495,6 @@ async function addToPlan(plantId, plantName) {
 function setLoading(id, on) {
   document.getElementById(id).classList.toggle("d-none", !on);
 }
-loadPots();
 loadPlans();
 const pageParams = new URLSearchParams(window.location.search);
 const requestedPlanId = pageParams.get("plan_id");

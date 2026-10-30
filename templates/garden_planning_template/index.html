@@ -167,7 +167,13 @@
           <button class="btn btn-success btn-sm w-100" type="submit">+ Tambah Pot</button>
         </div>
       </form>
-      <ul id="pot-list" class="list-unstyled d-flex flex-column gap-2"></ul>
+      <ul
+        id="pot-list"
+        class="list-unstyled d-flex flex-column gap-2"
+        hx-get="{% url 'garden_planning:pot_list_partial' %}"
+        hx-trigger="load, potsChanged from:body"
+        hx-swap="innerHTML"
+      ></ul>
     </div>
 
     <ul id="plan-list" class="list-unstyled d-flex flex-column gap-2">

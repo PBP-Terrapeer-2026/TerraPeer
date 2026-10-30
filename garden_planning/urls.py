@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from garden_planning.views import garden_planning_page, plan_summary_page, city_suggestions, recommend_plants, pot_list_create,pot_detail,plant_create, plan_list_create,plan_detail,plan_detail,planplant_list_create, planplant_detail
+from garden_planning.views import garden_planning_page, plan_summary_page, city_suggestions, recommend_plants, pot_list_create, pot_list_partial, pot_detail, plant_create, plan_list_create, plan_detail, planplant_list_create, planplant_detail
 
 app_name = "garden_planning"
 
@@ -13,6 +13,7 @@ urlpatterns = [
     # API: terima profil cuaca dari JS → kembalikan rekomendasi tanaman + pot
     path("api/recommend/", recommend_plants, name="recommend_plants"),
     path("api/pots/", pot_list_create, name="pot_list_create"),
+    path("partials/pots/", pot_list_partial, name="pot_list_partial"),
     path("api/pots/<int:pk>/", pot_detail, name="pot_detail"),
     path("api/plants/", plant_create, name="plant_create"),
 

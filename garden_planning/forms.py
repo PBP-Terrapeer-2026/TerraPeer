@@ -1,6 +1,15 @@
 from django import forms
+import re
 
 from .models import Pot
+from django.utils.html import strip_tags
+
+
+ACTIVE_HTML_CONTENT = re.compile(
+    r"<(script|style|iframe|object|embed|svg|math)\b[^>]*>.*?</\1\s*>|"
+    r"<(script|style|iframe|object|embed|svg|math)\b[^>]*/\s*>",
+    flags=re.IGNORECASE | re.DOTALL,
+)
 
 
 
@@ -45,7 +54,8 @@ class PotForm(forms.ModelForm):
         }
 
     def clean_name(self):
-        name = strip_tags(self.cleaned_data["name"].stript())
+        raw_name = ACTIVE_HTML_CONTENT.sub("", self.cleaned_data["name"])
+        name = strip_tags(raw_name).strip()
         if not name:
             raise forms.ValidationError("Nama pot tidak boleh kosong.")
         return name

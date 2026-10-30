@@ -381,6 +381,15 @@ def pot_list_create(request):
 
 
 @login_required
+@require_GET
+def pot_list_partial(request):
+    """Render daftar pot pengguna sebagai HTML untuk HTMX."""
+    return render(request, "garden_planning_template/_pot_list.html", {
+        "pots": Pot.objects.filter(owner=request.user).order_by("name"),
+    })
+
+
+@login_required
 @require_http_methods(["PUT", "DELETE"])
 def pot_detail(request, pk):
     pot = get_object_or_404(Pot, pk=pk, owner=request.user)
