@@ -4,6 +4,23 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def rename_legacy_plant_index(apps, schema_editor):
+    """RenameField keeps the old index name on PostgreSQL, so the new `plant` FK
+    would try to create an index with the same name. Give the old one a new name."""
+    if schema_editor.connection.vendor != "postgresql":
+        return
+    with schema_editor.connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'care_caretask' "
+            "AND indexdef LIKE '%%(legacy_plant_id)%%'"
+        )
+        for (name,) in cursor.fetchall():
+            if name.startswith("care_caretask_plant_id_"):
+                schema_editor.execute(
+                    f'ALTER INDEX "{name}" RENAME TO "care_caretask_legacy_plant_id_idx"'
+                )
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ("care", "0002_protect_task_plant"),
@@ -25,6 +42,7 @@ class Migration(migrations.Migration):
         migrations.RenameField(
             model_name="caretask", old_name="plant", new_name="legacy_plant"
         ),
+        migrations.RunPython(rename_legacy_plant_index, migrations.RunPython.noop),
         migrations.AlterField(
             model_name="caretask",
             name="legacy_plant",
