@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "main",
     "my_plants",
     "garden_planning",
+    "garden_setup",
 ]
 
 MIDDLEWARE = [

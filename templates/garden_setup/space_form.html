@@ -1,0 +1,405 @@
+{% extends "garden_setup/layout.html" %}
+{% load static %}
+
+{% block title %}
+{% if is_edit %}Edit{% else %}Create{% endif %} Growing Space — TerraPeer
+{% endblock %}
+
+{% block gs_content %}
+<section
+    class="gs-form-page"
+    id="gs-form-root"
+    data-search-url="{% url 'garden_setup:location_search' %}"
+>
+    <a class="gs-back-link"
+       href="{% url 'garden_setup:space_list' %}">
+        &larr; Back to My Growing Spaces
+    </a>
+
+    <div class="mt-4 mb-4">
+        <p class="gs-eyebrow">Garden Setup</p>
+
+        <h1 class="gs-title">
+            {% if is_edit %}
+                Edit Growing Space
+            {% else %}
+                Create Growing Space
+            {% endif %}
+        </h1>
+
+        <p class="gs-description">
+            Tell us about your growing environment
+            so you can plan your garden.
+        </p>
+    </div>
+
+    <form method="post" id="gs-space-form" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        {% for field in form.hidden_fields %}
+            {{ field }}
+            {% for error in field.errors %}
+                <p class="gs-field-error">{{ error }}</p>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="row g-4 align-items-start">
+
+            <!-- LEFT: FORM -->
+            <div class="col-12 col-lg-8">
+
+                <!-- ABOUT -->
+                <section class="gs-card mb-4">
+                    <p class="gs-eyebrow">01 · About</p>
+                    <h2 class="gs-section-title">About your space</h2>
+
+                    <div class="mb-4">
+                        <label class="form-label"
+                               for="{{ form.name.id_for_label }}">
+                            Space name *
+                        </label>
+
+                        {{ form.name }}
+
+                        <p class="gs-field-help">
+                            Example: My Balcony or Kitchen Window.
+                        </p>
+
+                        {% for error in form.name.errors %}
+                            <p class="gs-field-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <fieldset class="mb-4">
+                        <legend class="form-label">
+                            Environment *
+                        </legend>
+
+                        <div class="gs-option-group">
+                            {% for value, label in form.fields.environment.choices %}
+                                {% if value %}
+                                    <label class="gs-option">
+                                        <input
+                                            type="radio"
+                                            name="environment"
+                                            value="{{ value }}"
+                                            {% if form.environment.value == value %}checked{% endif %}
+                                        >
+                                        <span>{{ label }}</span>
+                                    </label>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        {% for error in form.environment.errors %}
+                            <p class="gs-field-error">{{ error }}</p>
+                        {% endfor %}
+                    </fieldset>
+
+                    <div>
+                        <label class="form-label"
+                               for="{{ form.space_type.id_for_label }}">
+                            Space type *
+                        </label>
+
+                        {{ form.space_type }}
+
+                        {% for error in form.space_type.errors %}
+                            <p class="gs-field-error">{{ error }}</p>
+                        {% endfor %}
+                        <div id="gs-other-type-wrapper" class="gs-other-type-field mt-3" hidden>
+                            {{ form.other_space_type }}
+
+                            {% for error in form.other_space_type.errors %}
+                                <p class="gs-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </section>
+
+                <!-- LOCATION -->
+                <section class="gs-card mb-4">
+                    <p class="gs-eyebrow">02 · Location</p>
+                    <h2 class="gs-section-title">
+                        Where is your space?
+                    </h2>
+
+                    <div class="gs-location-wrapper">
+                        <label class="form-label"
+                               for="{{ form.city.id_for_label }}">
+                            City or area *
+                        </label>
+
+                        {{ form.city }}
+
+                        <div
+                            id="gs-location-results"
+                            class="gs-location-results"
+                            role="group"
+                            aria-label="Location suggestions"
+                            hidden
+                        ></div>
+
+                        <p
+                            id="gs-location-status"
+                            class="gs-field-help"
+                            role="status"
+                            aria-live="polite"
+                        >
+                            Type your city, then select a suggestion.
+                        </p>
+
+                        {% for error in form.city.errors %}
+                            <p class="gs-field-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="gs-location-info mt-3">
+                        <span>Selected location:</span>
+                        <strong id="gs-location-summary">
+                            {% if form.geocoding_id.value %}
+                                {{ form.city.value }}
+                            {% else %}
+                                Not selected
+                            {% endif %}
+                        </strong>
+                    </div>
+                </section>
+
+                <!-- GROWING CONDITIONS -->
+                <section class="gs-card mb-4">
+                    <p class="gs-eyebrow">03 · Growing Conditions</p>
+                    <h2 class="gs-section-title">
+                        Growing conditions
+                    </h2>
+
+                    <fieldset class="mb-4">
+                        <legend class="form-label">
+                            Daily sunlight *
+                        </legend>
+
+                        <div class="gs-option-group">
+                            {% for value, label in form.fields.sunlight_range.choices %}
+                                {% if value %}
+                                    <label class="gs-option">
+                                        <input
+                                            type="radio"
+                                            name="sunlight_range"
+                                            value="{{ value }}"
+                                            {% if form.sunlight_range.value == value %}checked{% endif %}
+                                        >
+                                        <span>{{ label }}</span>
+                                    </label>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        {% for error in form.sunlight_range.errors %}
+                            <p class="gs-field-error">{{ error }}</p>
+                        {% endfor %}
+                    </fieldset>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label"
+                                   for="{{ form.light_exposure.id_for_label }}">
+                                Light exposure *
+                            </label>
+                            {{ form.light_exposure }}
+
+                            {% for error in form.light_exposure.errors %}
+                                <p class="gs-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label"
+                                   for="{{ form.growing_medium.id_for_label }}">
+                                Growing medium *
+                            </label>
+                            {{ form.growing_medium }}
+
+                            {% for error in form.growing_medium.errors %}
+                                <p class="gs-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label"
+                                   for="{{ form.rain_access.id_for_label }}">
+                                Rain access *
+                            </label>
+                            {{ form.rain_access }}
+
+                            <p class="gs-field-help" id="gs-rain-help">
+                                Indoor spaces must be sheltered.
+                            </p>
+
+                            {% for error in form.rain_access.errors %}
+                                <p class="gs-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label"
+                                   for="{{ form.support_available.id_for_label }}">
+                                Climbing support available? *
+                            </label>
+                            {{ form.support_available }}
+
+                            {% for error in form.support_available.errors %}
+                                <p class="gs-field-error">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="form-label"
+                               for="{{ form.pot_capacity.id_for_label }}">
+                            Maximum pot capacity *
+                        </label>
+
+                        {{ form.pot_capacity }}
+
+                        <p class="gs-field-help">
+                            Enter a whole number from 1 to 100.
+                        </p>
+
+                        {% for error in form.pot_capacity.errors %}
+                            <p class="gs-field-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- CARE -->
+                <section class="gs-card mb-4">
+                    <p class="gs-eyebrow">04 · Care Availability</p>
+                    <h2 class="gs-section-title">
+                        Your care routine
+                    </h2>
+
+                    <fieldset class="mb-4">
+                        <legend class="form-label">
+                            How often can you care for plants? *
+                        </legend>
+
+                        <div class="gs-option-group">
+                            {% for value, label in form.fields.care_availability.choices %}
+                                {% if value %}
+                                    <label class="gs-option">
+                                        <input
+                                            type="radio"
+                                            name="care_availability"
+                                            value="{{ value }}"
+                                            {% if form.care_availability.value == value %}checked{% endif %}
+                                        >
+                                        <span>{{ label }}</span>
+                                    </label>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        {% for error in form.care_availability.errors %}
+                            <p class="gs-field-error">{{ error }}</p>
+                        {% endfor %}
+                    </fieldset>
+
+                    <div>
+                        <label class="form-label"
+                               for="{{ form.notes.id_for_label }}">
+                            Additional notes (optional)
+                        </label>
+
+                        {{ form.notes }}
+
+                        {% for error in form.notes.errors %}
+                            <p class="gs-field-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <div class="d-flex flex-wrap gap-3">
+                    <button
+                        type="submit"
+                        class="btn gs-btn gs-btn-primary"
+                        id="gs-save-button"
+                    >
+                        {% if is_edit %}
+                            Save changes
+                        {% else %}
+                            Create growing space
+                        {% endif %}
+                    </button>
+
+                    <a class="btn gs-btn gs-btn-outline"
+                       href="{% url 'garden_setup:space_list' %}">
+                        Cancel
+                    </a>
+                </div>
+            </div>
+
+            <!-- RIGHT: LIVE PREVIEW -->
+            <div class="col-12 col-lg-4">
+                <aside class="gs-card gs-preview-card">
+                    <p class="gs-eyebrow">Live Preview</p>
+
+                    <div class="gs-preview-art" aria-hidden="true">
+                        🌱
+                    </div>
+
+                    <h2 class="gs-preview-name"
+                        id="gs-preview-name">
+                        Your Growing Space
+                    </h2>
+
+                    <p class="gs-preview-location"
+                       id="gs-preview-location">
+                        Location not selected
+                    </p>
+
+                    <div class="gs-preview-details">
+                        <div>
+                            <span>Environment</span>
+                            <strong id="gs-preview-environment">—</strong>
+                        </div>
+                        <div>
+                            <span>Space type</span>
+                            <strong id="gs-preview-type">—</strong>
+                        </div>
+                        <div>
+                            <span>Sunlight</span>
+                            <strong id="gs-preview-sunlight">—</strong>
+                        </div>
+                        <div>
+                            <span>Medium</span>
+                            <strong id="gs-preview-medium">—</strong>
+                        </div>
+                        <div>
+                            <span>Pot capacity</span>
+                            <strong id="gs-preview-pots">—</strong>
+                        </div>
+                        <div>
+                            <span>Care</span>
+                            <strong id="gs-preview-care">—</strong>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </form>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+{{ block.super }}
+<script
+    src="{% static 'garden_setup/js/space_form.js' %}"
+    defer
+></script>
+{% endblock %}
