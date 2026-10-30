@@ -17,6 +17,8 @@
     {% block framework_css %}{% endblock %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    {# Bootstrap JS is loaded once, here, so module scripts and inline scripts can use window.bootstrap. Modules must not load it again: a second copy toggles dropdowns twice (the account menu would not open). #}
+    <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
     {# HTMX and hyperscript are used by Garden Planning and Garden Journal. #}
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.11/dist/htmx.min.js" integrity="sha384-2OatzQy1H+Zd/IIrjr1TcuDGqLXeHhbooAyJY1KdQMKnr4LZ22k31GBLdYKHmVjg" crossorigin="anonymous" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.94/dist/_hyperscript.min.js" integrity="sha384-Vhc5IAlz1zenO+d5PjrPP8UuDzlMX30xrv2aMzX0DWZ15ZUvqX7RBqvRTEsavX4R" crossorigin="anonymous" defer></script>
@@ -37,7 +39,6 @@
     </main>
 
     {% include "partials/footer.html" %}
-    <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}" defer></script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>
