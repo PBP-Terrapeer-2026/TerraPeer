@@ -39,6 +39,7 @@ function mountPage() {
         const html = await response.text();
         if (controller.signal.aborted) return;
         results.innerHTML = html;
+        results.dispatchEvent(new Event('plants:results'));
         const url = new URL(window.location.href);
         url.search = params.toString();
         window.history.replaceState({ plants: true }, '', url);

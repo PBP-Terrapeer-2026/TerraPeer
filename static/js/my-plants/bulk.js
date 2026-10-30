@@ -4,6 +4,9 @@ import { navigate } from './navigation.js';
 export function mountBulkActions() {
   const results = document.querySelector('#plant-results');
   if (!results) return;
+  // The button stays usable without JavaScript; with it, it is only enabled once a plant is selected.
+  syncSelection(results);
+  results.addEventListener('plants:results', () => syncSelection(results));
   results.addEventListener('change', (event) => syncSelection(results, event.target));
   results.addEventListener('submit', async (event) => {
     const form = event.target.closest('[data-bulk-form]');
@@ -46,4 +49,6 @@ function syncSelection(results, target) {
   all.checked = count > 0 && count === inputs.length;
   all.indeterminate = count > 0 && count < inputs.length;
   results.querySelector('[data-selected-count]').textContent = `${count} selected`;
+  const submit = results.querySelector('[data-bulk-submit]');
+  if (submit) submit.disabled = count === 0;
 }
