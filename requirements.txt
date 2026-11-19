@@ -8,3 +8,6 @@ Pillow>=11,<13
 requests>=2.32,<3
 # Plant Care forecast and IANA timezone support
 tzdata
+
+# REST API for TerraPeer Flutter
+djangorestframework>=3.16,<4
