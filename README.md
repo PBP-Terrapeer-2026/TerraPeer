@@ -18,14 +18,15 @@ Proyek Tengah Semester PBP — Kelompok 5F.
 4. [Modul dan fitur](#modul-dan-fitur)
 5. [Integrasi antar modul](#integrasi-antar-modul)
 6. [Sumber data (Public API)](#sumber-data-public-api)
-7. [Desain UI/UX](#desain-uiux)
-8. [Menjalankan secara lokal](#menjalankan-secara-lokal)
-9. [Pengujian](#pengujian)
-10. [CI/CD dan deployment](#cicd-dan-deployment)
-11. [Alur kerja Git](#alur-kerja-git)
-12. [Keamanan](#keamanan)
-13. [AI usage disclosure](#ai-usage-disclosure)
-14. [Changelog](#changelog)
+7. [REST API untuk aplikasi mobile](#rest-api-untuk-aplikasi-mobile)
+8. [Desain UI/UX](#desain-uiux)
+9. [Menjalankan secara lokal](#menjalankan-secara-lokal)
+10. [Pengujian](#pengujian)
+11. [CI/CD dan deployment](#cicd-dan-deployment)
+12. [Alur kerja Git](#alur-kerja-git)
+13. [Keamanan](#keamanan)
+14. [AI usage disclosure](#ai-usage-disclosure)
+15. [Changelog](#changelog)
 
 ## Anggota dan modul
 
@@ -210,6 +211,25 @@ Garden Setup ──(lokasi + zona waktu)──► Plant Care (cuaca)
 | [Open-Meteo Forecast](https://open-meteo.com/en/docs) | Garden Planning (dari browser), Plant Care (dari server) | Plant Care menyimpan cache prakiraan di server dan menampilkan *Forecast unavailable* bila layanan tidak tersedia; Planning menampilkan pesan error yang jelas. |
 | [Perenual](https://www.perenual.com/docs/api) | My Plants, Garden Planning | Dipanggil dari server dengan `PERENUAL_API_KEY`; cache hasil; data *premium* dibersihkan; batas waktu dan fallback (input manual / saran bawaan) bila Perenual lambat atau tidak tersedia. |
 
+## REST API untuk aplikasi mobile
+
+Aplikasi Flutter ([TerraPeer_Mobile](https://github.com/PBP-Terrapeer-2026/TerraPeer_Mobile)) memakai data situs web ini lewat Django REST Framework di prefix `/api/v1/`.
+
+| Endpoint | Modul |
+| --- | --- |
+| `POST /api/v1/auth/token/` | Login, mengembalikan token (maks. 10 percobaan/menit) |
+| `/api/v1/spaces/` | Garden Setup |
+| `/api/v1/plans/` | Garden Planning |
+| `/api/v1/my-plants/` | My Plants (`?search=`, `?status=active\|finished`, `?stage=`, `?ordering=`) |
+| `/api/v1/care-tasks/` | Plant Care |
+| `/api/v1/journal-entries/` | Garden Journal |
+
+- **Dokumentasi otomatis (OpenAPI 3):** Swagger UI di [`/api/v1/docs/`](https://muhammad-farel52-terrapeer.pws.cs.ui.ac.id/api/v1/docs/), ReDoc di `/api/v1/redoc/`, skema di `/api/v1/schema/`.
+- **Autentikasi:** header `Authorization: Token <token>`; setiap endpoint hanya mengembalikan data milik pengguna tersebut.
+- **Rate limiting:** 60 request/menit untuk guest (per IP), 300 request/menit per akun, 10 percobaan login/menit.
+- **Format error seragam** (`Terra/api_exceptions.py`): semua error berupa JSON berisi `detail` (atau pesan per field dari serializer) dan `status_code`, termasuk path API yang tidak ada (404), data yang masih dipakai modul lain (409), dan error tak terduga (500, tanpa traceback).
+- **CORS** hanya aktif untuk `/api/` agar build Flutter web dapat memanggil API; autentikasi memakai header token, bukan cookie.
+
 ## Desain UI/UX
 
 - **Figma:** [Figma TerraPeer](https://www.figma.com/design/fZa8nxPXXGqgu0ytl6WFhY/Terrapeer) — password akses: `TerrapeerPBP5F`. Berisi design system (warna, tipografi, komponen) dan seluruh layar desktop serta mobile.
@@ -255,6 +275,12 @@ Buka <http://127.0.0.1:8000/>. Mode lokal memakai SQLite dan `DEBUG=True`; tidak
 python manage.py check
 python manage.py makemigrations --check --dry-run
 python manage.py test
+```
+
+Test REST API (My Plants dan perilaku API bersama: dokumentasi, format error, CORS, rate limiting):
+
+```bash
+python manage.py test my_plants.test_api Terra.test_api Terra.test_api_platform
 ```
 
 Cakupan per modul:
