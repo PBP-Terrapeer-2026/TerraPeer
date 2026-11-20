@@ -66,6 +66,8 @@ INSTALLED_APPS = [
     "garden_planning",
     "garden_setup",
     "plant_care.apps.PlantCareConfig",
+    "rest_framework",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
@@ -177,3 +179,19 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 
 WEATHER_DEMO = os.getenv("WEATHER_DEMO", "0") == "1"
+
+
+# Mobile API only: default permissions apply to DRF endpoints, not Django web views.
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ],
+}
