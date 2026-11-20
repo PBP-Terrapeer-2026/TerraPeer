@@ -11,3 +11,5 @@ tzdata
 
 # REST API for TerraPeer Flutter
 djangorestframework>=3.16,<4
+drf-spectacular>=0.28,<1
+django-cors-headers>=4.4,<5
