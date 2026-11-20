@@ -43,6 +43,8 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "muhammad-farel52-terrapeer.pws.cs.ui.ac.id",
+    # Android emulator reaching a local runserver (flutter --dart-define=API_BASE_URL=http://10.0.2.2:8000)
+    "10.0.2.2",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -68,11 +70,15 @@ INSTALLED_APPS = [
     "plant_care.apps.PlantCareConfig",
     "rest_framework",
     "rest_framework.authtoken",
+    "drf_spectacular",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # Must run before CommonMiddleware; only affects /api/ (see CORS_URLS_REGEX).
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -194,4 +200,39 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
+    # Rate limiting: per IP for guests, per account for logged-in users,
+    # and a strict limit on the login endpoint against password guessing.
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/min",
+        "user": "300/min",
+        "login": "10/min",
+    },
+    # One JSON error shape for every endpoint (Terra/api_exceptions.py).
+    "EXCEPTION_HANDLER": "Terra.api_exceptions.api_exception_handler",
+    # OpenAPI schema for Swagger UI / ReDoc.
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "TerraPeer Mobile API",
+    "DESCRIPTION": (
+        "REST API used by the TerraPeer Flutter app. Get a token from "
+        "POST /api/v1/auth/token/ and send it as `Authorization: Token <token>`. "
+        "Every error response is JSON with `detail` (or per-field messages) and `status_code`."
+    ),
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # The documentation itself is public; the endpoints it describes still require a token.
+    "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
+    "SERVE_AUTHENTICATION": [],
+}
+
+# CORS for the mobile API only, so the Flutter web build can call it.
+# Safe to open to any origin: the API authenticates with a token header,
+# not cookies, and CORS_ALLOW_CREDENTIALS stays False.
+CORS_URLS_REGEX = r"^/api/.*$"
+CORS_ALLOW_ALL_ORIGINS = True
